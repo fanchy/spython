@@ -1,2 +1,1 @@
-#spython
-small python
+#stackpython
