@@ -1,6 +1,15 @@
 #include "Parser.h"
+#include "Scanner.h"
 
 using namespace ff;
+
+Parser::Parser():m_curScanner(NULL){
+}
+
+ExprASTPtr Parser::parse(Scanner& scanner){
+    m_curScanner = &scanner;
+    return this->parse_file_input();
+}
 
 //! single_input: NEWLINE | simple_stmt | compound_stmt NEWLINE
 ExprASTPtr Parser::parse_single_input(){
@@ -9,6 +18,23 @@ ExprASTPtr Parser::parse_single_input(){
 
 //! file_input: (NEWLINE | stmt)* ENDMARKER
 ExprASTPtr Parser::parse_file_input(){
+    const Token* token = m_curScanner->getToken();
+    while (token->nTokenType != TOK_EOF){
+        if (token->strVal == "\n"){
+            m_curScanner->seek(1);
+        }
+        else{
+            ExprASTPtr stmt = this->parse_stmt();
+            m_curScanner->seek(1);
+            token = m_curScanner->getToken();
+            
+            if (stmt){
+                stmt->dump(0);
+            }else{
+                printf("this->parse_stmt Ê§°Ü£¡%d\n", m_curScanner->seek(0));
+            }
+        }
+    }
     return NULL;
 }
 
@@ -61,24 +87,28 @@ ExprASTPtr Parser::parse_fplist(){
 
 //! stmt: simple_stmt | compound_stmt
 ExprASTPtr Parser::parse_stmt(){
-    return NULL;
+    ExprASTPtr retExpr = parse_simple_stmt();
+    return retExpr;
 }
 
 //! simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
 ExprASTPtr Parser::parse_simple_stmt(){
-    return NULL;
+    ExprASTPtr retExpr = parse_small_stmt();
+    return retExpr;
 }
 
 //! small_stmt: (expr_stmt | print_stmt  | del_stmt | pass_stmt | flow_stmt |
 //!              import_stmt | global_stmt | exec_stmt | assert_stmt)
 ExprASTPtr Parser::parse_small_stmt(){
-    return NULL;
+    ExprASTPtr retExpr = parse_expr_stmt();
+    return retExpr;
 }
 
 //! expr_stmt: testlist (augassign (yield_expr|testlist) |
 //!                      ('=' (yield_expr|testlist))*)
 ExprASTPtr Parser::parse_expr_stmt(){
-    return NULL;
+    ExprASTPtr retExpr = parse_testlist();
+    return retExpr;
 }
 
 //! augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' |
@@ -255,7 +285,8 @@ ExprASTPtr Parser::parse_old_lambdef(){
 
 //! test: or_test ['if' or_test 'else' test] | lambdef
 ExprASTPtr Parser::parse_test(){
-    return NULL;
+    ExprASTPtr retExpr = or_test();
+    return retExpr;
 }
 
 //! or_test: and_test ('or' and_test)*
@@ -374,7 +405,8 @@ ExprASTPtr Parser::parse_exprlist(){
 
 //! testlist: test (',' test)* [',']
 ExprASTPtr Parser::parse_testlist(){
-    return NULL;
+    ExprASTPtr retExpr = parse_test();
+    return retExpr;
 }
 
 //! dictorsetmaker: ( (test ':' test (comp_for | (',' test ':' test)* [','])) |

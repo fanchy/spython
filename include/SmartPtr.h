@@ -3,10 +3,9 @@
 
 #include <assert.h>
 #include <stdexcept>
-using namespace std;
 
 namespace ff {
-#define FF_ASSERT(X) if (!(X)) throw runtime_error("SmartPtr NULL DATA")
+#define FF_ASSERT(X) if (!(X)) throw std::runtime_error("SmartPtr NULL DATA")
 
 #define ATOMIC_ADD(src_ptr, v)            (void)__sync_add_and_fetch(src_ptr, v)
 #define ATOMIC_SUB_AND_FETCH(src_ptr, v)  __sync_sub_and_fetch(src_ptr, v)

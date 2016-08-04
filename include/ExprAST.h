@@ -7,7 +7,6 @@
 #include <map>
 #include <stdexcept>
 #include "Base.h"
-using namespace std;
 
 namespace ff {
 
@@ -27,9 +26,9 @@ public:
 };
 class StrExprAST : public ExprAST {
 public:
-    string val;
+    std::string val;
     PyObjPtr obj;
-    StrExprAST(const string& v) ;
+    StrExprAST(const std::string& v) ;
     virtual PyObjPtr eval(PyObjPtr context) {
         return obj;
     }
@@ -41,7 +40,7 @@ public:
 /// VariableExprAST - Expression class for referencing a variable, like "a".
 class VariableExprAST : public ExprAST {
 public:
-    VariableExprAST(const string &n) {
+    VariableExprAST(const std::string &n) {
         this->name = n;
     }
     virtual PyObjPtr eval(PyObjPtr context) {
@@ -59,7 +58,7 @@ public:
 
 struct VariableExprAllocator{
 
-    ExprASTPtr alloc(const string& name){
+    ExprASTPtr alloc(const std::string& name){
         ExprASTPtr& ret = allVar[name];
         if (!ret){
             ExprASTPtr p = new VariableExprAST(name);
@@ -70,7 +69,7 @@ struct VariableExprAllocator{
     }
     
     template<typename T>
-    ExprASTPtr allocIfNotExist(const string& name){
+    ExprASTPtr allocIfNotExist(const std::string& name){
         ExprASTPtr& ret = allVar[name];
         if (!ret){
             ExprASTPtr p = new T();
@@ -79,7 +78,7 @@ struct VariableExprAllocator{
         }
         return ret;
     }
-    map<string, ExprASTPtr> allVar;
+    std::map<std::string, ExprASTPtr> allVar;
 };
 
 /// BinaryExprAST - Expression class for a binary operator.
@@ -101,14 +100,14 @@ public:
 class FuncCodeImpl: public ExprAST{
 public:
     ExprASTPtr         varAstforName;
-    vector<ExprASTPtr> argsDef;
-    vector<ExprASTPtr> body;
+    std::vector<ExprASTPtr> argsDef;
+    std::vector<ExprASTPtr> body;
 public:
     FuncCodeImpl(){
         //this->varAstforName = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(p->name);
         //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
     }
-    virtual PyObjPtr exeCode(PyObjPtr context, list<PyObjPtr>&  tmpArgsInput);
+    virtual PyObjPtr exeCode(PyObjPtr context, std::list<PyObjPtr>&  tmpArgsInput);
     virtual int getType() {
         return EXPR_FUNC;
     }
@@ -149,7 +148,7 @@ public:
 class ClassAST: public ExprAST {
 public:
     ExprASTPtr codeImplptr;
-    vector<ExprASTPtr> classFieldCode;
+    std::vector<ExprASTPtr> classFieldCode;
 public:
     ClassAST():codeImplptr(new ClassCodeImpl()){
         
@@ -165,8 +164,8 @@ public:
 
 class IfExprAST: public ExprAST {
 public:
-    vector<ExprASTPtr>          conditions;
-    vector<vector<ExprASTPtr> > ifbody;
+    std::vector<ExprASTPtr>          conditions;
+    std::vector<std::vector<ExprASTPtr> > ifbody;
 
 public:
     IfExprAST(){
@@ -217,7 +216,7 @@ class ForExprAST: public ExprAST {
 public:
     ExprASTPtr                  iterTuple;
     ExprASTPtr                  iterFunc;
-    vector<ExprASTPtr>          forBody;
+    std::vector<ExprASTPtr>     forBody;
 public:
     ForExprAST(){
         this->name = "for";
@@ -232,7 +231,7 @@ public:
 
 class TupleExprAST: public ExprAST {
 public:
-    vector<ExprASTPtr>    values;
+    std::vector<ExprASTPtr>    values;
 
 public:
     TupleExprAST(){

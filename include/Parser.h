@@ -5,8 +5,12 @@
 
 namespace ff{
 
+class Scanner;
 class Parser{
 public:
+    Parser();
+    ExprASTPtr parse(Scanner& scanner);
+    
     //! single_input: NEWLINE | simple_stmt | compound_stmt NEWLINE
     ExprASTPtr parse_single_input();
     //! file_input: (NEWLINE | stmt)* ENDMARKER
@@ -195,6 +199,9 @@ public:
     ExprASTPtr parse_encoding_decl();
     //! yield_expr: 'yield' [testlist]
     ExprASTPtr parse_yield_expr();
+    
+protected:
+    Scanner*            m_curScanner;
 };
 
 }

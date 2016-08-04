@@ -1,6 +1,8 @@
 
 #include "PyObj.h"
 #include "ExprAST.h"
+
+using namespace std;
 using namespace ff;
 
 

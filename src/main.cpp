@@ -2,9 +2,12 @@
 
 #include <cstdlib>
 #include <string.h>
-using namespace ff;
 
 #include "Scanner.h"
+#include "Parser.h"
+
+using namespace std;
+using namespace ff;
 
 int main(int argc, char** argv) {
     string strCode;
@@ -23,6 +26,16 @@ int main(int argc, char** argv) {
 
     Scanner scanner;
     scanner.tokenize(strCode);
+    
+    Parser parser;
+    ExprASTPtr rootExpr = parser.parse(scanner);
+    
+    if (rootExpr){
+        rootExpr->dump(0);
+    }else{
+        printf("parser.parse Ê§°Ü£¡\n");
+    }
+    
     return 0;
     PyObjPtr mainMod = new PyObjModule("__main__");
     ParseHelper parserHelper(strCode);

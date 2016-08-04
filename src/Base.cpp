@@ -1,8 +1,9 @@
 #include "Base.h"
 #include "PyObj.h"
 #include "OldParser.h"
-using namespace ff;
 
+using namespace std;
+using namespace ff;
 
 void PyObj::dump() {
     DMSG(("dump type:%d\n", this->getType()));

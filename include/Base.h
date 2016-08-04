@@ -6,7 +6,6 @@
 #include <vector>
 #include <list>
 #include <stdexcept>
-using namespace std;
 
 #include "SmartPtr.h"
 #include "Singleton.h"
@@ -80,8 +79,8 @@ enum ETokenType {
 
 class PyMetaType{
 public:
-    inline int allocFieldId(const string& name){
-        map<string, int>::iterator it = name2filed.find(name);
+    inline int allocFieldId(const std::string& name){
+        std::map<std::string, int>::iterator it = name2filed.find(name);
         if (it != name2filed.end()){
             return it->second;
         }
@@ -89,8 +88,8 @@ public:
         name2filed[name] = n;
         return n;
     }
-    inline string id2name(int nFieldId){
-        for (map<string, int>::iterator it = name2filed.begin(); it != name2filed.end(); ++it){
+    inline std::string id2name(int nFieldId){
+        for (std::map<std::string, int>::iterator it = name2filed.begin(); it != name2filed.end(); ++it){
             if (it->second == nFieldId){
                 return it->first;
             }
@@ -99,19 +98,19 @@ public:
     }
 
 private:
-    map<string, int> name2filed;
+    std::map<std::string, int> name2filed;
 };
 
 class ParseHelper;
 
 struct PyException {
-    static runtime_error buildIndentException(ParseHelper& parseHelper, int nNeedIndent, string err = "") ;
-    static runtime_error buildException(ParseHelper& parseHelper, const string& err);
-    static runtime_error buildException(const string& err);
+    static std::runtime_error buildIndentException(ParseHelper& parseHelper, int nNeedIndent, std::string err = "") ;
+    static std::runtime_error buildException(ParseHelper& parseHelper, const std::string& err);
+    static std::runtime_error buildException(const std::string& err);
 };
 
 struct PyHelper{    
-    static string token2name(TokenType token);
+    static std::string token2name(TokenType token);
 }; 
 
 class ExprAST;
@@ -123,7 +122,7 @@ struct ObjIdInfo{
 
     unsigned int nModuleId;
     unsigned int nObjectId;
-    string strFieldName;
+    std::string strFieldName;
 };
 
 
@@ -131,9 +130,9 @@ struct ObjFieldMetaData{
     ObjFieldMetaData():nCountMeta(0){
     }
     //!module id -> objectid -> fieldid -> fieldname
-    map<int, map<int,  map<int, string> > >        module2object2fieldname;
+    std::map<int, std::map<int,  std::map<int, std::string> > >        module2object2fieldname;
 
-    const string& getFiledName(int moduleid, int objectid, int nFieldId) {
+    const std::string& getFiledName(int moduleid, int objectid, int nFieldId) {
         return module2object2fieldname[moduleid][objectid][nFieldId];
     }
     int allocObjId() {
@@ -168,7 +167,7 @@ public:
     virtual int getType() {
         return 0;
     }
-    virtual PyObjPtr handleCall(PyObjPtr context, list<PyObjPtr>& args){
+    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args){
         return NULL;
     }
 
@@ -184,7 +183,7 @@ public:
     
     virtual const ObjIdInfo& getObjIdInfo() = 0;
 public:
-    vector<PyObjPtr>    m_objStack;
+    std::vector<PyObjPtr>    m_objStack;
     ObjIdInfo*          m_pObjIdInfo;
 };
 typedef PyObj::PyObjPtr PyObjPtr;
@@ -225,7 +224,7 @@ struct PyObjTool{
 class ExprAST {
 public:
     int    nFieldId;
-    string name;
+    std::string name;
     ExprAST():nFieldId(-1){
     }
     virtual ~ExprAST() {}
@@ -238,7 +237,9 @@ public:
     }
     virtual PyObjPtr handleAssign(PyObjPtr context, PyObjPtr val) { return NULL; }
     
-    vector<vector<int> >  module2objcet2fieldIndex;
+    virtual void dump(int nDepth){
+    }
+    std::vector<std::vector<int> >  module2objcet2fieldIndex;
 };
 
 typedef SmartPtr<ExprAST> ExprASTPtr;

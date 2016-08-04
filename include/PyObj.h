@@ -7,7 +7,6 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
-using namespace std;
 
 #include "Base.h"
 #include "singleton.h"
@@ -58,8 +57,8 @@ typedef SmartPtr<PyObjBool> PyObjBoolPtr;
 
 class PyObjStr:public PyObj {
 public:
-    string value;
-    PyObjStr(const string& v):value(v) {
+    std::string value;
+    PyObjStr(const std::string& v):value(v) {
     }
     virtual void dump() {
         DMSG(("%s(str)", value.c_str()));
@@ -75,8 +74,8 @@ public:
 
 class PyObjModule:public PyObj {
 public:
-    string moduleName;
-    PyObjModule(const string& v):moduleName(v) {
+    std::string moduleName;
+    PyObjModule(const std::string& v):moduleName(v) {
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjModule> >::instance_ptr()->objInfo;
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
@@ -108,7 +107,7 @@ public:
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
 
-    vector<PyObjPtr> values;
+    std::vector<PyObjPtr> values;
 };
 
 
@@ -123,7 +122,7 @@ public:
     virtual int getType() {
         return PY_FUNC_DEF;
     }
-    virtual PyObjPtr handleCall(PyObjPtr context, list<PyObjPtr>& args);
+    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args);
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
@@ -140,7 +139,7 @@ public:
     virtual int getType() {
         return PY_CLASS_FUNC;
     }
-    virtual PyObjPtr handleCall(PyObjPtr context, list<PyObjPtr>& args);
+    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args);
     virtual const ObjIdInfo& getObjIdInfo(){
         return funcDefPtr.cast<PyObjFuncDef>()->getObjIdInfo();
     }
@@ -159,7 +158,7 @@ public:
     virtual int getType() {
         return PY_CLASS_DEF;
     }
-    virtual PyObjPtr handleCall(PyObjPtr context, list<PyObjPtr>& args);
+    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args);
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }

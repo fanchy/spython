@@ -6,7 +6,6 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
-using namespace std;
 
 #include "Base.h"
 #include "PyObj.h"
@@ -20,7 +19,7 @@ class PyObjModule;
 
 
 struct ParseHelper {
-    ParseHelper(const string& strCode):m_nCurTok(0), cLastOne(' '), m_codeTocheck(strCode), m_nIndex(0),NumVal(0),nCurIndent(0),nIndentWidth(4),line(1),col(1) {
+    ParseHelper(const std::string& strCode):m_nCurTok(0), cLastOne(' '), m_codeTocheck(strCode), m_nIndex(0),NumVal(0),nCurIndent(0),nIndentWidth(4),line(1),col(1) {
         m_codeTocheck += '\n';
         for (unsigned int i = m_nIndex; i < m_codeTocheck.size(); ++i) {
             if (m_codeTocheck[i] == ' ') {
@@ -40,15 +39,15 @@ struct ParseHelper {
 
     TokenType m_nCurTok;
     char cLastOne;
-    string m_codeTocheck;
+    std::string m_codeTocheck;
     unsigned int    m_nIndex;
     int    NumVal;
     int nCurIndent;
     int nIndentWidth;
     int line;
     int col;
-    string IdentifierStr;
-    string strVal;
+    std::string IdentifierStr;
+    std::string strVal;
 };
 
 

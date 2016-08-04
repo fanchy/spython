@@ -10,7 +10,7 @@ struct Token{
     Token():nTokenType(0), nVal(0), fVal(0.0){
     }
     
-    string dump() const;
+    std::string dump() const;
     int             nTokenType;
     long            nVal;
     double          fVal;
@@ -19,9 +19,18 @@ struct Token{
 
 class Scanner{
 public:
+    Scanner();
+    
+    //!parse string to token vector
     bool tokenize(const std::string& content);
 
+    //!get cur token obj
+    const Token* getToken(int nOffset = 0);
+    int seek(int nOffset);
+
 protected:
+    int                     m_nSeekIndex;
+    Token                   m_tokenEOF;
     std::vector<Token>      m_allTokens;
 };
     
