@@ -4,6 +4,8 @@
 #include <string.h>
 using namespace ff;
 
+#include "Scanner.h"
+
 int main(int argc, char** argv) {
     string strCode;
     FILE* fp = ::fopen("./test.py", "r");
@@ -19,6 +21,9 @@ int main(int argc, char** argv) {
         printf("∂¡»° ß∞‹£°\n");
     }
 
+    Scanner scanner;
+    scanner.tokenize(strCode);
+    return 0;
     PyObjPtr mainMod = new PyObjModule("__main__");
     ParseHelper parserHelper(strCode);
     ParseTool tool(mainMod);

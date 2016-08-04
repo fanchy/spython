@@ -51,7 +51,7 @@ runtime_error PyException::buildException(const string& err) {
 string PyHelper::token2name(TokenType token){
     map<int, string> cfg;
     cfg[TOK_VAR ] = "TOK_VAR";
-    cfg[TOK_NUM ] = "TOK_NUM";
+    cfg[TOK_INT ] = "TOK_NUM";
     cfg[TOK_STR ] = "TOK_STR";
     cfg[TOK_CALL] = "TOK_CALL";
 

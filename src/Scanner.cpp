@@ -1,7 +1,39 @@
+#include <stdlib.h>
+
+#include "Base.h"
 #include "Scanner.h"
 
 using namespace std;
 using namespace ff;
+
+string Token::dump() const{
+    char msg[64] = {0};
+    switch(nTokenType){
+        case TOK_EOF:{
+            return "TOK_EOF";
+            break;
+        }
+        case TOK_VAR:{
+            return strVal + "(var)";
+            break;
+        }
+        case TOK_INT:{
+            snprintf(msg, sizeof(msg), "%ld(int)", nVal);
+            return msg;
+            break;
+        }
+        case TOK_FLOAT:{
+            snprintf(msg, sizeof(msg), "%f(float)", fVal);
+            return msg;
+            break;
+        }
+        case TOK_CHAR:{
+            return strVal + "(char)";
+            break;
+        }
+    }
+    return msg;
+}
 
 static char getCharNext(const string& content, int& index) {
     if (index < content.size()){
@@ -13,18 +45,44 @@ static char getCharNext(const string& content, int& index) {
 /// gettok - Return the next token from standard input.
 static Token getOneToken(const string& content, int& index) {
     Token retToken;
+
+    //!ignore comment 
+    char cLastOne = getCharNext(content, index);
+    
+    while (cLastOne == '#' || cLastOne == '\n' || cLastOne == '\r') {
+        // Comment until end of line.
+        if (cLastOne == '#'){
+            do{
+                cLastOne = getCharNext(content, index);
+            }
+            while (cLastOne != TOK_EOF && cLastOne != '\n');
+            cLastOne = getCharNext(content, index);
+        }
+        else{
+             //!ignore \n
+            if (cLastOne == '\n' || cLastOne == '\r') {
+                do{
+                    cLastOne = getCharNext(content, index);
+                    //printf("lastone2:%c %d \n", cLastOne, cLastOne);
+                }
+                while (cLastOne == '\n' || cLastOne == '\r');
+            }
+        }
+    }
+
+    
     // Skip any whitespace.
-    char cLastOne = ' ';
     while (::isspace(cLastOne)){
         cLastOne = getCharNext(content, index);
     }
  
     if (::isalpha(cLastOne) || cLastOne == '_') { // identifier: [a-zA-Z][a-zA-Z0-9]*
-        string strIdentifier = cLastOne;
+        retToken.strVal = cLastOne;
         while (::isalnum((cLastOne = getCharNext(content, index))) || cLastOne == '_'){
-            strIdentifier += cLastOne;
+            retToken.strVal += cLastOne;
         }
-        retToken.strVal = strIdentifier;
+        index--;
+        retToken.nTokenType = TOK_VAR;
         return retToken;
     }
 
@@ -32,7 +90,7 @@ static Token getOneToken(const string& content, int& index) {
         string strNum;
         bool isFloat = false;
         do {
-            if (cLastOne = '.'){
+            if (cLastOne == '.'){
                 isFloat = true;
             }
             strNum += cLastOne;
@@ -41,51 +99,54 @@ static Token getOneToken(const string& content, int& index) {
 
         if (false == isFloat){
             retToken.nVal = ::atol(strNum.c_str());
+            retToken.nTokenType = TOK_INT;
         }
         else{
             retToken.fVal = ::atof(strNum.c_str());
+            retToken.nTokenType = TOK_FLOAT;
         }
 
         return retToken;
     }
 
-    string strVal;
     if (cLastOne == '\'' || cLastOne == '\"') {
         char tmpC = cLastOne;
-        strVal.clear();
+        retToken.strVal.clear();
         do {
-            cLastOne = getCharNext();
+            cLastOne = getCharNext(content, index);
             if (cLastOne == tmpC){
+                cLastOne = getCharNext(content, index);
                 break;
             }
-            strVal += cLastOne;
+            retToken.strVal += cLastOne;
         } while (cLastOne != TOK_EOF);
-        cLastOne = getCharNext();
-        return TOK_STR;
-    }
-    
-    if (cLastOne == '#') {
-        // Comment until end of line.
-        do
-            cLastOne = getCharNext();
-        while (cLastOne != EOF && cLastOne != '\n' && cLastOne != '\r');
 
-        if (cLastOne != EOF)
-            return gettok();
+        retToken.nTokenType = TOK_STR;
+        return retToken;
     }
 
     // Check for end of file.  Don't eat the EOF.
-    if (cLastOne == EOF)
-        return TOK_EOF;
+    if (cLastOne == TOK_EOF)
+        return retToken;
 
     // Otherwise, just return the character as its ascii value.
-    int ThisChar = cLastOne;
-    cLastOne = getCharNext();
-    return ThisChar;
+    retToken.strVal        = cLastOne;
+    retToken.nTokenType    = TOK_CHAR;
+    return retToken;
 }
 
 bool Scanner::tokenize(const std::string& content){
     
+    int nIndex = 0;
+    
+    Token retToken;
+    do{
+        retToken = getOneToken(content, nIndex);
+        m_allTokens.push_back(retToken);
+
+        printf("token:%s\n", retToken.dump().c_str());
+        
+    }while (retToken.nTokenType != TOK_EOF);
     
     return true;
 }

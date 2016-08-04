@@ -10,6 +10,7 @@ struct Token{
     Token():nTokenType(0), nVal(0), fVal(0.0){
     }
     
+    string dump() const;
     int             nTokenType;
     long            nVal;
     double          fVal;

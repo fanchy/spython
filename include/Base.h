@@ -45,14 +45,17 @@ enum PyObjType{
 
 typedef  int TokenType;
 
-enum Token {
-    TOK_EOF = -1,
+enum ETokenType {
+    TOK_EOF = 0,
     //TOK_DEF = -2,
     TOK_VAR = -4,
-    TOK_NUM = -5,
-    TOK_STR = -6,
-    TOK_CALL= -7,
-    TOK_FIELD = -7, // .
+    TOK_INT = -5,
+    TOK_FLOAT = -6,
+    TOK_STR = -7,
+    TOK_CHAR = -8,
+    
+    TOK_CALL= -9,
+    TOK_FIELD = -10, // .
 
     TOK_LS  = -21, //<
     TOK_LE  = -22, //<=

@@ -96,7 +96,7 @@ TokenType ParseHelper::gettok() {
         } while (isdigit(cLastOne) || cLastOne == '.');
 
         NumVal = ::atoi(NumStr.c_str());
-        return TOK_NUM;
+        return TOK_INT;
     }
 
     if (cLastOne == '\'' || cLastOne == '\"') {
@@ -426,7 +426,7 @@ ExprASTPtr ParseTool::ParsePrimary(ParseHelper& parseHelper, bool checkTuple) {
             result =  ParseIdentifierExpr(parseHelper);
             //DMSG(("ParseTool::ParsePrimary end token CurTok:%d\n", int(parseHelper.at())));
         }break;
-        case TOK_NUM:{
+        case TOK_INT:{
             result = ParseNumberExpr(parseHelper);
             //DMSG(("ParseTool::ParsePrimary end token CurTok:%d\n", int(parseHelper.at())));
         }break;
