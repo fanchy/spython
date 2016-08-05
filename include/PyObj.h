@@ -16,10 +16,10 @@ namespace ff {
 class PyObjInt:public PyObj {
 public:
     int value;
-    PyObjInt(int n = 0):value(n) {
+    PyObjInt(long n = 0):value(n) {
     }
     virtual void dump() {
-        DMSG(("%d(int)", value));
+        DMSG(("%ld(int)", value));
     }
     virtual int getType() {
         return PY_INT;
@@ -35,16 +35,41 @@ public:
         return singleton_t<ObjIdTypeTraits<PyObjInt> >::instance_ptr()->objInfo;
     }
 };
+
+class PyObjFloat:public PyObj {
+public:
+    double value;
+    PyObjFloat(double n = 0):value(n) {
+    }
+    virtual void dump() {
+        DMSG(("%f(float)", value));
+    }
+    virtual int getType() {
+        return PY_FLOAT;
+    }
+    virtual bool handleEQ(PyObjPtr arg){
+        if (arg && arg->getType() == this->getType()){
+            return arg.cast<PyObjInt>()->value == this->value;
+        }
+        return false;
+    }
+    
+    virtual const ObjIdInfo& getObjIdInfo(){
+        return singleton_t<ObjIdTypeTraits<PyObjFloat> >::instance_ptr()->objInfo;
+    }
+};
 class PyObjBool:public PyObj {
 public:
     bool value;
     PyObjBool(bool n = false):value(n) {
     }
     virtual void dump() {
-        if (value)
-           DMSG(("True(bool)"));
-        else
-           DMSG(("False(bool)"));
+        if (value){
+            DMSG(("True(bool)"));
+        }
+        else{
+            DMSG(("False(bool)"));
+        }
     }
     virtual int getType() {
         return PY_BOOL;

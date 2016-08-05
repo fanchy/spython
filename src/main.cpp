@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     ExprASTPtr rootExpr = parser.parse(scanner);
     
     if (rootExpr){
-        rootExpr->dump(0);
+        //rootExpr->dump(0);
     }else{
         printf("parser.parse Ê§°Ü£¡\n");
     }

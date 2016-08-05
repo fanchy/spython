@@ -14,9 +14,21 @@ namespace ff {
 /// NumberExprAST - Expression class for numeric literals like "1.0".
 class NumberExprAST : public ExprAST {
 public:
-    int Val;
+    long Val;
     PyObjPtr obj;
-    NumberExprAST(int v);
+    NumberExprAST(long v);
+    virtual PyObjPtr eval(PyObjPtr context) {
+        return obj;
+    }
+    virtual int getType() {
+        return EXPR_INT;
+    }
+};
+class FloatExprAST : public ExprAST {
+public:
+    double Val;
+    PyObjPtr obj;
+    FloatExprAST(double v);
     virtual PyObjPtr eval(PyObjPtr context) {
         return obj;
     }
@@ -79,6 +91,20 @@ struct VariableExprAllocator{
         return ret;
     }
     std::map<std::string, ExprASTPtr> allVar;
+};
+
+class StmtAST : public ExprAST {
+
+public:
+    StmtAST(){
+        //DMSG(("build call %s\n", Callee->name.c_str()));
+    }
+    virtual int getType() {
+        return EXPR_STMT;
+    }
+    virtual PyObjPtr eval(PyObjPtr context);
+public:
+    std::vector<ExprASTPtr> exprs;
 };
 
 /// BinaryExprAST - Expression class for a binary operator.

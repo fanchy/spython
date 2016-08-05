@@ -168,4 +168,9 @@ int Scanner::seek(int nOffset){
     return m_nSeekIndex;
 }
 
+int Scanner::resetTo(int nOffset){
+    m_nSeekIndex = nOffset;
+    return m_nSeekIndex;
+}
+
 

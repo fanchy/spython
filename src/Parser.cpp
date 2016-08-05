@@ -1,6 +1,8 @@
 #include "Parser.h"
 #include "Scanner.h"
+#include "ExprAST.h"
 
+using namespace std;
 using namespace ff;
 
 Parser::Parser():m_curScanner(NULL){
@@ -19,21 +21,25 @@ ExprASTPtr Parser::parse_single_input(){
 //! file_input: (NEWLINE | stmt)* ENDMARKER
 ExprASTPtr Parser::parse_file_input(){
     const Token* token = m_curScanner->getToken();
+    StmtAST* allStmt = new StmtAST();
+    ExprASTPtr ret = allStmt;
+    
     while (token->nTokenType != TOK_EOF){
         if (token->strVal == "\n"){
             m_curScanner->seek(1);
         }
         else{
             ExprASTPtr stmt = this->parse_stmt();
-            m_curScanner->seek(1);
-            token = m_curScanner->getToken();
             
             if (stmt){
                 stmt->dump(0);
+                allStmt->exprs.push_back(stmt);
             }else{
-                printf("this->parse_stmt Ê§°Ü£¡%d\n", m_curScanner->seek(0));
+                printf("this->parse_stmt Ê§°Ü£¡%d %s\n", m_curScanner->seek(0), token->dump().c_str());
+                m_curScanner->seek(1);
             }
         }
+        token = m_curScanner->getToken();
     }
     return NULL;
 }
@@ -107,8 +113,19 @@ ExprASTPtr Parser::parse_small_stmt(){
 //! expr_stmt: testlist (augassign (yield_expr|testlist) |
 //!                      ('=' (yield_expr|testlist))*)
 ExprASTPtr Parser::parse_expr_stmt(){
-    ExprASTPtr retExpr = parse_testlist();
-    return retExpr;
+    DMSG(("parse_expr_stmt 1"));
+    ExprASTPtr testlist = parse_testlist();
+    if (!testlist){
+        return NULL;
+    }
+    const Token* token = m_curScanner->getToken();
+    if (token->strVal == "="){
+        DMSG(("parse_expr_stmt 2 `=`"));
+        m_curScanner->seek(1);
+        ExprASTPtr testlist2  = parse_testlist();
+        return new BinaryExprAST(TOK_ASSIGN, testlist, testlist2);
+    }
+    return testlist;
 }
 
 //! augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' |
@@ -285,28 +302,32 @@ ExprASTPtr Parser::parse_old_lambdef(){
 
 //! test: or_test ['if' or_test 'else' test] | lambdef
 ExprASTPtr Parser::parse_test(){
-    ExprASTPtr retExpr = or_test();
-    return retExpr;
+    ExprASTPtr or_test = parse_or_test();
+    return or_test;
 }
 
 //! or_test: and_test ('or' and_test)*
 ExprASTPtr Parser::parse_or_test(){
-    return NULL;
+    ExprASTPtr and_test = parse_and_test();
+    return and_test;
 }
 
 //! and_test: not_test ('and' not_test)*
 ExprASTPtr Parser::parse_and_test(){
-    return NULL;
+    ExprASTPtr not_test = parse_not_test();
+    return not_test;
 }
 
 //! not_test: 'not' not_test | comparison
 ExprASTPtr Parser::parse_not_test(){
-    return NULL;
+    ExprASTPtr comparison = parse_comparison();
+    return comparison;
 }
 
 //! comparison: expr (comp_op expr)*
 ExprASTPtr Parser::parse_comparison(){
-    return NULL;
+    ExprASTPtr expr = parse_expr();
+    return expr;
 }
 
 //! comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not'
@@ -316,42 +337,50 @@ ExprASTPtr Parser::parse_comp_op(){
 
 //! expr: xor_expr ('|' xor_expr)*
 ExprASTPtr Parser::parse_expr(){
-    return NULL;
+    ExprASTPtr xor_expr = parse_xor_expr();
+    return xor_expr;
 }
 
 //! xor_expr: and_expr ('^' and_expr)*
 ExprASTPtr Parser::parse_xor_expr(){
-    return NULL;
+    ExprASTPtr and_expr = parse_and_expr();
+    return and_expr;
 }
 
 //! and_expr: shift_expr ('&' shift_expr)*
 ExprASTPtr Parser::parse_and_expr(){
-    return NULL;
+    ExprASTPtr shift_expr = parse_shift_expr();
+    return shift_expr;
 }
 
 //! shift_expr: arith_expr (('<<'|'>>') arith_expr)*
 ExprASTPtr Parser::parse_shift_expr(){
-    return NULL;
+    ExprASTPtr arith_expr = parse_arith_expr();
+    return arith_expr;
 }
 
 //! arith_expr: term (('+'|'-') term)*
 ExprASTPtr Parser::parse_arith_expr(){
-    return NULL;
+    ExprASTPtr term = parse_term();
+    return term;
 }
 
 //! term: factor (('*'|'/'|'%'|'//') factor)*
 ExprASTPtr Parser::parse_term(){
-    return NULL;
+    ExprASTPtr factor = parse_factor();
+    return factor;
 }
 
 //! factor: ('+'|'-'|'~') factor | power
 ExprASTPtr Parser::parse_factor(){
-    return NULL;
+    ExprASTPtr power = parse_power();
+    return power;
 }
 
 //! power: atom trailer* ['**' factor]
 ExprASTPtr Parser::parse_power(){
-    return NULL;
+    ExprASTPtr atom = parse_atom();
+    return atom;
 }
 
 //! atom: ('(' [yield_expr|testlist_comp] ')' |
@@ -360,7 +389,21 @@ ExprASTPtr Parser::parse_power(){
 //!        '`' testlist1 '`' |
 //!        NAME | NUMBER | STRING+)
 ExprASTPtr Parser::parse_atom(){
-    return NULL;
+    const Token* token = m_curScanner->getToken();
+    DMSG(("parse_atom %s", token->dump().c_str()));
+    
+    ExprASTPtr retExpr;
+    if (token->nTokenType == TOK_FLOAT){
+        retExpr = new NumberExprAST(token->nVal);
+    }
+    else if (token->nTokenType == TOK_FLOAT){
+        retExpr = new FloatExprAST(token->fVal);
+    }
+    else if (token->nTokenType == TOK_VAR){
+        retExpr = new VariableExprAST(token->strVal);
+    }
+    m_curScanner->seek(1);
+    return retExpr;
 }
 
 //! listmaker: test ( list_for | (',' test)* [','] )

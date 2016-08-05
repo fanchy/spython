@@ -8,11 +8,25 @@
 using namespace std;
 using namespace ff;
 
-NumberExprAST::NumberExprAST(int v) : Val(v) {
+NumberExprAST::NumberExprAST(long v) : Val(v) {
     char msg[64];
-    snprintf(msg, sizeof(msg), "%d(int)", Val);
+    snprintf(msg, sizeof(msg), "%ld(int)", Val);
     this->name = msg;
     obj = new PyObjInt(Val);
+}
+FloatExprAST::FloatExprAST(double v) : Val(v) {
+    char msg[64];
+    snprintf(msg, sizeof(msg), "%f(float)", Val);
+    this->name = msg;
+    obj = new PyObjFloat(Val);
+}
+
+PyObjPtr StmtAST::eval(PyObjPtr context){
+    PyObjPtr ret;
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret = exprs[i]->eval(context);
+    }
+    return ret;
 }
 
 StrExprAST::StrExprAST(const string& v) : val(v) {

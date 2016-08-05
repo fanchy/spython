@@ -27,7 +27,7 @@ public:
     //!get cur token obj
     const Token* getToken(int nOffset = 0);
     int seek(int nOffset);
-
+    int resetTo(int nOffset);
 protected:
     int                     m_nSeekIndex;
     Token                   m_tokenEOF;

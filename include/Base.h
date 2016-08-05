@@ -11,7 +11,7 @@
 #include "Singleton.h"
 
 #include <stdio.h>
-#define DMSG(x) printf x
+#define DMSG(x) printf x ; printf("\n")
 
 namespace ff {
 
@@ -20,8 +20,10 @@ enum ExprType{
     EXPR_FUNC = 2,
     EXPR_IF   = 3,
     EXPR_INT  = 4,
-    EXPR_STR  = 5,
+    EXPR_FLOAT  = 5,
+    EXPR_STR,
     EXPR_VAR,
+    EXPR_STMT,
     EXPR_TUPLE,
     EXPR_FOR,
     EXPR_CLASS,
@@ -32,6 +34,7 @@ enum ExprType{
 enum PyObjType{
     PY_NONE = 1,
     PY_INT,
+    PY_FLOAT,
     PY_STR,
     PY_FUNC_DEF,
     PY_CLASS_FUNC,
