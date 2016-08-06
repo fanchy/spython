@@ -28,6 +28,17 @@ PyObjPtr StmtAST::eval(PyObjPtr context){
     }
     return ret;
 }
+string StmtAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "StmtAST";
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret += "\n" + exprs[i]->dump(nDepth+1);
+    }
+    return ret;
+}
 
 StrExprAST::StrExprAST(const string& v) : val(v) {
     this->name = v;
@@ -109,25 +120,25 @@ PyObjPtr ForExprAST::eval(PyObjPtr context) {
 PyObjPtr BinaryExprAST::eval(PyObjPtr context) {
     switch (op){
         case TOK_ASSIGN:{
-            //DMSG()("TOK_ASSIGN Op:%s %s %s begin\n", this->name.c_str(), LHS->name.c_str(), RHS->name.c_str());
+            //DMSG()("TOK_ASSIGN Op:%s %s %s begin\n", this->name.c_str(), left->name.c_str(), right->name.c_str());
 
-            if (LHS->getType() == EXPR_INT || LHS->getType() == EXPR_STR){
+            if (left->getType() == EXPR_INT || left->getType() == EXPR_STR){
                 throw PyException::buildException("can not assign to const value");
             }
-            PyObjPtr rval = RHS->eval(context);
+            PyObjPtr rval = right->eval(context);
             
-            if (LHS->getType() == EXPR_TUPLE)
+            if (left->getType() == EXPR_TUPLE)
             {
-                PyObjPtr ret = LHS.cast<TupleExprAST>()->handleAssign(context, rval);
+                PyObjPtr ret = left.cast<TupleExprAST>()->handleAssign(context, rval);
                 return ret;
             }
-            PyObjPtr& v = LHS->getFieldVal(context);
+            PyObjPtr& v = left->getFieldVal(context);
             v = rval;
             return rval;
         }break;
         case TOK_EQ:{
-            PyObjPtr lval = LHS->eval(context);
-            PyObjPtr rval = RHS->eval(context);
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr rval = right->eval(context);
             //DMSG(("BinaryExprAST Op:%s begin\n", this->name.c_str()));
             //lval->dump();
             //rval->dump();
@@ -138,8 +149,8 @@ PyObjPtr BinaryExprAST::eval(PyObjPtr context) {
             return PyObjTool::buildBool(false);
         }break;
         case TOK_AND:{
-            PyObjPtr lval = LHS->eval(context);
-            PyObjPtr rval = RHS->eval(context);
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr rval = right->eval(context);
             //DMSG(("BinaryExprAST TOK_AND Op:%s begin\n", this->name.c_str()));
             //lval->dump();
             //rval->dump();
@@ -150,8 +161,8 @@ PyObjPtr BinaryExprAST::eval(PyObjPtr context) {
             return PyObjTool::buildBool(false);
         }break;
         case TOK_OR:{
-            PyObjPtr lval = LHS->eval(context);
-            PyObjPtr rval = RHS->eval(context);
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr rval = right->eval(context);
             //DMSG(("BinaryExprAST TOK_OR Op:%s begin\n", this->name.c_str()));
             //lval->dump();
             //rval->dump();
@@ -162,9 +173,9 @@ PyObjPtr BinaryExprAST::eval(PyObjPtr context) {
             return PyObjTool::buildBool(false);
         }break;
         case TOK_FIELD:{
-            PyObjPtr lval = LHS->eval(context);
-            //DMSG(("BinaryExprAST TOK_FIELD Op:%s %s %s begin\n", this->name.c_str(), LHS->name.c_str(), RHS->name.c_str()));
-            PyObjPtr& v = RHS->getFieldVal(lval);
+            PyObjPtr lval = left->eval(context);
+            //DMSG(("BinaryExprAST TOK_FIELD Op:%s %s %s begin\n", this->name.c_str(), left->name.c_str(), right->name.c_str()));
+            PyObjPtr& v = right->getFieldVal(lval);
             
             return v;
         }break;
@@ -177,8 +188,8 @@ PyObjPtr BinaryExprAST::eval(PyObjPtr context) {
 PyObjPtr& BinaryExprAST::getFieldVal(PyObjPtr& context){
     switch (op){
         case TOK_FIELD:{
-            PyObjPtr lval = LHS->eval(context);
-            PyObjPtr& v = RHS->getFieldVal(lval);
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr& v = right->getFieldVal(lval);
             return v;
         }
         break;
@@ -186,6 +197,32 @@ PyObjPtr& BinaryExprAST::getFieldVal(PyObjPtr& context){
             return context;
     }
     return context;
+}
+string BinaryExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += left->dump(0) + this->name + right->dump(0);
+    return ret;
+}
+
+PyObjPtr AugassignAST::eval(PyObjPtr context){
+    return NULL;//!TODO
+}
+PyObjPtr& AugassignAST::getFieldVal(PyObjPtr& context){
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr& v = right->getFieldVal(lval);
+    return v;
+    return context;
+}
+string AugassignAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += left->dump(0) + this->name + right->dump(0);
+    return ret;
 }
 
 PyObjPtr TupleExprAST::eval(PyObjPtr context){

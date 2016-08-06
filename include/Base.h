@@ -11,6 +11,7 @@
 #include "Singleton.h"
 
 #include <stdio.h>
+#define DTRACE(x) {}//printf x ; printf("\n")
 #define DMSG(x) printf x ; printf("\n")
 
 namespace ff {
@@ -28,7 +29,9 @@ enum ExprType{
     EXPR_FOR,
     EXPR_CLASS,
     EXPR_BREAK,
-    EXPR_CONTINUE
+    EXPR_CONTINUE,
+    EXPR_ASSIGN,
+    EXPR_AUGASSIGN
 };
 
 enum PyObjType{
@@ -240,7 +243,15 @@ public:
     }
     virtual PyObjPtr handleAssign(PyObjPtr context, PyObjPtr val) { return NULL; }
     
-    virtual void dump(int nDepth){
+    virtual std::string dump(int nDepth){
+        std::string ret;
+        for (int i = 0; i < nDepth; ++i){
+            ret += "-";
+        }
+        char tmp[64] = {0};
+        snprintf(tmp, sizeof(tmp), "%s", name.c_str());
+        ret += tmp;
+        return ret;
     }
     std::vector<std::vector<int> >  module2objcet2fieldIndex;
 };

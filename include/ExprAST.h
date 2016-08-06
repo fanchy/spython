@@ -102,6 +102,7 @@ public:
     virtual int getType() {
         return EXPR_STMT;
     }
+    virtual std::string dump(int nDepth);
     virtual PyObjPtr eval(PyObjPtr context);
 public:
     std::vector<ExprASTPtr> exprs;
@@ -110,18 +111,43 @@ public:
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {
     TokenType op;
-    ExprASTPtr LHS, RHS;
+    ExprASTPtr left, right;
 
 public:
     BinaryExprAST(TokenType o, ExprASTPtr l, ExprASTPtr r)
-        : op(o), LHS(l), RHS(r) {
+        : op(o), left(l), right(r) {
         
         this->name = PyHelper::token2name(op);
-        //DMSG(("BinaryExprAST Op:%s,lhs=%s,rhs=%s\n", this->name.c_str(), LHS->name.c_str(), RHS->name.c_str()));
+        //DMSG(("BinaryExprAST Op:%s,left=%s,right=%s\n", this->name.c_str(), left->name.c_str(), right->name.c_str()));
     }
+    virtual int getType() {
+        return EXPR_ASSIGN;
+    }
+    virtual std::string dump(int nDepth);
     virtual PyObjPtr eval(PyObjPtr context);
     virtual PyObjPtr& getFieldVal(PyObjPtr& context);
 };
+
+class AugassignAST : public ExprAST {
+public:
+    std::string op;
+    ExprASTPtr left, right;
+
+public:
+    AugassignAST(const std::string& o, ExprASTPtr l, ExprASTPtr r)
+        : op(o), left(l), right(r) {
+        
+        this->name = op;
+        //DMSG(("BinaryExprAST Op:%s,left=%s,right=%s\n", this->name.c_str(), left->name.c_str(), right->name.c_str()));
+    }
+    virtual int getType() {
+        return EXPR_AUGASSIGN;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+    virtual PyObjPtr& getFieldVal(PyObjPtr& context);
+};
+
 
 class FuncCodeImpl: public ExprAST{
 public:

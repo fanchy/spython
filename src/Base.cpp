@@ -63,11 +63,11 @@ string PyHelper::token2name(TokenType token){
     cfg[TOK_EQ  ] = "TOK_EQ"; //] = "] = "
     cfg[TOK_NE  ] = "TOK_NE"; //!] = "
     
-    cfg[TOK_ASSIGN] = "TOK_ASSIGN"; // ] = " 
-    cfg[TOK_PLUS] = "TOK_PLUS"; // +
-    cfg[TOK_SUB ] = "TOK_SUB"; //
-    cfg[TOK_MUT ] = "TOK_MUT"; // *
-    cfg[TOK_DIV ] = "TOK_DIV"; // /
+    cfg[TOK_ASSIGN] = "="; // ] = " 
+    cfg[TOK_PLUS] = "+"; // +
+    cfg[TOK_SUB ] = "-"; //
+    cfg[TOK_MUT ] = "*"; // *
+    cfg[TOK_DIV ] = "/"; // /
     
     cfg[TOK_AND ] = "TOK_AND"; // && and
     cfg[TOK_OR  ] = "TOK_OR"; // || or

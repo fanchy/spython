@@ -4,6 +4,7 @@
 
 using namespace std;
 using namespace ff;
+#define THROW_ERROR(X) throwError(X, __LINE__)
 
 Parser::Parser():m_curScanner(NULL){
 }
@@ -41,7 +42,7 @@ ExprASTPtr Parser::parse_file_input(){
         }
         token = m_curScanner->getToken();
     }
-    return NULL;
+    return ret;
 }
 
 //! eval_input: testlist NEWLINE* ENDMARKER
@@ -94,43 +95,168 @@ ExprASTPtr Parser::parse_fplist(){
 //! stmt: simple_stmt | compound_stmt
 ExprASTPtr Parser::parse_stmt(){
     ExprASTPtr retExpr = parse_simple_stmt();
+    if (!retExpr){
+        retExpr = parse_compound_stmt();
+    }
     return retExpr;
 }
 
 //! simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
 ExprASTPtr Parser::parse_simple_stmt(){
-    ExprASTPtr retExpr = parse_small_stmt();
-    return retExpr;
+    DTRACE(("parse_simple_stmt begin..."));
+    ExprASTPtr small_stmt = parse_small_stmt();
+    
+    const Token* token = m_curScanner->getToken();
+    if (small_stmt && token->strVal == ";"){
+        StmtAST* allStmt = new StmtAST();
+        ExprASTPtr ret = allStmt;
+        allStmt->exprs.push_back(small_stmt);
+        
+        while (token->strVal == ";"){
+            m_curScanner->seek(1);
+            small_stmt = parse_small_stmt();
+            if (!small_stmt){
+                break;
+            }
+            allStmt->exprs.push_back(small_stmt);
+            token = m_curScanner->getToken();
+        }
+
+        if (token->strVal == ";"){
+            m_curScanner->seek(1);
+            token = m_curScanner->getToken();
+        }
+        
+        if (token->strVal == "\n"){
+            m_curScanner->seek(1);
+        }
+
+        //!if only one direct return first
+        if (allStmt->exprs.size() == 1){
+            return allStmt->exprs[0];
+        }
+        DTRACE(("parse_simple_stmt end muti small..."));
+        return ret;
+    }
+    DTRACE(("parse_simple_stmt end small..."));
+    return small_stmt;
 }
 
 //! small_stmt: (expr_stmt | print_stmt  | del_stmt | pass_stmt | flow_stmt |
 //!              import_stmt | global_stmt | exec_stmt | assert_stmt)
 ExprASTPtr Parser::parse_small_stmt(){
     ExprASTPtr retExpr = parse_expr_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_print_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_del_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_pass_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_flow_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_import_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_global_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_exec_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_assert_stmt();
+    if (retExpr){
+        return retExpr;
+    }
     return retExpr;
 }
 
 //! expr_stmt: testlist (augassign (yield_expr|testlist) |
 //!                      ('=' (yield_expr|testlist))*)
 ExprASTPtr Parser::parse_expr_stmt(){
-    DMSG(("parse_expr_stmt 1"));
+    DTRACE(("parse_expr_stmt begin..."));
     ExprASTPtr testlist = parse_testlist();
     if (!testlist){
+        DTRACE(("parse_expr_stmt ignore"));
         return NULL;
     }
-    const Token* token = m_curScanner->getToken();
-    if (token->strVal == "="){
-        DMSG(("parse_expr_stmt 2 `=`"));
-        m_curScanner->seek(1);
-        ExprASTPtr testlist2  = parse_testlist();
-        return new BinaryExprAST(TOK_ASSIGN, testlist, testlist2);
+
+    ExprASTPtr augassign = parse_augassign();
+    if (augassign){
+        ExprASTPtr yield_expr = parse_yield_expr();
+        if (yield_expr){
+            augassign.cast<AugassignAST>()->left  = testlist;
+            augassign.cast<AugassignAST>()->right = testlist;
+        }
+        else{
+            ExprASTPtr testlist2 = parse_testlist();
+            if (!testlist2){
+                THROW_ERROR("parse_expr_stmt failed augassign-2");
+            }
+            augassign.cast<AugassignAST>()->left  = testlist;
+            augassign.cast<AugassignAST>()->right = testlist2;
+        }
+        return augassign;
     }
-    return testlist;
+    else{
+        const Token* token = m_curScanner->getToken();
+        if (token->strVal == "="){
+            m_curScanner->seek(1);
+            
+            DMSG(("parse_expr_stmt 2 `=`"));
+            
+            ExprASTPtr yield_expr = parse_yield_expr();
+            if (yield_expr){
+                return new BinaryExprAST(TOK_ASSIGN, testlist, yield_expr);
+            }
+            ExprASTPtr testlist2  = parse_testlist();
+            if (!testlist2){
+                THROW_ERROR("parse_expr_stmt failed assign-2");
+            }
+            
+            return new BinaryExprAST(TOK_ASSIGN, testlist, testlist2);
+        }
+        else{
+            THROW_ERROR("parse_expr_stmt failed");
+        }
+    }
+    
+    return NULL;
 }
 
 //! augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' |
 //!             '<<=' | '>>=' | '**=' | '//=')
 ExprASTPtr Parser::parse_augassign(){
+    const Token* token1 = m_curScanner->getToken();
+    if (token1->strVal == "+=" ||
+        token1->strVal == "-=" ||
+        token1->strVal == "*=" ||
+        token1->strVal == "/=" ||
+        token1->strVal == "%=" ||
+        token1->strVal == "&=" ||
+        token1->strVal == "|=" ||
+        token1->strVal == "^=" ||
+        token1->strVal == "<<=" ||
+        token1->strVal == ">>=" ||
+        token1->strVal == "**=" ||
+        token1->strVal == "//=")
+    {
+        m_curScanner->seek(1);
+        return new AugassignAST(token1->strVal, NULL, NULL);
+    }
     return NULL;
 }
 
@@ -393,7 +519,7 @@ ExprASTPtr Parser::parse_atom(){
     DMSG(("parse_atom %s", token->dump().c_str()));
     
     ExprASTPtr retExpr;
-    if (token->nTokenType == TOK_FLOAT){
+    if (token->nTokenType == TOK_INT){
         retExpr = new NumberExprAST(token->nVal);
     }
     else if (token->nTokenType == TOK_FLOAT){
@@ -401,6 +527,9 @@ ExprASTPtr Parser::parse_atom(){
     }
     else if (token->nTokenType == TOK_VAR){
         retExpr = new VariableExprAST(token->strVal);
+    }
+    else{
+        return retExpr;
     }
     m_curScanner->seek(1);
     return retExpr;
@@ -519,3 +648,10 @@ ExprASTPtr Parser::parse_encoding_decl(){
 ExprASTPtr Parser::parse_yield_expr(){
     return NULL;
 }
+
+void Parser::throwError(const string& err, int nLine){
+    char msg[256] = {0};
+    snprintf(msg, sizeof(msg), "%s(%d)", err.c_str(), nLine);
+    throw PyException::buildException(msg);
+}
+

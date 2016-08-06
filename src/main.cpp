@@ -27,14 +27,21 @@ int main(int argc, char** argv) {
     Scanner scanner;
     scanner.tokenize(strCode);
     
-    Parser parser;
-    ExprASTPtr rootExpr = parser.parse(scanner);
     
-    if (rootExpr){
-        //rootExpr->dump(0);
-    }else{
-        printf("parser.parse Ê§°Ü£¡\n");
+    Parser parser;
+    try{
+        ExprASTPtr rootExpr = parser.parse(scanner);
+    
+        if (rootExpr){
+            printf("%s", rootExpr->dump(0).c_str());
+        }else{
+            printf("parser.parse Ê§°Ü£¡\n");
+        }
     }
+    catch(exception& e){
+        printf("%s\n", e.what());
+    }
+    
     
     return 0;
     PyObjPtr mainMod = new PyObjModule("__main__");

@@ -200,6 +200,7 @@ public:
     //! yield_expr: 'yield' [testlist]
     ExprASTPtr parse_yield_expr();
     
+    void throwError(const std::string& err, int nLine = 0);
 protected:
     Scanner*            m_curScanner;
 };

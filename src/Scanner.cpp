@@ -127,8 +127,63 @@ static Token getOneToken(const string& content, int& index) {
     if (cLastOne == TOK_EOF)
         return retToken;
 
-    // Otherwise, just return the character as its ascii value.
     retToken.strVal        = cLastOne;
+    if (cLastOne ==';'){
+        retToken.strVal        = cLastOne;
+    }
+    //! augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' |
+    //!             '<<=' | '>>=' | '**=' | '//=')
+    switch (cLastOne){
+        case '+':
+        case '-':
+        case '%':
+        case '&':
+        case '^':
+        {
+            cLastOne = getCharNext(content, index);
+            if (cLastOne == '='){
+                retToken.strVal += '=';
+            }
+            else{
+                --index;
+            }
+        }break;
+        case '<':
+        case '>':
+        {
+            char cLastOne2 = getCharNext(content, index);
+            char cLastOne3 = getCharNext(content, index);
+            if (cLastOne == cLastOne2 && cLastOne3 == '='){
+                retToken.strVal += cLastOne2;
+                retToken.strVal += cLastOne3;
+            }
+            else{
+                index -= 2;
+            }
+        }break;
+        case '/':
+        case '*':{
+            char cLastOne2 = getCharNext(content, index);
+            char cLastOne3 = getCharNext(content, index);
+            if (cLastOne2 == '='){
+                retToken.strVal += cLastOne2;
+                index -= 1;
+            }
+            else if (cLastOne == cLastOne2 && cLastOne3 == '='){
+                retToken.strVal += cLastOne2;
+                retToken.strVal += cLastOne3;
+            }
+            else{
+                index -= 2;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    // Otherwise, just return the character as its ascii value.
+    
+    
     retToken.nTokenType    = TOK_CHAR;
     return retToken;
 }
