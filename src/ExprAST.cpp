@@ -110,6 +110,63 @@ string RaiseAST::dump(int nDepth){
     return ret;
 }
 
+PyObjPtr GlobalAST::eval(PyObjPtr context){
+    PyObjPtr ret;
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret = exprs[i]->eval(context);
+    }
+    return ret;
+}
+string GlobalAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "GlobalAST";
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret += "\n" + exprs[i]->dump(nDepth+1);
+    }
+    return ret;
+}
+
+PyObjPtr ExecAST::eval(PyObjPtr context){
+    PyObjPtr ret;
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret = exprs[i]->eval(context);
+    }
+    return ret;
+}
+string ExecAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "ExecAST";
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret += "\n" + exprs[i]->dump(nDepth+1);
+    }
+    return ret;
+}
+
+PyObjPtr AssertAST::eval(PyObjPtr context){
+    PyObjPtr ret;
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret = exprs[i]->eval(context);
+    }
+    return ret;
+}
+string AssertAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "AssertAST";
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret += "\n" + exprs[i]->dump(nDepth+1);
+    }
+    return ret;
+}
+
 StrExprAST::StrExprAST(const string& v) : val(v) {
     this->name = v;
     this->name += "(str)";
@@ -185,6 +242,15 @@ PyObjPtr ForExprAST::eval(PyObjPtr context) {
         forBody[i]->eval(context);
     }
     return context;
+}
+string ImportAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "import";
+    ret += "\n" + param->dump(nDepth+1);
+    return ret;
 }
 
 PyObjPtr BinaryExprAST::eval(PyObjPtr context) {

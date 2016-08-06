@@ -175,7 +175,7 @@ public:
 };
 class ImportAST : public ExprAST {
 public:
-    ImportAST(){
+    ImportAST(ExprASTPtr& p):param(p){
         this->name = "import";
     }
     virtual int getType() {
@@ -184,7 +184,9 @@ public:
     virtual PyObjPtr eval(PyObjPtr context) {
         return PyObjTool::buildNone();
     }
+    virtual std::string dump(int nDepth);
 public:
+    ExprASTPtr param;
 };
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {
@@ -232,6 +234,46 @@ public:
 public:
     std::vector<ExprASTPtr> exprs;
 };
+class GlobalAST : public ExprAST {
+
+public:
+    GlobalAST(){
+    }
+    virtual int getType() {
+        return EXPR_GLOBAL_STMT;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+public:
+    std::vector<ExprASTPtr> exprs;
+};
+class ExecAST : public ExprAST {
+
+public:
+    ExecAST(){
+    }
+    virtual int getType() {
+        return EXPR_EXEC_STMT;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+public:
+    std::vector<ExprASTPtr> exprs;
+};
+class AssertAST : public ExprAST {
+
+public:
+    AssertAST(){
+    }
+    virtual int getType() {
+        return EXPR_ASSERT_STMT;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+public:
+    std::vector<ExprASTPtr> exprs;
+};
+
 class AugassignAST : public ExprAST {
 public:
     std::string op;

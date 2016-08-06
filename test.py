@@ -8,5 +8,12 @@ continue
 return 1
 raise 1, 2, 3
 #yield
-#import time
+
+import time.b as a
+from datetime import datetime
+global g, h, k
+assert 10
+
+if a:
+    b = 10
 

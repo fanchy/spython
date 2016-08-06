@@ -420,7 +420,7 @@ ExprASTPtr Parser::parse_import_name(){
         m_curScanner->seek(1);
 
         ExprASTPtr dotted_as_names = parse_dotted_as_names();
-        return new ImportAST();
+        return new ImportAST(dotted_as_names);
     }
     
     return NULL;
@@ -429,22 +429,126 @@ ExprASTPtr Parser::parse_import_name(){
 //! import_from: ('from' ('.'* dotted_name | '.'+)
 //!               'import' ('*' | '(' import_as_names ')' | import_as_names))
 ExprASTPtr Parser::parse_import_from(){
+    
+    if (m_curScanner->getToken()->strVal == "from"){
+        StmtAST* stmt = new StmtAST();
+        ExprASTPtr ret = stmt;
+        m_curScanner->seek(1);
+        
+        ExprASTPtr dotted_name = parse_dotted_name();
+        if (!dotted_name){
+            THROW_ERROR("dotted_name need when parse import after from");
+        }
+        stmt->exprs.push_back(dotted_name);
+        
+        if (m_curScanner->getToken()->strVal != "import"){
+            THROW_ERROR("import need when parse import after from");
+        }
+        m_curScanner->seek(1);
+        
+        if (m_curScanner->getToken()->strVal == "*"){
+            stmt->exprs.push_back(new StrExprAST("*"));
+            m_curScanner->seek(1);
+        }
+        else if (m_curScanner->getToken()->strVal == "("){
+            m_curScanner->seek(1);
+            ExprASTPtr import_as_names = parse_import_as_names();
+            if (!import_as_names){
+                THROW_ERROR("import_as_names need when parse import after import (");
+            }
+            stmt->exprs.push_back(import_as_names);
+            
+            if (m_curScanner->getToken()->strVal != ""){
+                THROW_ERROR(") need when parse import after import (");
+            }
+            m_curScanner->seek(1);
+        }
+        else{
+            ExprASTPtr import_as_names = parse_import_as_names();
+            if (!import_as_names){
+                THROW_ERROR("import_as_names need when parse import after import");
+            }
+            stmt->exprs.push_back(import_as_names);
+        }
+        return ret;
+    }
     return NULL;
 }
 
 //! import_as_name: NAME ['as' NAME]
 ExprASTPtr Parser::parse_import_as_name(){
-    return NULL;
+    DMSG(("parse_import_as_name %s", m_curScanner->getToken()->strVal.c_str()));
+    StmtAST* stmt = new StmtAST();
+    ExprASTPtr ret = stmt;
+
+    if (m_curScanner->getToken()->nTokenType == TOK_VAR){
+        stmt->exprs.push_back(new StrExprAST(m_curScanner->getToken()->strVal));
+        m_curScanner->seek(1);
+
+        if (m_curScanner->getToken()->strVal == "as"){
+            m_curScanner->seek(1);
+            if (m_curScanner->getToken()->nTokenType == TOK_VAR){
+                stmt->exprs.push_back(new StrExprAST(m_curScanner->getToken()->strVal));
+                m_curScanner->seek(1);
+            }
+            else{
+                THROW_ERROR("name needed when parse import after as");
+            }
+        }
+        
+    }
+    else{
+        THROW_ERROR("name needed when parse import");
+    }
+    return ret;
 }
 
 //! dotted_as_name: dotted_name ['as' NAME]
 ExprASTPtr Parser::parse_dotted_as_name(){
-    return NULL;
+    StmtAST* stmt = new StmtAST();
+    ExprASTPtr ret = stmt;
+    
+    ExprASTPtr dotted_name = parse_dotted_name();
+    if (!dotted_name){
+        return NULL;
+    }
+    stmt->exprs.push_back(dotted_name);
+    if (m_curScanner->getToken()->strVal == "as"){
+        m_curScanner->seek(1);
+        
+        if (m_curScanner->getToken()->nTokenType == TOK_VAR){
+            ExprASTPtr expr = new StrExprAST(m_curScanner->getToken()->strVal);
+            stmt->exprs.push_back(expr);
+            m_curScanner->seek(1);
+        }
+        else{
+            THROW_ERROR("name needed when parse import after as");
+            return NULL;
+        }
+    }
+    return ret;
 }
 
 //! import_as_names: import_as_name (',' import_as_name)* [',']
 ExprASTPtr Parser::parse_import_as_names(){
-    return NULL;
+    StmtAST* stmt = new StmtAST();
+    ExprASTPtr ret = stmt;
+    
+    ExprASTPtr import_as_name = parse_import_as_name();
+    if (!import_as_name){
+        return NULL;
+    }
+    stmt->exprs.push_back(import_as_name);
+    
+    while (m_curScanner->getToken()->strVal == ","){
+        m_curScanner->seek(1);
+        import_as_name = parse_import_as_name();
+        if (!import_as_name){
+            THROW_ERROR("name needed when parse import after ,");;
+        }
+        stmt->exprs.push_back(import_as_name);
+    }
+    return ret;
 }
 
 //! dotted_as_names: dotted_as_name (',' dotted_as_name)*
@@ -462,32 +566,209 @@ ExprASTPtr Parser::parse_dotted_as_names(){
 
 //! dotted_name: NAME ('.' NAME)*
 ExprASTPtr Parser::parse_dotted_name(){
-    return NULL;
+    StmtAST* stmt = new StmtAST();
+    ExprASTPtr ret = stmt;
+    DMSG(("parse_dotted_name %s", m_curScanner->getToken()->strVal.c_str()));
+    
+    if (m_curScanner->getToken()->nTokenType == TOK_VAR){
+        ExprASTPtr expr = new StrExprAST(m_curScanner->getToken()->strVal);
+        stmt->exprs.push_back(expr);
+        m_curScanner->seek(1);
+    }
+    else{
+        THROW_ERROR("name needed when parse import");
+        return NULL;
+    }
+    
+    while (m_curScanner->getToken()->strVal == "."){
+        m_curScanner->seek(1);
+        
+        if (m_curScanner->getToken()->nTokenType == TOK_VAR){
+            ExprASTPtr expr = new StrExprAST(m_curScanner->getToken()->strVal);
+            stmt->exprs.push_back(expr);
+            m_curScanner->seek(1);
+        }
+        else{
+            THROW_ERROR("name needed when parse import after .");
+        }
+    }
+    return ret;
 }
 
 //! global_stmt: 'global' NAME (',' NAME)*
 ExprASTPtr Parser::parse_global_stmt(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "global"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    GlobalAST* stmt = new GlobalAST();
+    ExprASTPtr ret = stmt;
+    
+    if (m_curScanner->getToken()->nTokenType != TOK_VAR){
+        THROW_ERROR("var needed when parse global");
+    }
+    stmt->exprs.push_back(new VariableExprAST(m_curScanner->getToken()->strVal));
+    m_curScanner->seek(1);
+    
+    while (m_curScanner->getToken()->strVal == ","){
+        m_curScanner->seek(1);
+
+        if (m_curScanner->getToken()->nTokenType == TOK_VAR){
+            stmt->exprs.push_back(new VariableExprAST(m_curScanner->getToken()->strVal));
+            m_curScanner->seek(1);
+        }
+        else{
+            THROW_ERROR("var needed when parse global after ,");
+        }
+    }
+    return ret;
 }
 
 //! exec_stmt: 'exec' expr ['in' test [',' test]]
 ExprASTPtr Parser::parse_exec_stmt(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "exec"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    ExecAST* stmt = new ExecAST();
+    ExprASTPtr ret = stmt;
+    
+    ExprASTPtr expr = parse_expr();
+    if (!expr){
+        THROW_ERROR("expr needed when parse exec after exec");
+    }
+    stmt->exprs.push_back(expr);
+    
+    if (m_curScanner->getToken()->strVal == "in"){
+        m_curScanner->seek(1);
+        
+        ExprASTPtr test = parse_test();
+        if (!test){
+            THROW_ERROR("test needed when parse exec after in");
+        }
+        stmt->exprs.push_back(test);
+        
+        if (m_curScanner->getToken()->strVal == ","){
+            test = parse_test();
+            if (!test){
+                THROW_ERROR("test needed when parse exec after ,");
+            }
+            stmt->exprs.push_back(test);
+        }
+    }
+    return ret;
 }
 
 //! assert_stmt: 'assert' test [',' test]
 ExprASTPtr Parser::parse_assert_stmt(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "assert"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    AssertAST* stmt = new AssertAST();
+    ExprASTPtr ret = stmt;
+    
+    ExprASTPtr test = parse_test();
+    if (!test){
+        THROW_ERROR("test needed when parse assert after assert");
+    }
+    stmt->exprs.push_back(test);
+    
+    if (m_curScanner->getToken()->strVal == ","){
+        m_curScanner->seek(1);
+        
+        ExprASTPtr test = parse_test();
+        if (!test){
+            THROW_ERROR("test needed when parse assert after ,");
+        }
+        stmt->exprs.push_back(test);
+    }
+    return ret;
 }
 
 //! compound_stmt: if_stmt | while_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated
 ExprASTPtr Parser::parse_compound_stmt(){
+    if (ExprASTPtr if_stmt = parse_if_stmt()){
+        return if_stmt;
+    }
+    if (ExprASTPtr while_stmt = parse_while_stmt()){
+        return while_stmt;
+    }
+    if (ExprASTPtr for_stmt = parse_for_stmt()){
+        return for_stmt;
+    }
+    if (ExprASTPtr try_stmt = parse_try_stmt()){
+        return try_stmt;
+    }
+    if (ExprASTPtr with_stmt = parse_with_stmt()){
+        return with_stmt;
+    }
+    if (ExprASTPtr funcdef = parse_funcdef()){
+        return funcdef;
+    }
+    if (ExprASTPtr classdef = parse_classdef()){
+        return classdef;
+    }
+    if (ExprASTPtr decorated = parse_decorated()){
+        return decorated;
+    }
     return NULL;
 }
 
 //! if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 ExprASTPtr Parser::parse_if_stmt(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "if"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    IfExprAST* ifexpr = new IfExprAST();
+    ExprASTPtr ret    = ifexpr;
+    
+    ExprASTPtr test = parse_test();
+    if (!test){
+        THROW_ERROR("test needed when parse if after if");
+    }
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed when parse if after if");
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr suite = parse_suite();
+    if (!suite){
+        THROW_ERROR("suite needed when parse if after :");
+    }
+    
+    while (m_curScanner->getToken()->strVal == "elif"){
+        m_curScanner->seek(1);
+        test = parse_test();
+        if (!test){
+            THROW_ERROR("test needed when parse if after elif");
+        }
+        if (m_curScanner->getToken()->strVal != ":"){
+            THROW_ERROR(": needed when parse if after elif");
+        }
+        m_curScanner->seek(1);
+        
+        suite = parse_suite();
+        if (!suite){
+            THROW_ERROR("suite needed when parse if after elif :");
+        }
+    }
+    
+    if (m_curScanner->getToken()->strVal == "else"){
+        m_curScanner->seek(1);
+        if (m_curScanner->getToken()->strVal != ":"){
+            THROW_ERROR(": needed when parse if after else");
+        }
+        m_curScanner->seek(1);
+        suite = parse_suite();
+        if (!suite){
+            THROW_ERROR("suite needed when parse if after elif :");
+        }
+    }
+    return ret;
 }
 
 //! while_stmt: 'while' test ':' suite ['else' ':' suite]
@@ -526,7 +807,12 @@ ExprASTPtr Parser::parse_except_clause(){
 
 //! suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
 ExprASTPtr Parser::parse_suite(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal == "\n"){
+        m_curScanner->seek(1);
+    }
+    DMSG(("parse_suite %s", m_curScanner->getToken()->strVal.c_str()));
+    ExprASTPtr simple_stmt = parse_simple_stmt();
+    return simple_stmt;
 }
 
 //! testlist_safe: old_test [(',' old_test)+ [',']]
@@ -633,7 +919,6 @@ ExprASTPtr Parser::parse_power(){
 //!        '`' testlist1 '`' |
 //!        NAME | NUMBER | STRING+)
 ExprASTPtr Parser::parse_atom(){
-    DMSG(("parse_atom %s", m_curScanner->getToken()->dump().c_str()));
     
     ExprASTPtr retExpr;
     if (m_curScanner->getToken()->nTokenType == TOK_INT){
@@ -654,6 +939,8 @@ ExprASTPtr Parser::parse_atom(){
     else{
         return retExpr;
     }
+    
+    DMSG(("parse_atom %s", m_curScanner->getToken()->dump().c_str()));
     m_curScanner->seek(1);
     return retExpr;
 }
