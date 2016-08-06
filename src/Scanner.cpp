@@ -78,7 +78,8 @@ static Token getOneToken(const string& content, int& index) {
         while (::isalnum((cLastOne = getCharNext(content, index))) || cLastOne == '_'){
             retToken.strVal += cLastOne;
         }
-        index--;//!pop last char \n
+        if (cLastOne != 0)
+            index--;//!pop last char \n
         retToken.nTokenType = TOK_VAR;
         return retToken;
     }
@@ -103,7 +104,8 @@ static Token getOneToken(const string& content, int& index) {
             retToken.nTokenType = TOK_FLOAT;
         }
 
-        index--;//!pop last char \n
+        if (cLastOne != 0)
+            index--;//!pop last char \n
         return retToken;
     }
 
@@ -200,7 +202,7 @@ bool Scanner::tokenize(const std::string& content){
         retToken = getOneToken(content, nIndex);
         m_allTokens.push_back(retToken);
 
-        //printf("token:%s\n", retToken.dump().c_str());
+        printf("token:%s\n", retToken.dump().c_str());
 
     }while (retToken.nTokenType != TOK_EOF);
     

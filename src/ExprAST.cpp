@@ -40,6 +40,76 @@ string StmtAST::dump(int nDepth){
     return ret;
 }
 
+PyObjPtr PrintAST::eval(PyObjPtr context){
+    PyObjPtr ret;
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret = exprs[i]->eval(context);
+    }
+    return ret;
+}
+string PrintAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "PrintAST";
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret += "\n" + exprs[i]->dump(nDepth+1);
+    }
+    return ret;
+}
+
+PyObjPtr DelAST::eval(PyObjPtr context){
+    PyObjPtr ret = exprlist->eval(context);
+    return ret;
+}
+string DelAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "DelAST";
+    ret += "\n" + exprlist->dump(nDepth+1);
+    return ret;
+}
+
+PyObjPtr ReturnAST::eval(PyObjPtr context){
+    if (!testlist){
+        return PyObjTool::buildNone();
+    }
+    PyObjPtr ret = testlist->eval(context);
+    return ret;
+}
+string ReturnAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "ReturnAST";
+    if (testlist)
+        ret += "\n" + testlist->dump(nDepth+1);
+    return ret;
+}
+
+PyObjPtr RaiseAST::eval(PyObjPtr context){
+    PyObjPtr ret;
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret = exprs[i]->eval(context);
+    }
+    return ret;
+}
+string RaiseAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "RaiseAST";
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        ret += "\n" + exprs[i]->dump(nDepth+1);
+    }
+    return ret;
+}
+
 StrExprAST::StrExprAST(const string& v) : val(v) {
     this->name = v;
     this->name += "(str)";
@@ -118,6 +188,7 @@ PyObjPtr ForExprAST::eval(PyObjPtr context) {
 }
 
 PyObjPtr BinaryExprAST::eval(PyObjPtr context) {
+    /*
     switch (op){
         case TOK_ASSIGN:{
             //DMSG()("TOK_ASSIGN Op:%s %s %s begin\n", this->name.c_str(), left->name.c_str(), right->name.c_str());
@@ -182,10 +253,12 @@ PyObjPtr BinaryExprAST::eval(PyObjPtr context) {
         default:
             return context;
     }
+    */
     return context;
 }
 
 PyObjPtr& BinaryExprAST::getFieldVal(PyObjPtr& context){
+    /*
     switch (op){
         case TOK_FIELD:{
             PyObjPtr lval = left->eval(context);
@@ -196,6 +269,7 @@ PyObjPtr& BinaryExprAST::getFieldVal(PyObjPtr& context){
         default:
             return context;
     }
+    */
     return context;
 }
 string BinaryExprAST::dump(int nDepth){

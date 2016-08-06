@@ -135,6 +135,7 @@ TokenType ParseHelper::gettok() {
 }
 int ParseTool::GetTokPrecedence(TokenType c) {
     map<int, int> BinopPrecedence;
+    /*
     BinopPrecedence[TOK_ASSIGN] = 2;
     
     BinopPrecedence[TOK_AND] = 9, // && and
@@ -155,7 +156,7 @@ int ParseTool::GetTokPrecedence(TokenType c) {
     BinopPrecedence[TOK_FIELD]   = 50;
     BinopPrecedence[TOK_CALL]    = 50;
     
-
+    */
     map<int, int>::iterator it = BinopPrecedence.find(c);
     if (it == BinopPrecedence.end())
         return -1;
@@ -495,6 +496,7 @@ ExprASTPtr ParseTool::ParseTupleExpr(ParseHelper& parseHelper, ExprASTPtr first)
 
 static int parseOperator(ParseHelper& parseHelper){
     TokenType curOps = parseHelper.at();
+    /*
     if (curOps == '<'){
         TokenType nextToken = parseHelper.checkNext(); // eat binop
         if (nextToken == '='){
@@ -555,7 +557,7 @@ static int parseOperator(ParseHelper& parseHelper){
         else if (varname == "or"){
             return TOK_OR;
         }
-    }
+    }*/
     return curOps;
 }
 
@@ -563,6 +565,7 @@ void ParseTool::popTokenIfBinOps(ParseHelper& parseHelper, TokenType curTok){
     parseHelper.at();
     //DMSG(("popTokenIfBinOps begin cat=%d\n",  parseHelper.at()));
     parseHelper.next();
+    /*
     if (TOK_LS  == curTok || //<
         TOK_LE  == curTok ||//<=
         TOK_GT  == curTok || //>
@@ -573,7 +576,7 @@ void ParseTool::popTokenIfBinOps(ParseHelper& parseHelper, TokenType curTok){
         
         parseHelper.next();
     }
-    
+    */
     //DMSG(("popTokenIfBinOps end c=%d name=%s\n", c, parseHelper.IdentifierStr.c_str()));
     return;
 }
@@ -624,7 +627,7 @@ ExprASTPtr ParseTool::ParseBinOpRHS(ParseHelper& parseHelper, int ExprPrec, Expr
         }
          
         // Merge LHS/RHS.
-        LHS = new BinaryExprAST(BinOp, LHS, RHS);
+        //LHS = new BinaryExprAST(BinOp, LHS, RHS);
     }
 
     return NULL;
@@ -638,7 +641,7 @@ ExprASTPtr ParseTool::ParseExpression(ParseHelper& parseHelper) {
     if (!LHS)
         return NULL;
     //DMSG(("parse expr %s, %d\n", LHS->name.c_str(), LHS->getType()));
-    if (LHS->getType() == EXPR_CALL || LHS->getType() == EXPR_FUNC || LHS->getType() == EXPR_CLASS){
+    if (LHS->getType() == EXPR_CALL || LHS->getType() == EXPR_FUNCDEF || LHS->getType() == EXPR_CLASSDEF){
         return LHS;
     }
     return ParseBinOpRHS(parseHelper, 0, LHS);

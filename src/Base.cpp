@@ -49,35 +49,50 @@ runtime_error PyException::buildException(const string& err) {
     return runtime_error(msg);
 }
 
-string PyHelper::token2name(TokenType token){
-    map<int, string> cfg;
-    cfg[TOK_VAR ] = "TOK_VAR";
-    cfg[TOK_INT ] = "TOK_NUM";
-    cfg[TOK_STR ] = "TOK_STR";
-    cfg[TOK_CALL] = "TOK_CALL";
-
-    cfg[TOK_LS  ] = "TOK_LS"; //<
-    cfg[TOK_LE  ] = "TOK_LE"; //<] = "
-    cfg[TOK_GT  ] = "TOK_GT"; //>
-    cfg[TOK_GE  ] = "TOK_GE"; //>] = "
-    cfg[TOK_EQ  ] = "TOK_EQ"; //] = "] = "
-    cfg[TOK_NE  ] = "TOK_NE"; //!] = "
+PyHelper::PyHelper(){
+    m_allKeyword.insert("False");
+    m_allKeyword.insert("class");
+    m_allKeyword.insert("finally");
+    m_allKeyword.insert("is");
+    m_allKeyword.insert("return");
+    m_allKeyword.insert("None");
+    m_allKeyword.insert("continuefor");
+    m_allKeyword.insert("lambda");
+    m_allKeyword.insert("try");
+    m_allKeyword.insert("True");
+    m_allKeyword.insert("def");
+    m_allKeyword.insert("from");
+    m_allKeyword.insert("nonlocalwhile");
+    m_allKeyword.insert("and");
+    m_allKeyword.insert("del");
+    m_allKeyword.insert("global");
+    m_allKeyword.insert("not");
+    m_allKeyword.insert("with");
+    m_allKeyword.insert("as");
+    m_allKeyword.insert("elif");
+    m_allKeyword.insert("if");
+    m_allKeyword.insert("or");
+    m_allKeyword.insert("yield");
+    m_allKeyword.insert("assert");
+    m_allKeyword.insert("else");
+    m_allKeyword.insert("import");
+    m_allKeyword.insert("pass");
+    m_allKeyword.insert("break");
+    m_allKeyword.insert("except");
+    m_allKeyword.insert("in");
+    m_allKeyword.insert("raise");
     
-    cfg[TOK_ASSIGN] = "="; // ] = " 
-    cfg[TOK_PLUS] = "+"; // +
-    cfg[TOK_SUB ] = "-"; //
-    cfg[TOK_MUT ] = "*"; // *
-    cfg[TOK_DIV ] = "/"; // /
-    
-    cfg[TOK_AND ] = "TOK_AND"; // && and
-    cfg[TOK_OR  ] = "TOK_OR"; // || or
-    cfg[TOK_YU  ] = "TOK_YU"; // &
-    cfg[TOK_HUO ] = "TOK_HUO"; // |
-    cfg[TOK_FAN ] = "TOK_FAN"; // ! 
-    cfg[TOK_FIELD ] = "TOK_FIELD"; // . 
-    return cfg[token];
+    m_allKeyword.insert("print");
+    m_allKeyword.insert("continue");
 }
 
+
+bool PyHelper::isKeyword(const string& v){
+    if (m_allKeyword.find(v) != m_allKeyword.end()){
+        return true;
+    }
+    return false;
+}
 
 struct NoneTraits{
     NoneTraits(){

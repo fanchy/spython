@@ -21,12 +21,11 @@ ExprASTPtr Parser::parse_single_input(){
 
 //! file_input: (NEWLINE | stmt)* ENDMARKER
 ExprASTPtr Parser::parse_file_input(){
-    const Token* token = m_curScanner->getToken();
     StmtAST* allStmt = new StmtAST();
     ExprASTPtr ret = allStmt;
     
-    while (token->nTokenType != TOK_EOF){
-        if (token->strVal == "\n"){
+    while (m_curScanner->getToken()->nTokenType != TOK_EOF){
+        if (m_curScanner->getToken()->strVal == "\n"){
             m_curScanner->seek(1);
         }
         else{
@@ -36,11 +35,10 @@ ExprASTPtr Parser::parse_file_input(){
                 stmt->dump(0);
                 allStmt->exprs.push_back(stmt);
             }else{
-                printf("this->parse_stmt Ê§°Ü£¡%d %s\n", m_curScanner->seek(0), token->dump().c_str());
+                printf("this->parse_stmt Ê§°Ü£¡%d %s\n", m_curScanner->seek(0), m_curScanner->getToken()->dump().c_str());
                 m_curScanner->seek(1);
             }
         }
-        token = m_curScanner->getToken();
     }
     return ret;
 }
@@ -106,35 +104,28 @@ ExprASTPtr Parser::parse_simple_stmt(){
     DTRACE(("parse_simple_stmt begin..."));
     ExprASTPtr small_stmt = parse_small_stmt();
     
-    const Token* token = m_curScanner->getToken();
-    if (small_stmt && token->strVal == ";"){
+    if (small_stmt && m_curScanner->getToken()->strVal == ";"){
         StmtAST* allStmt = new StmtAST();
         ExprASTPtr ret = allStmt;
         allStmt->exprs.push_back(small_stmt);
         
-        while (token->strVal == ";"){
+        while (m_curScanner->getToken()->strVal == ";"){
             m_curScanner->seek(1);
             small_stmt = parse_small_stmt();
             if (!small_stmt){
                 break;
             }
             allStmt->exprs.push_back(small_stmt);
-            token = m_curScanner->getToken();
         }
 
-        if (token->strVal == ";"){
+        if (m_curScanner->getToken()->strVal == ";"){
             m_curScanner->seek(1);
-            token = m_curScanner->getToken();
         }
         
-        if (token->strVal == "\n"){
+        if (m_curScanner->getToken()->strVal == "\n"){
             m_curScanner->seek(1);
         }
 
-        //!if only one direct return first
-        if (allStmt->exprs.size() == 1){
-            return allStmt->exprs[0];
-        }
         DTRACE(("parse_simple_stmt end muti small..."));
         return ret;
     }
@@ -212,22 +203,21 @@ ExprASTPtr Parser::parse_expr_stmt(){
         return augassign;
     }
     else{
-        const Token* token = m_curScanner->getToken();
-        if (token->strVal == "="){
+        if (m_curScanner->getToken()->strVal == "="){
             m_curScanner->seek(1);
             
             DMSG(("parse_expr_stmt 2 `=`"));
             
             ExprASTPtr yield_expr = parse_yield_expr();
             if (yield_expr){
-                return new BinaryExprAST(TOK_ASSIGN, testlist, yield_expr);
+                return new BinaryExprAST("=", testlist, yield_expr);
             }
             ExprASTPtr testlist2  = parse_testlist();
             if (!testlist2){
                 THROW_ERROR("parse_expr_stmt failed assign-2");
             }
             
-            return new BinaryExprAST(TOK_ASSIGN, testlist, testlist2);
+            return new BinaryExprAST("=", testlist, testlist2);
         }
         else{
             THROW_ERROR("parse_expr_stmt failed");
@@ -240,22 +230,21 @@ ExprASTPtr Parser::parse_expr_stmt(){
 //! augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' |
 //!             '<<=' | '>>=' | '**=' | '//=')
 ExprASTPtr Parser::parse_augassign(){
-    const Token* token1 = m_curScanner->getToken();
-    if (token1->strVal == "+=" ||
-        token1->strVal == "-=" ||
-        token1->strVal == "*=" ||
-        token1->strVal == "/=" ||
-        token1->strVal == "%=" ||
-        token1->strVal == "&=" ||
-        token1->strVal == "|=" ||
-        token1->strVal == "^=" ||
-        token1->strVal == "<<=" ||
-        token1->strVal == ">>=" ||
-        token1->strVal == "**=" ||
-        token1->strVal == "//=")
+    if (m_curScanner->getToken()->strVal == "+=" ||
+        m_curScanner->getToken()->strVal == "-=" ||
+        m_curScanner->getToken()->strVal == "*=" ||
+        m_curScanner->getToken()->strVal == "/=" ||
+        m_curScanner->getToken()->strVal == "%=" ||
+        m_curScanner->getToken()->strVal == "&=" ||
+        m_curScanner->getToken()->strVal == "|=" ||
+        m_curScanner->getToken()->strVal == "^=" ||
+        m_curScanner->getToken()->strVal == "<<=" ||
+        m_curScanner->getToken()->strVal == ">>=" ||
+        m_curScanner->getToken()->strVal == "**=" ||
+        m_curScanner->getToken()->strVal == "//=")
     {
         m_curScanner->seek(1);
-        return new AugassignAST(token1->strVal, NULL, NULL);
+        return new AugassignAST(m_curScanner->getToken()->strVal, NULL, NULL);
     }
     return NULL;
 }
@@ -263,56 +252,177 @@ ExprASTPtr Parser::parse_augassign(){
 //! print_stmt: 'print' ( [ test (',' test)* [','] ] |
 //!                       '>>' test [ (',' test)+ [','] ] )
 ExprASTPtr Parser::parse_print_stmt(){
+    if (m_curScanner->getToken()->strVal == "print"){
+        m_curScanner->seek(1);
+        
+        if (m_curScanner->getToken()->strVal != ">>"){
+            ExprASTPtr test = parse_test();
+            if (!test){
+                THROW_ERROR("test needed when parse print");
+            }
+            PrintAST* printAst = new PrintAST();
+            ExprASTPtr ret = printAst;
+            printAst->exprs.push_back(test);
+            
+            while (m_curScanner->getToken()->strVal == ","){
+                m_curScanner->seek(1);
+                test = parse_test();
+                if (!test){
+                    break;
+                }
+                
+                printAst->exprs.push_back(test);
+            }
+            
+            return ret;
+        }
+        else{
+            m_curScanner->seek(1);
+            ExprASTPtr test = parse_test();
+        }
+        
+    }
     return NULL;
 }
 
 //! del_stmt: 'del' exprlist
 ExprASTPtr Parser::parse_del_stmt(){
+    if (m_curScanner->getToken()->strVal == "del"){
+        m_curScanner->seek(1);
+        
+        ExprASTPtr exprlist = parse_exprlist();
+        if (!exprlist){
+            THROW_ERROR("exprlist needed when parse del");
+        }
+        return new DelAST(exprlist);
+    }
     return NULL;
 }
 
 //! pass_stmt: 'pass'
 ExprASTPtr Parser::parse_pass_stmt(){
+    if (m_curScanner->getToken()->strVal == "pass"){
+        m_curScanner->seek(1);
+        return new PassAST();
+    }
     return NULL;
 }
 
 //! flow_stmt: break_stmt | continue_stmt | return_stmt | raise_stmt | yield_stmt
 ExprASTPtr Parser::parse_flow_stmt(){
+    ExprASTPtr retExpr = parse_break_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_continue_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_return_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_raise_stmt();
+    if (retExpr){
+        return retExpr;
+    }
+    retExpr = parse_yield_stmt();
+    if (retExpr){
+        return retExpr;
+    }
     return NULL;
 }
 
 //! break_stmt: 'break'
 ExprASTPtr Parser::parse_break_stmt(){
+    const Token* token = m_curScanner->getToken();
+    if (token->strVal == "break"){
+        m_curScanner->seek(1);
+        return new BreakAST();
+    }
     return NULL;
 }
 
 //! continue_stmt: 'continue'
 ExprASTPtr Parser::parse_continue_stmt(){
+    if (m_curScanner->getToken()->strVal == "continue"){
+        m_curScanner->seek(1);
+        return new ContinueAST();
+    }
     return NULL;
 }
 
 //! return_stmt: 'return' [testlist]
 ExprASTPtr Parser::parse_return_stmt(){
+    if (m_curScanner->getToken()->strVal == "return"){
+        m_curScanner->seek(1);
+        
+        ExprASTPtr testlist = parse_testlist();
+        return new ReturnAST(testlist);
+    }
     return NULL;
 }
 
 //! yield_stmt: yield_expr
 ExprASTPtr Parser::parse_yield_stmt(){
-    return NULL;
+    ExprASTPtr yield_expr = parse_yield_expr();
+    return yield_expr;
 }
 
 //! raise_stmt: 'raise' [test [',' test [',' test]]]
 ExprASTPtr Parser::parse_raise_stmt(){
+    if (m_curScanner->getToken()->strVal == "raise"){
+        m_curScanner->seek(1);
+        
+        RaiseAST* raiseAST = new RaiseAST();
+        ExprASTPtr ret     = raiseAST;
+        ExprASTPtr test    = parse_test();
+        
+        if (test){
+            raiseAST->exprs.push_back(test);
+            
+            if (m_curScanner->getToken()->strVal == ","){
+                m_curScanner->seek(1);
+                test = parse_test();
+                if (!test){
+                    THROW_ERROR("test needed when parse raise after ,");
+                }
+                
+                raiseAST->exprs.push_back(test);
+                if (m_curScanner->getToken()->strVal == ","){
+                    m_curScanner->seek(1);
+                    test = parse_test();
+                    if (!test){
+                        THROW_ERROR("test needed when parse raise after second ,");
+                    }
+                    raiseAST->exprs.push_back(test);
+                }
+            }
+        }
+        return ret;
+    }
     return NULL;
 }
 
 //! import_stmt: import_name | import_from
 ExprASTPtr Parser::parse_import_stmt(){
-    return NULL;
+    ExprASTPtr ret = parse_import_name();
+    if (ret){
+        return ret;
+    }
+    ret = parse_import_from();
+    return ret;
 }
 
 //! import_name: 'import' dotted_as_names
 ExprASTPtr Parser::parse_import_name(){
+    if (m_curScanner->getToken()->strVal == "import"){
+        m_curScanner->seek(1);
+
+        ExprASTPtr dotted_as_names = parse_dotted_as_names();
+        return new ImportAST();
+    }
+    
     return NULL;
 }
 
@@ -339,7 +449,15 @@ ExprASTPtr Parser::parse_import_as_names(){
 
 //! dotted_as_names: dotted_as_name (',' dotted_as_name)*
 ExprASTPtr Parser::parse_dotted_as_names(){
-    return NULL;
+    ExprASTPtr dotted_as_name = parse_dotted_as_name();
+    if (!dotted_as_name){
+        return NULL;
+    }
+    while (m_curScanner->getToken()->strVal == ","){
+        m_curScanner->seek(1);
+        dotted_as_name = parse_dotted_as_name();
+    }
+    return dotted_as_name;
 }
 
 //! dotted_name: NAME ('.' NAME)*
@@ -515,18 +633,23 @@ ExprASTPtr Parser::parse_power(){
 //!        '`' testlist1 '`' |
 //!        NAME | NUMBER | STRING+)
 ExprASTPtr Parser::parse_atom(){
-    const Token* token = m_curScanner->getToken();
-    DMSG(("parse_atom %s", token->dump().c_str()));
+    DMSG(("parse_atom %s", m_curScanner->getToken()->dump().c_str()));
     
     ExprASTPtr retExpr;
-    if (token->nTokenType == TOK_INT){
-        retExpr = new NumberExprAST(token->nVal);
+    if (m_curScanner->getToken()->nTokenType == TOK_INT){
+        retExpr = new NumberExprAST(m_curScanner->getToken()->nVal);
     }
-    else if (token->nTokenType == TOK_FLOAT){
-        retExpr = new FloatExprAST(token->fVal);
+    else if (m_curScanner->getToken()->nTokenType == TOK_FLOAT){
+        retExpr = new FloatExprAST(m_curScanner->getToken()->fVal);
     }
-    else if (token->nTokenType == TOK_VAR){
-        retExpr = new VariableExprAST(token->strVal);
+    else if (m_curScanner->getToken()->nTokenType == TOK_STR){
+        retExpr = new StrExprAST(m_curScanner->getToken()->strVal);
+    }
+    else if (m_curScanner->getToken()->nTokenType == TOK_VAR){
+        if (singleton_t<PyHelper>::instance_ptr()->isKeyword(m_curScanner->getToken()->strVal)){
+            return NULL;
+        }
+        retExpr = new VariableExprAST(m_curScanner->getToken()->strVal);
     }
     else{
         return retExpr;
@@ -572,7 +695,26 @@ ExprASTPtr Parser::parse_sliceop(){
 
 //! exprlist: expr (',' expr)* [',']
 ExprASTPtr Parser::parse_exprlist(){
-    return NULL;
+    ExprASTPtr expr = parse_expr();
+    if (!expr){
+        return NULL;
+    }
+
+    StmtAST* stmtAST = new StmtAST();
+    stmtAST->exprs.push_back(expr);
+    ExprASTPtr ret   = stmtAST;
+
+    const Token* token = m_curScanner->getToken();
+    while (token->strVal == ","){
+        m_curScanner->seek(1);
+        expr = parse_expr();
+        if (!expr){
+            break;
+        }
+        stmtAST->exprs.push_back(expr);
+        token = m_curScanner->getToken();
+    }
+    return ret;
 }
 
 //! testlist: test (',' test)* [',']
@@ -636,6 +778,24 @@ ExprASTPtr Parser::parse_comp_if(){
 
 //! testlist1: test (',' test)*
 ExprASTPtr Parser::parse_testlist1(){
+    ExprASTPtr test = parse_test();
+    if (!test){
+        return NULL;
+    }
+    StmtAST* stmp = new StmtAST();
+    ExprASTPtr ret= stmp;
+    
+    stmp->exprs.push_back(test);
+    
+    while (m_curScanner->getToken()->strVal == ","){
+        m_curScanner->seek(1);
+        
+        test = parse_test();
+        if (!test){
+            THROW_ERROR("test expr needed when parse testlist1 after ,");
+        }
+        stmp->exprs.push_back(test);
+    }
     return NULL;
 }
 
@@ -646,6 +806,10 @@ ExprASTPtr Parser::parse_encoding_decl(){
 
 //! yield_expr: 'yield' [testlist]
 ExprASTPtr Parser::parse_yield_expr(){
+    if (m_curScanner->getToken()->strVal == "yield"){
+        THROW_ERROR("yield not supported");
+    }
+    
     return NULL;
 }
 

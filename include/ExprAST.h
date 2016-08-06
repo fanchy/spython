@@ -107,27 +107,131 @@ public:
 public:
     std::vector<ExprASTPtr> exprs;
 };
+class PrintAST : public ExprAST {
 
+public:
+    PrintAST(){
+    }
+    virtual int getType() {
+        return EXPR_PRINT_STMT;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+public:
+    std::vector<ExprASTPtr> exprs;
+};
+class DelAST : public ExprAST {
+
+public:
+    DelAST(ExprASTPtr& v):exprlist(v){
+    }
+    virtual int getType() {
+        return EXPR_DEL_STMT;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+public:
+    ExprASTPtr exprlist;
+};
+class PassAST : public ExprAST {
+
+public:
+    PassAST(){
+        this->name = "pass";
+    }
+    virtual int getType() {
+        return EXPR_PASS_STMT;
+    }
+    virtual PyObjPtr eval(PyObjPtr context) {
+        return PyObjTool::buildNone();
+    }
+public:
+};
+class BreakAST : public ExprAST {
+public:
+    BreakAST(){
+        this->name = "continue";
+    }
+    virtual int getType() {
+        return EXPR_BREAK_STMT;
+    }
+    virtual PyObjPtr eval(PyObjPtr context) {
+        return PyObjTool::buildNone();
+    }
+public:
+};
+class ContinueAST : public ExprAST {
+public:
+    ContinueAST(){
+        this->name = "break";
+    }
+    virtual int getType() {
+        return EXPR_CONTINUE_STMT;
+    }
+    virtual PyObjPtr eval(PyObjPtr context) {
+        return PyObjTool::buildNone();
+    }
+public:
+};
+class ImportAST : public ExprAST {
+public:
+    ImportAST(){
+        this->name = "import";
+    }
+    virtual int getType() {
+        return EXPR_IMPORT_STMT;
+    }
+    virtual PyObjPtr eval(PyObjPtr context) {
+        return PyObjTool::buildNone();
+    }
+public:
+};
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {
-    TokenType op;
+    std::string op;
     ExprASTPtr left, right;
 
 public:
-    BinaryExprAST(TokenType o, ExprASTPtr l, ExprASTPtr r)
+    BinaryExprAST(const std::string& o, ExprASTPtr l, ExprASTPtr r)
         : op(o), left(l), right(r) {
         
-        this->name = PyHelper::token2name(op);
+        this->name = op;
         //DMSG(("BinaryExprAST Op:%s,left=%s,right=%s\n", this->name.c_str(), left->name.c_str(), right->name.c_str()));
     }
     virtual int getType() {
-        return EXPR_ASSIGN;
+        return EXPR_BIN;
     }
     virtual std::string dump(int nDepth);
     virtual PyObjPtr eval(PyObjPtr context);
     virtual PyObjPtr& getFieldVal(PyObjPtr& context);
 };
 
+class ReturnAST : public ExprAST {
+
+public:
+    ReturnAST(ExprASTPtr& v):testlist(v){
+    }
+    virtual int getType() {
+        return EXPR_DEL_STMT;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+public:
+    ExprASTPtr testlist;
+};
+class RaiseAST : public ExprAST {
+
+public:
+    RaiseAST(){
+    }
+    virtual int getType() {
+        return EXPR_RAISE_STMT;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+public:
+    std::vector<ExprASTPtr> exprs;
+};
 class AugassignAST : public ExprAST {
 public:
     std::string op;
@@ -161,7 +265,7 @@ public:
     }
     virtual PyObjPtr exeCode(PyObjPtr context, std::list<PyObjPtr>&  tmpArgsInput);
     virtual int getType() {
-        return EXPR_FUNC;
+        return EXPR_FUNCDEF;
     }
 };
 
@@ -176,7 +280,7 @@ public:
         //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
     }
     virtual int getType() {
-        return EXPR_FUNC;
+        return EXPR_FUNCDEF;
     }
 
     virtual PyObjPtr eval(PyObjPtr context);
@@ -192,7 +296,7 @@ public:
     }
 
     virtual int getType() {
-        return EXPR_CLASS;
+        return EXPR_CLASSDEF;
     }
 };
 
@@ -208,7 +312,7 @@ public:
         //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
     }
     virtual int getType() {
-        return EXPR_CLASS;
+        return EXPR_CLASSDEF;
     }
 
     virtual PyObjPtr eval(PyObjPtr context);
@@ -225,7 +329,7 @@ public:
         //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
     }
     virtual int getType() {
-        return EXPR_IF;
+        return EXPR_IF_STMT;
     }
     virtual PyObjPtr eval(PyObjPtr context);
     
@@ -247,7 +351,7 @@ public:
         return context;
     }
     virtual int getType() {
-        return EXPR_CONTINUE;
+        return EXPR_CONTINUE_STMT;
     }
 };
 
@@ -261,7 +365,7 @@ public:
         return context;
     }
     virtual int getType() {
-        return EXPR_BREAK;
+        return EXPR_BREAK_STMT;
     }
 };
 class ForExprAST: public ExprAST {
@@ -275,7 +379,7 @@ public:
         //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
     }
     virtual int getType() {
-        return EXPR_FOR;
+        return EXPR_FOR_STMT;
     }
     virtual PyObjPtr eval(PyObjPtr context);
 };

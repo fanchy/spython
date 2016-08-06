@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <list>
+#include <set>
 #include <stdexcept>
 
 #include "SmartPtr.h"
@@ -15,7 +16,7 @@
 #define DMSG(x) printf x ; printf("\n")
 
 namespace ff {
-
+/*
 enum ExprType{
     EXPR_CALL = 1,
     EXPR_FUNC = 2,
@@ -31,9 +32,10 @@ enum ExprType{
     EXPR_BREAK,
     EXPR_CONTINUE,
     EXPR_ASSIGN,
-    EXPR_AUGASSIGN
+    EXPR_AUGASSIGN,
+    EXPR_PRINT,
 };
-
+*/
 enum PyObjType{
     PY_NONE = 1,
     PY_INT,
@@ -58,29 +60,6 @@ enum ETokenType {
     TOK_FLOAT = -6,
     TOK_STR = -7,
     TOK_CHAR = -8,
-    
-    TOK_CALL= -9,
-    TOK_FIELD = -10, // .
-
-    TOK_LS  = -21, //<
-    TOK_LE  = -22, //<=
-    TOK_GT  = -23, //>
-    TOK_GE  = -24, //>=
-    TOK_EQ  = -25, //==
-    TOK_NE  = -26, //!=
-    
-    TOK_ASSIGN= -27, // = 
-    TOK_PLUS= -28, // +
-    TOK_SUB = -29, // -
-    TOK_MUT = -30, // *
-    TOK_DIV = -31, // /
-    
-    TOK_AND = -32, // && and
-    TOK_OR  = -33, // || or
-    TOK_YU  = -34, // &
-    TOK_HUO = -35, // |
-    TOK_FAN = -36, // ! 
-    
 };
 
 class PyMetaType{
@@ -115,8 +94,11 @@ struct PyException {
     static std::runtime_error buildException(const std::string& err);
 };
 
-struct PyHelper{    
-    static std::string token2name(TokenType token);
+struct PyHelper{
+    PyHelper();
+    bool isKeyword(const std::string& v);
+    
+    std::set<std::string>    m_allKeyword;
 }; 
 
 class ExprAST;
@@ -259,6 +241,102 @@ public:
 typedef SmartPtr<ExprAST> ExprASTPtr;
 
 
+enum EEXPR_TYPE{ 
+    EXPR_SINGLE_INPUT,
+    EXPR_FILE_INPUT,
+    EXPR_EVAL_INPUT,
+    EXPR_DECORATOR,
+    EXPR_DECORATORS,
+    EXPR_DECORATED,
+    EXPR_FUNCDEF,
+    EXPR_PARAMETERS,
+    EXPR_VARARGSLIST,
+    EXPR_FPDEF,
+    EXPR_FPLIST,
+    EXPR_STMT,
+    EXPR_SIMPLE_STMT,
+    EXPR_SMALL_STMT,
+    EXPR_EXPR_STMT,
+    EXPR_AUGASSIGN,
+    EXPR_PRINT_STMT,
+    EXPR_DEL_STMT,
+    EXPR_PASS_STMT,
+    EXPR_FLOW_STMT,
+    EXPR_BREAK_STMT,
+    EXPR_CONTINUE_STMT,
+    EXPR_RETURN_STMT,
+    EXPR_YIELD_STMT,
+    EXPR_RAISE_STMT,
+    EXPR_IMPORT_STMT,
+    EXPR_IMPORT_NAME,
+    EXPR_IMPORT_FROM,
+    EXPR_IMPORT_AS_NAME,
+    EXPR_DOTTED_AS_NAME,
+    EXPR_IMPORT_AS_NAMES,
+    EXPR_DOTTED_AS_NAMES,
+    EXPR_DOTTED_NAME,
+    EXPR_GLOBAL_STMT,
+    EXPR_EXEC_STMT,
+    EXPR_ASSERT_STMT,
+    EXPR_COMPOUND_STMT,
+    EXPR_IF_STMT,
+    EXPR_WHILE_STMT,
+    EXPR_FOR_STMT,
+    EXPR_TRY_STMT,
+    EXPR_WITH_STMT,
+    EXPR_WITH_ITEM,
+    EXPR_EXCEPT_CLAUSE,
+    EXPR_SUITE,
+    EXPR_TESTLIST_SAFE,
+    EXPR_OLD_TEST,
+    EXPR_OLD_LAMBDEF,
+    EXPR_TEST,
+    EXPR_OR_TEST,
+    EXPR_AND_TEST,
+    EXPR_NOT_TEST,
+    EXPR_COMPARISON,
+    EXPR_COMP_OP,
+    EXPR_EXPR,
+    EXPR_XOR_EXPR,
+    EXPR_AND_EXPR,
+    EXPR_SHIFT_EXPR,
+    EXPR_ARITH_EXPR,
+    EXPR_TERM,
+    EXPR_FACTOR,
+    EXPR_POWER,
+    EXPR_ATOM,
+    EXPR_LISTMAKER,
+    EXPR_TESTLIST_COMP,
+    EXPR_LAMBDEF,
+    EXPR_TRAILER,
+    EXPR_SUBSCRIPTLIST,
+    EXPR_SUBSCRIPT,
+    EXPR_SLICEOP,
+    EXPR_EXPRLIST,
+    EXPR_TESTLIST,
+    EXPR_DICTORSETMAKER,
+    EXPR_CLASSDEF,
+    EXPR_ARGLIST,
+    EXPR_ARGUMENT,
+    EXPR_LIST_ITER,
+    EXPR_LIST_FOR,
+    EXPR_LIST_IF,
+    EXPR_COMP_ITER,
+    EXPR_COMP_FOR,
+    EXPR_COMP_IF,
+    EXPR_TESTLIST1,
+    EXPR_ENCODING_DECL,
+    EXPR_YIELD_EXPR,
+    
+    //!self define
+    EXPR_INT,
+    EXPR_FLOAT,
+    EXPR_STR,
+    EXPR_VAR,
+    EXPR_BIN,
+    EXPR_TUPLE,
+    EXPR_CALL
+};
 
 }
 #endif
