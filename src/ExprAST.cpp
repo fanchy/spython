@@ -173,21 +173,150 @@ StrExprAST::StrExprAST(const string& v) : val(v) {
     obj = new PyObjStr(val);
 }
 
+string IfExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "IfExprAST";
+    for (unsigned int i = 0; i < ifTest.size(); ++i){
+        ret += "\niftest\n" + ifTest[i]->dump(nDepth+1);
+        ret += "\nifsuit\n" + ifSuite[i]->dump(nDepth+1);
+    }
+    if (elseSuite){
+        ret += "\nelse\n" + elseSuite->dump(nDepth+1);
+    }
+    return ret;
+}
+
 PyObjPtr IfExprAST::eval(PyObjPtr context) {
-    for (unsigned int i = 0; i < conditions.size(); ++i){
-        PyObjPtr caseBool = conditions[i]->eval(context);
+    for (unsigned int i = 0; i < ifTest.size(); ++i){
+        PyObjPtr caseBool = ifTest[i]->eval(context);
         if (PyObjTool::handleBool(caseBool)){
-            vector<ExprASTPtr>& bodys = ifbody[i];
-            for (unsigned int m = 0; m < bodys.size(); ++m){
-                bodys[m]->eval(context);
-            }
+            ifSuite[i]->eval(context);
             return context;
         }
     }
     return context;
 }
 
+string WhileExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "WhileExprAST";
+    ret += "\ntest\n" + test->dump(nDepth+1);
+    ret += "\nsuite\n" + suite->dump(nDepth+1);
+    if (elseSuite){
+        ret += "\nelse\n" + elseSuite->dump(nDepth+1);
+    }
+    return ret;
+}
+
+PyObjPtr WhileExprAST::eval(PyObjPtr context) {
+    while (true){
+        PyObjPtr caseBool = test->eval(context);
+        if (PyObjTool::handleBool(caseBool)){
+            suite->eval(context);
+        }
+        else{
+            break;
+        }
+    }
+    if (elseSuite){
+        elseSuite->eval(context);
+    }
+    return context;
+}
+
+string ForExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "ForExprAST";
+    ret += "\nexprlist\n" + exprlist->dump(nDepth+1);
+    ret += "\ntestlist\n" + testlist->dump(nDepth+1);
+    ret += "\nsuite\n" + suite->dump(nDepth+1);
+    if (elseSuite){
+        ret += "\nelse\n" + elseSuite->dump(nDepth+1);
+    }
+    return ret;
+}
+
 PyObjPtr ForExprAST::eval(PyObjPtr context) {
+    while (true){
+        PyObjPtr caseBool = exprlist->eval(context);
+        if (PyObjTool::handleBool(caseBool)){
+            suite->eval(context);
+        }
+        else{
+            break;
+        }
+    }
+    if (elseSuite){
+        elseSuite->eval(context);
+    }
+    return context;
+}
+
+string ListMakerExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "list";
+    for (unsigned int i = 0; i < test.size(); ++i){
+        ret += "\ntest\n" + test[i]->dump(nDepth+1);
+    }
+    if (list_for){
+        ret += "\nlist_for\n" + list_for->dump(nDepth+1);
+    }
+    return ret;
+}
+
+PyObjPtr ListMakerExprAST::eval(PyObjPtr context) {
+    for (unsigned int i = 0; i < test.size(); ++i){
+        test[i]->eval(context);
+    }
+    if (list_for){
+        list_for->eval(context);
+    }
+    return context;
+}
+
+string DictorsetMakerExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "dict";
+    ret += "\ntestKey,Val";
+    for (unsigned int i = 0; i < testKey.size(); ++i){
+        ret += "\n"+ testKey[i]->dump(nDepth+1);
+        ret += "\n"+ testVal[i]->dump(nDepth+1);
+    }
+    for (unsigned int i = 0; i < test.size(); ++i){
+        ret += "\ntest\n" + test[i]->dump(nDepth+1);
+    }
+    if (comp_for){
+        ret += "\ncomp_for\n" + comp_for->dump(nDepth+1);
+    }
+    return ret;
+}
+
+PyObjPtr DictorsetMakerExprAST::eval(PyObjPtr context) {
+    for (unsigned int i = 0; i < test.size(); ++i){
+        test[i]->eval(context);
+    }
+    if (comp_for){
+        comp_for->eval(context);
+    }
+    return context;
+}
+
+PyObjPtr ForExprASTOld::eval(PyObjPtr context) {
     PyObjPtr iterObj = iterFunc->eval(context);
     if (!iterObj)
     {

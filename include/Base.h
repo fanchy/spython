@@ -209,10 +209,18 @@ struct PyObjTool{
     static bool handleBool(PyObjPtr b);
 }; 
 
+struct ExprLine{
+    ExprLine():nLine(0), nIndent(0){
+    }
+    std::string file;
+    int         nLine;
+    int         nIndent;
+};
 class ExprAST {
 public:
     int    nFieldId;
     std::string name;
+    ExprLine    lineInfo;
     ExprAST():nFieldId(-1){
     }
     virtual ~ExprAST() {}

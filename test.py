@@ -16,4 +16,22 @@ assert 10
 
 if a:
     b = 10
+elif b:
+    c = 20
+    d = 30
+else:
+    e2 = 40
+
+while d:
+    f  = 10
+    g = 12
+la = [
+    1, 
+    2, 
+    3
+]
+da = {
+    1:2,
+    3:4
+}
 

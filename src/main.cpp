@@ -1,5 +1,3 @@
-#include "OldParser.h"
-
 #include <cstdlib>
 #include <string.h>
 
@@ -42,19 +40,5 @@ int main(int argc, char** argv) {
         printf("%s\n", e.what());
     }
     
-    
     return 0;
-    PyObjPtr mainMod = new PyObjModule("__main__");
-    ParseHelper parserHelper(strCode);
-    ParseTool tool(mainMod);
-    try{
-        tool.MainLoop(parserHelper);
-    }
-    catch(exception& e){
-        fprintf(stderr, "exception=%s\n", e.what());
-    }
-    
-    if (argc >= 2 && string(argv[1]) == "-dump")
-        mainMod->dump();
-	return 0;
 }

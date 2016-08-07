@@ -1,6 +1,5 @@
 #include "Base.h"
 #include "PyObj.h"
-#include "OldParser.h"
 
 using namespace std;
 using namespace ff;
@@ -34,13 +33,13 @@ PyObjPtr& PyObj::getVar(PyObjPtr& self, unsigned int nFieldIndex) {
 
 
 runtime_error PyException::buildIndentException(ParseHelper& parseHelper, int nNeedIndent, string err) {
-    char msg[1024];
-    snprintf(msg, sizeof(msg) - 1, "line:%d,col:%d,err:space indent need %d, given %d %s", parseHelper.line, parseHelper.col, nNeedIndent, parseHelper.nCurIndent, err.c_str());
+    char msg[1024] = {0};
+    //snprintf(msg, sizeof(msg) - 1, "line:%d,col:%d,err:space indent need %d, given %d %s", parseHelper.line, parseHelper.col, nNeedIndent, parseHelper.nCurIndent, err.c_str());
     return runtime_error(msg);
 }
 runtime_error PyException::buildException(ParseHelper& parseHelper, const string& err) {
-    char msg[1024];
-    snprintf(msg, sizeof(msg) - 1, "line:%d,col:%d,err:%s,curTok=%d", parseHelper.line, parseHelper.col, err.c_str(), parseHelper.at());
+    char msg[1024] = {0};
+    //snprintf(msg, sizeof(msg) - 1, "line:%d,col:%d,err:%s,curTok=%d", parseHelper.line, parseHelper.col, err.c_str(), parseHelper.at());
     return runtime_error(msg);
 }
 runtime_error PyException::buildException(const string& err) {
@@ -84,6 +83,7 @@ PyHelper::PyHelper(){
     
     m_allKeyword.insert("print");
     m_allKeyword.insert("continue");
+    m_allKeyword.insert("while");
 }
 
 

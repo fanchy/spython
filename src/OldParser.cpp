@@ -201,6 +201,7 @@ ExprASTPtr ParseTool::ParseParenExpr(ParseHelper& parseHelper) {
 
 
 ExprASTPtr ParseTool::ParseIfExpr(ParseHelper& parseHelper) {
+    /*
     int nNeedIndent = parseHelper.nCurIndent;
     TokenType CurTok = parseHelper.next(); // eat if
     //DMSG(("ParseIfExpr1 begin condition CurTok=%d\n", CurTok));
@@ -274,6 +275,8 @@ ExprASTPtr ParseTool::ParseIfExpr(ParseHelper& parseHelper) {
     pIf->ifbody.push_back(ifBody);
     //DMSG(("ParseIfExpr end line=%d\n", parseHelper.line));
     return ifPtr;
+    */
+    return NULL;
 }
 
 ExprASTPtr ParseTool::ParseForExpr(ParseHelper& parseHelper) {
@@ -284,7 +287,7 @@ ExprASTPtr ParseTool::ParseForExpr(ParseHelper& parseHelper) {
     ExprASTPtr iterTuple = ParseExpression(parseHelper); //! k or k, v
     CurTok = parseHelper.at();
     //DMSG(("ParseIfExpr1 nNeedIndent=%d CurTok=%d %s\n", nNeedIndent, CurTok, parseHelper.IdentifierStr.c_str())); 
-    ForExprAST* pFor = new ForExprAST();
+    ForExprASTOld* pFor = new ForExprASTOld();
     ExprASTPtr forPtr(pFor);
     pFor->iterTuple = iterTuple;
     

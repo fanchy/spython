@@ -349,9 +349,6 @@ public:
     std::vector<ExprASTPtr> classFieldCode;
 public:
     ClassAST():codeImplptr(new ClassCodeImpl()){
-        
-        //this->varAstforName = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(p->name);
-        //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
     }
     virtual int getType() {
         return EXPR_CLASSDEF;
@@ -360,19 +357,96 @@ public:
     virtual PyObjPtr eval(PyObjPtr context);
 };
 
+//! if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 class IfExprAST: public ExprAST {
 public:
-    std::vector<ExprASTPtr>          conditions;
-    std::vector<std::vector<ExprASTPtr> > ifbody;
+    std::vector<ExprASTPtr>          ifTest;
+    std::vector<ExprASTPtr>          ifSuite;
+    ExprASTPtr                       elseSuite;
 
 public:
     IfExprAST(){
         this->name = "if";
-        //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
     }
     virtual int getType() {
         return EXPR_IF_STMT;
     }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+    
+};
+
+//! while_stmt: 'while' test ':' suite ['else' ':' suite]
+class WhileExprAST: public ExprAST {
+public:
+    ExprASTPtr          test;
+    ExprASTPtr          suite;
+    ExprASTPtr          elseSuite;
+
+public:
+    WhileExprAST(){
+        this->name = "while";
+    }
+    virtual int getType() {
+        return EXPR_WHILE_STMT;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+    
+};
+//! for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
+class ForExprAST: public ExprAST {
+public:
+    ExprASTPtr          exprlist;
+    ExprASTPtr          testlist;
+    ExprASTPtr          suite;
+    ExprASTPtr          elseSuite;
+
+public:
+    ForExprAST(){
+        this->name = "for";
+    }
+    virtual int getType() {
+        return EXPR_FOR_STMT;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+    
+};
+//! listmaker: test ( list_for | (',' test)* [','] )
+class ListMakerExprAST: public ExprAST {
+public:
+    std::vector<ExprASTPtr>  test;
+    ExprASTPtr               list_for;
+
+public:
+    ListMakerExprAST(){
+        this->name = "list";
+    }
+    virtual int getType() {
+        return EXPR_LISTMAKER;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+    
+};
+
+class DictorsetMakerExprAST: public ExprAST {
+public:
+    std::vector<ExprASTPtr>  testKey;
+    std::vector<ExprASTPtr>  testVal;
+    
+    std::vector<ExprASTPtr>  test;
+    ExprASTPtr               comp_for;
+
+public:
+    DictorsetMakerExprAST(){
+        this->name = "dict";
+    }
+    virtual int getType() {
+        return EXPR_DICTORSETMAKER;
+    }
+    virtual std::string dump(int nDepth);
     virtual PyObjPtr eval(PyObjPtr context);
     
 };
@@ -410,13 +484,14 @@ public:
         return EXPR_BREAK_STMT;
     }
 };
-class ForExprAST: public ExprAST {
+
+class ForExprASTOld: public ExprAST {
 public:
     ExprASTPtr                  iterTuple;
     ExprASTPtr                  iterFunc;
     std::vector<ExprASTPtr>     forBody;
 public:
-    ForExprAST(){
+    ForExprASTOld(){
         this->name = "for";
         //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
     }

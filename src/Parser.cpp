@@ -4,7 +4,10 @@
 
 using namespace std;
 using namespace ff;
+
 #define THROW_ERROR(X) throwError(X, __LINE__)
+
+#define ALLOC_EXPR(X, Y) assignLineInfo(X, Y->nLine, m_curScanner->calLineIndentWidth(Y->nLine))
 
 Parser::Parser():m_curScanner(NULL){
 }
@@ -739,7 +742,11 @@ ExprASTPtr Parser::parse_if_stmt(){
     if (!suite){
         THROW_ERROR("suite needed when parse if after :");
     }
+    ifexpr->ifTest.push_back(test);
+    ifexpr->ifSuite.push_back(suite);
     
+    m_curScanner->skipEnterChar();
+    DMSG(("parse_if_stmt %s", m_curScanner->getToken()->strVal.c_str()));
     while (m_curScanner->getToken()->strVal == "elif"){
         m_curScanner->seek(1);
         test = parse_test();
@@ -755,8 +762,11 @@ ExprASTPtr Parser::parse_if_stmt(){
         if (!suite){
             THROW_ERROR("suite needed when parse if after elif :");
         }
+        
+        ifexpr->ifTest.push_back(test);
+        ifexpr->ifSuite.push_back(suite);
     }
-    
+    m_curScanner->skipEnterChar();
     if (m_curScanner->getToken()->strVal == "else"){
         m_curScanner->seek(1);
         if (m_curScanner->getToken()->strVal != ":"){
@@ -767,18 +777,107 @@ ExprASTPtr Parser::parse_if_stmt(){
         if (!suite){
             THROW_ERROR("suite needed when parse if after elif :");
         }
+        
+        ifexpr->elseSuite = suite;
     }
     return ret;
 }
 
 //! while_stmt: 'while' test ':' suite ['else' ':' suite]
 ExprASTPtr Parser::parse_while_stmt(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "while"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    WhileExprAST* whileexpr = new WhileExprAST();
+    ExprASTPtr ret          = whileexpr;
+    
+    ExprASTPtr test = parse_test();
+    if (!test){
+        THROW_ERROR("test needed when parse while after while");
+    }
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed when parse while after while");
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr suite = parse_suite();
+    if (!suite){
+        THROW_ERROR("suite needed when parse while after :");
+    }
+    whileexpr->test  = test;
+    whileexpr->suite = suite;
+    
+    m_curScanner->skipEnterChar();
+    if (m_curScanner->getToken()->strVal == "else"){
+        m_curScanner->seek(1);
+        if (m_curScanner->getToken()->strVal != ":"){
+            THROW_ERROR(": needed when parse while after else");
+        }
+        m_curScanner->seek(1);
+        suite = parse_suite();
+        if (!suite){
+            THROW_ERROR("suite needed when parse while after else:");
+        }
+        
+        whileexpr->elseSuite = suite;
+    }
+    return ret;
 }
 
 //! for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 ExprASTPtr Parser::parse_for_stmt(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "for"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    ForExprAST* forexpr = new ForExprAST();
+    ExprASTPtr ret      = forexpr;
+    
+    ExprASTPtr exprlist = parse_exprlist();
+    if (!exprlist){
+        THROW_ERROR("test needed when parse while after for");
+    }
+    if (m_curScanner->getToken()->strVal != "in"){
+        THROW_ERROR("in needed when parse for after for");
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr testlist = parse_testlist();
+    if (!testlist){
+        THROW_ERROR("suite needed when parse for after :");
+    }
+    forexpr->exprlist = exprlist;
+    forexpr->testlist = testlist;
+    
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed when parse for after for in");
+    }
+    m_curScanner->seek(1);
+
+    ExprASTPtr suite = parse_suite();
+    if (!suite){
+        THROW_ERROR("suite needed when parse while after for:");
+    }
+    forexpr->suite   = suite;
+    
+    m_curScanner->skipEnterChar();
+    if (m_curScanner->getToken()->strVal == "else"){
+        m_curScanner->seek(1);
+        if (m_curScanner->getToken()->strVal != ":"){
+            THROW_ERROR(": needed when parse for after else");
+        }
+        m_curScanner->seek(1);
+        suite = parse_suite();
+        if (!suite){
+            THROW_ERROR("suite needed when parse for after else:");
+        }
+        
+        forexpr->elseSuite = suite;
+    }
+    return ret;
 }
 
 //! try_stmt: ('try' ':' suite
@@ -807,12 +906,36 @@ ExprASTPtr Parser::parse_except_clause(){
 
 //! suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
 ExprASTPtr Parser::parse_suite(){
-    if (m_curScanner->getToken()->strVal == "\n"){
-        m_curScanner->seek(1);
+    if (m_curScanner->getToken()->strVal != "\n"){
+        ExprASTPtr simple_stmt = parse_simple_stmt();
+        return simple_stmt;
     }
-    DMSG(("parse_suite %s", m_curScanner->getToken()->strVal.c_str()));
-    ExprASTPtr simple_stmt = parse_simple_stmt();
-    return simple_stmt;
+    else{
+        StmtAST* allStmt = new StmtAST();
+        ExprASTPtr ret = allStmt;
+        
+        m_curScanner->skipEnterChar();
+        
+        int nIndent = m_curScanner->curIndentWidth();
+        
+        DMSG(("parse_suite %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
+        while (ExprASTPtr stmt = parse_stmt()){
+            
+            if (!stmt){
+                break;
+            }
+            allStmt->exprs.push_back(stmt);
+            m_curScanner->skipEnterChar();
+            if (nIndent != m_curScanner->curIndentWidth()){
+                break;
+            }
+            
+            DMSG(("parse_suite %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
+        }
+        
+        return ret;
+    }
+    return NULL;
 }
 
 //! testlist_safe: old_test [(',' old_test)+ [',']]
@@ -936,6 +1059,42 @@ ExprASTPtr Parser::parse_atom(){
         }
         retExpr = new VariableExprAST(m_curScanner->getToken()->strVal);
     }
+    else if (m_curScanner->getToken()->strVal == "["){
+        m_curScanner->seek(1);
+        if (m_curScanner->getToken()->strVal == "]"){
+            m_curScanner->seek(1);
+            retExpr = new ListMakerExprAST();
+        }
+        else{
+            retExpr = parse_listmaker();
+            if (!retExpr){
+                THROW_ERROR("listmake needed when parse list");
+            }
+            m_curScanner->skipEnterChar();
+            if (m_curScanner->getToken()->strVal != "]"){
+                THROW_ERROR("] needed when parse listmake");
+            }
+            m_curScanner->seek(1);
+        }
+    }
+    else if (m_curScanner->getToken()->strVal == "{"){
+        m_curScanner->seek(1);
+        if (m_curScanner->getToken()->strVal == "}"){
+            m_curScanner->seek(1);
+            retExpr = new DictorsetMakerExprAST();
+        }
+        else{
+            retExpr = parse_dictorsetmaker();
+            if (!retExpr){
+                THROW_ERROR("dictorsetmaker needed when parse list");
+            }
+            m_curScanner->skipEnterChar();
+            if (m_curScanner->getToken()->strVal != "}"){
+                THROW_ERROR("} needed when parse dictorsetmaker");
+            }
+            m_curScanner->seek(1);
+        }
+    }
     else{
         return retExpr;
     }
@@ -947,7 +1106,37 @@ ExprASTPtr Parser::parse_atom(){
 
 //! listmaker: test ( list_for | (',' test)* [','] )
 ExprASTPtr Parser::parse_listmaker(){
-    return NULL;
+    m_curScanner->skipEnterChar();
+    ExprASTPtr test = parse_test();
+    if (!test){
+        return NULL;
+    }
+    
+    ListMakerExprAST* listMaker = new ListMakerExprAST();
+    ExprASTPtr ret = listMaker;
+    
+    listMaker->test.push_back(test);
+    
+    if (m_curScanner->getToken()->strVal != ","){
+        ExprASTPtr list_for = parse_list_for();
+        if (!list_for){
+            THROW_ERROR("list_for needed when parse_listmaker");
+        }
+        listMaker->list_for = list_for;
+    }
+    else{
+        while (m_curScanner->getToken()->strVal == ","){
+            m_curScanner->seek(1);
+            
+            m_curScanner->skipEnterChar();
+            test = parse_test();
+            if (!test){
+                break;
+            }
+            listMaker->test.push_back(test);
+        }
+    }
+    return ret;
 }
 
 //! testlist_comp: test ( comp_for | (',' test)* [','] )
@@ -991,15 +1180,13 @@ ExprASTPtr Parser::parse_exprlist(){
     stmtAST->exprs.push_back(expr);
     ExprASTPtr ret   = stmtAST;
 
-    const Token* token = m_curScanner->getToken();
-    while (token->strVal == ","){
+    while (m_curScanner->getToken()->strVal == ","){
         m_curScanner->seek(1);
         expr = parse_expr();
         if (!expr){
             break;
         }
         stmtAST->exprs.push_back(expr);
-        token = m_curScanner->getToken();
     }
     return ret;
 }
@@ -1013,7 +1200,60 @@ ExprASTPtr Parser::parse_testlist(){
 //! dictorsetmaker: ( (test ':' test (comp_for | (',' test ':' test)* [','])) |
 //!                   (test (comp_for | (',' test)* [','])) )
 ExprASTPtr Parser::parse_dictorsetmaker(){
-    return NULL;
+    m_curScanner->skipEnterChar();
+    ExprASTPtr testKey = parse_test();
+    if (!testKey){
+        return NULL;
+    }
+    
+    DictorsetMakerExprAST* dict = new DictorsetMakerExprAST();
+    ExprASTPtr ret = dict;
+    
+    if (m_curScanner->getToken()->strVal == ":"){
+        m_curScanner->seek(1);
+        
+        ExprASTPtr testVal = parse_test();
+        if (!testVal){
+            THROW_ERROR("test needed whern parse dict after key:");
+        }
+        
+        dict->testKey.push_back(testKey);
+        dict->testVal.push_back(testVal);
+    
+        if (m_curScanner->getToken()->strVal != ","){
+            ExprASTPtr comp_for = parse_comp_for();
+            if (!comp_for){
+                THROW_ERROR("comp_for needed whern parse dict");
+            }
+            dict->comp_for = comp_for;
+        }
+        else{
+            while (m_curScanner->getToken()->strVal == ",")
+            {
+                m_curScanner->seek(1);
+                m_curScanner->skipEnterChar();
+                
+                testKey = parse_test();
+                if (!testKey){
+                    break;
+                }
+                if (m_curScanner->getToken()->strVal != ":"){
+                    THROW_ERROR(": needed whern parse dict after key");
+                }
+                m_curScanner->seek(1);
+                
+                testVal = parse_test();
+                if (!testVal){
+                    THROW_ERROR("test val needed whern parse dict after key:");
+                }
+                
+                dict->testKey.push_back(testKey);
+                dict->testVal.push_back(testVal);
+            }
+            
+        }
+    }
+    return ret;
 }
 
 //! classdef: 'class' NAME ['(' [testlist] ')'] ':' suite
@@ -1102,7 +1342,7 @@ ExprASTPtr Parser::parse_yield_expr(){
 
 void Parser::throwError(const string& err, int nLine){
     char msg[256] = {0};
-    snprintf(msg, sizeof(msg), "%s(%d)", err.c_str(), nLine);
+    snprintf(msg, sizeof(msg), "%s(%d) given:%s,indent=%d", err.c_str(), nLine, m_curScanner->getToken()->strVal.c_str(), m_curScanner->curIndentWidth());
     throw PyException::buildException(msg);
 }
 

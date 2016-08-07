@@ -40,7 +40,7 @@ string Token::dump() const{
     return msg;
 }
 
-static char getCharNext(const string& content, int& index) {
+char Scanner::getCharNext(const string& content, int& index) {
     char ret = 0;
     do{
         if (index < content.size()){
@@ -49,11 +49,15 @@ static char getCharNext(const string& content, int& index) {
             ret = 0;
         }
     }while(ret == '\r');
-
+    
+    if (ret == '\n' & index > m_hasSearchMaxIndex){
+        m_hasSearchMaxIndex = index;
+        m_nCurLine++;
+    }
     return ret;
 }
 /// gettok - Return the next token from standard input.
-static Token getOneToken(const string& content, int& index) {
+Token Scanner::getOneToken(const std::string& content, int& index) {
     Token retToken;
 
     //!ignore comment 
@@ -190,16 +194,61 @@ static Token getOneToken(const string& content, int& index) {
     return retToken;
 }
 
-Scanner::Scanner():m_nSeekIndex(0){
+Scanner::Scanner():m_nSeekIndex(0), m_nCurLine(1), m_hasSearchMaxIndex(0){
 }
-
+void Scanner::calLineIndentInfo(const std::string& content){
+    int nLine = 1;
+    LineInfo& lineInfo = m_allLines[nLine];
+    bool bLineCal = true;
+    for (unsigned int j = 0; j < content.size(); ++j){
+        if (content[j] == '\n')
+            break;
+        lineInfo.strLine += content[j];
+        
+        if (bLineCal && content[j] == ' '){
+            lineInfo.nIndent ++;
+        }
+        else{
+            bLineCal = false;
+        }
+    }
+    
+    for (unsigned int i = 0; i < content.size(); ++i)
+    {
+        char ret = content[i];
+        if (ret != '\n'){
+            continue;
+        }
+        ++nLine;
+        
+        LineInfo& lineInfo = m_allLines[nLine];
+        bool bLineCal = true;
+        for (unsigned int j = i + 1; j < content.size(); ++j){
+            if (content[j] == '\n')
+                break;
+            lineInfo.strLine += content[j];
+            
+            if (bLineCal && content[j] == ' '){
+                lineInfo.nIndent ++;
+            }
+            else{
+                bLineCal = false;
+            }
+        }
+        printf("line:%d indent:%d\n", nLine, lineInfo.nIndent);
+    }
+}
 bool Scanner::tokenize(const std::string& content){
 
     int nIndex = 0;
-
+    m_nCurLine = 1;
+    m_hasSearchMaxIndex = 0;
     Token retToken;
+    
+    calLineIndentInfo(content);
     do{
         retToken = getOneToken(content, nIndex);
+        retToken.nLine = m_nCurLine;
         m_allTokens.push_back(retToken);
 
         printf("token:%s\n", retToken.dump().c_str());
@@ -229,5 +278,21 @@ int Scanner::resetTo(int nOffset){
     m_nSeekIndex = nOffset;
     return m_nSeekIndex;
 }
+int Scanner::skipEnterChar(){
+    while (this->getToken()->strVal == "\n"){
+        this->seek(1);
+    }
+    return m_nSeekIndex;
+}
+int Scanner::curIndentWidth(){
+    int nIndex = 0;
+    while (this->getToken(nIndex)->strVal == "\n"){
+        ++nIndex;
+    }
+    return m_allLines[this->getToken(nIndex)->nLine].nIndent;
+}
 
+int Scanner::calLineIndentWidth(int nLine){
+    return m_allLines[nLine].nIndent;
+}
 

@@ -201,6 +201,12 @@ public:
     ExprASTPtr parse_yield_expr();
     
     void throwError(const std::string& err, int nLine = 0);
+private:
+    template<typename T>
+    T* assignLineInfo(T* p, int nLine, int nIndent){
+        p->lineInfo.nLine   = nLine;
+        p->lineInfo.nIndent = nIndent;
+    }
 protected:
     Scanner*            m_curScanner;
 };
