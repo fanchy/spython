@@ -93,6 +93,21 @@ struct VariableExprAllocator{
     std::map<std::string, ExprASTPtr> allVar;
 };
 
+class PowerAST : public ExprAST {
+public:
+    ExprASTPtr                  atom;
+    std::vector<ExprASTPtr>     trailer;
+
+public:
+    PowerAST() {
+        this->name = "power";
+    }
+    virtual int getType() {
+        return EXPR_POWER;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+};
 class StmtAST : public ExprAST {
 
 public:
@@ -445,6 +460,61 @@ public:
     }
     virtual int getType() {
         return EXPR_DICTORSETMAKER;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+    
+};
+
+class ParametersExprAST: public ExprAST {
+public:
+    std::vector<ExprASTPtr>  fpdef;
+    std::vector<ExprASTPtr>  test;
+
+public:
+    ParametersExprAST(){
+        this->name = "parameters";
+    }
+    virtual int getType() {
+        return EXPR_PARAMETERS;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+    
+};
+
+
+class FuncDefExprAST: public ExprAST {
+public:
+    ExprASTPtr              funcname;
+    ExprASTPtr              parameters;
+    ExprASTPtr              suite;
+
+public:
+    FuncDefExprAST(){
+        this->name = "funcdef";
+    }
+    virtual int getType() {
+        return EXPR_FUNCDEF;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr eval(PyObjPtr context);
+    
+};
+
+
+class ClassDefExprAST: public ExprAST {
+public:
+    ExprASTPtr              classname;
+    ExprASTPtr              testlist;
+    ExprASTPtr              suite;
+
+public:
+    ClassDefExprAST(){
+        this->name = "classdef";
+    }
+    virtual int getType() {
+        return EXPR_CLASSDEF;
     }
     virtual std::string dump(int nDepth);
     virtual PyObjPtr eval(PyObjPtr context);

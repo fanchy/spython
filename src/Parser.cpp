@@ -68,24 +68,103 @@ ExprASTPtr Parser::parse_decorated(){
 
 //! funcdef: 'def' NAME parameters ':' suite
 ExprASTPtr Parser::parse_funcdef(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "def"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    FuncDefExprAST* f = new FuncDefExprAST();
+    ExprASTPtr ret = f;
+    
+    if (m_curScanner->getToken()->nTokenType != TOK_VAR){
+        THROW_ERROR("name needed after def");
+    }
+    ExprASTPtr name = parse_name();
+    
+    ExprASTPtr parameters = parse_parameters();
+    if (!parameters){
+        THROW_ERROR("parameters parse failed after def");
+    }
+    
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed after def");
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr suite = parse_suite();
+    if (!suite){
+        THROW_ERROR("suite parse failed after def");
+    }
+    
+    f->funcname   = name;
+    f->parameters = parameters;
+    f->suite      = suite;
+    return ret;
 }
 
 //! parameters: '(' [varargslist] ')'
 ExprASTPtr Parser::parse_parameters(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "("){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr varargslist;
+    if (m_curScanner->getToken()->strVal != ")"){
+        varargslist = parse_varargslist();
+    }
+    
+    if (m_curScanner->getToken()->strVal != ")"){
+        THROW_ERROR(") needed when parse parameters");
+    }
+    m_curScanner->seek(1);
+    
+    if (!varargslist){
+        varargslist = new ParametersExprAST();
+    }
+    return varargslist;
 }
 
 //! varargslist: ((fpdef ['=' test] ',')*
 //!               ('*' NAME [',' '**' NAME] | '**' NAME) |
 //!               fpdef ['=' test] (',' fpdef ['=' test])* [','])
 ExprASTPtr Parser::parse_varargslist(){
-    return NULL;
+    ParametersExprAST* p = new ParametersExprAST();
+    ExprASTPtr ret = p;
+    do{
+        ExprASTPtr fpdef = parse_fpdef();
+        if (!fpdef){
+            break;
+        }
+        p->fpdef.push_back(fpdef);
+        
+        if (m_curScanner->getToken()->strVal == "="){
+            m_curScanner->seek(1);
+            ExprASTPtr test = parse_test();
+            if (!test){
+                THROW_ERROR("test parse failed when parse param after =");
+            }
+            p->test.push_back(test);
+        }
+        
+        if (m_curScanner->getToken()->strVal != ","){
+            break;
+        }
+        m_curScanner->seek(1);
+    }
+    while (true);
+    
+    return ret;
 }
 
 //! fpdef: NAME | '(' fplist ')'
 ExprASTPtr Parser::parse_fpdef(){
-    return NULL;
+    if (m_curScanner->getToken()->nTokenType != TOK_VAR){
+        return NULL;
+    }
+    ExprASTPtr name = parse_name();
+    //!TODO
+    return name;
 }
 
 //! fplist: fpdef (',' fpdef)* [',']
@@ -611,15 +690,13 @@ ExprASTPtr Parser::parse_global_stmt(){
     if (m_curScanner->getToken()->nTokenType != TOK_VAR){
         THROW_ERROR("var needed when parse global");
     }
-    stmt->exprs.push_back(new VariableExprAST(m_curScanner->getToken()->strVal));
-    m_curScanner->seek(1);
+    stmt->exprs.push_back(parse_name());
     
     while (m_curScanner->getToken()->strVal == ","){
         m_curScanner->seek(1);
 
         if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-            stmt->exprs.push_back(new VariableExprAST(m_curScanner->getToken()->strVal));
-            m_curScanner->seek(1);
+            stmt->exprs.push_back(parse_name());
         }
         else{
             THROW_ERROR("var needed when parse global after ,");
@@ -1033,7 +1110,18 @@ ExprASTPtr Parser::parse_factor(){
 //! power: atom trailer* ['**' factor]
 ExprASTPtr Parser::parse_power(){
     ExprASTPtr atom = parse_atom();
-    return atom;
+    if (!atom){
+        return NULL;
+    }
+    
+    PowerAST* p    = new PowerAST();
+    ExprASTPtr ret = p;
+    
+    p->atom = atom;
+    while (ExprASTPtr trailer = parse_trailer()){
+        p->trailer.push_back(trailer);
+    }
+    return ret;
 }
 
 //! atom: ('(' [yield_expr|testlist_comp] ')' |
@@ -1151,6 +1239,34 @@ ExprASTPtr Parser::parse_lambdef(){
 
 //! trailer: '(' [arglist] ')' | '[' subscriptlist ']' | '.' NAME
 ExprASTPtr Parser::parse_trailer(){
+    if (m_curScanner->getToken()->strVal == "("){ //!call func
+        m_curScanner->seek(1);
+        if (m_curScanner->getToken()->strVal != ")"){
+            ExprASTPtr arglist = parse_arglist();
+            if (!arglist){
+                THROW_ERROR("arglist parse failed when parse trailer after (");
+            }
+        }
+        m_curScanner->seek(1);
+    }
+    else if (m_curScanner->getToken()->strVal == "["){ //!call [] operator
+        m_curScanner->seek(1);
+        if (m_curScanner->getToken()->strVal != "]"){
+            ExprASTPtr subscriptlist = parse_subscriptlist();
+            if (!subscriptlist){
+                THROW_ERROR("subscriptlist parse failed when parse trailer after [");
+            }
+        }
+        m_curScanner->seek(1);
+    }
+    else if (m_curScanner->getToken()->strVal == "."){ //!call [] operator
+        m_curScanner->seek(1);
+        if (m_curScanner->getToken()->nTokenType != TOK_VAR){
+            THROW_ERROR("name parse failed when parse trailer after .");
+        }
+        ExprASTPtr name = parse_name();
+        return name;
+    }
     return NULL;
 }
 
@@ -1258,7 +1374,33 @@ ExprASTPtr Parser::parse_dictorsetmaker(){
 
 //! classdef: 'class' NAME ['(' [testlist] ')'] ':' suite
 ExprASTPtr Parser::parse_classdef(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "class"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    ClassDefExprAST* f = new ClassDefExprAST();
+    ExprASTPtr ret = f;
+    
+    if (m_curScanner->getToken()->nTokenType != TOK_VAR){
+        THROW_ERROR("name needed after class");
+    }
+    ExprASTPtr name = parse_name();
+
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed after class");
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr suite = parse_suite();
+    if (!suite){
+        THROW_ERROR("suite parse failed after class");
+    }
+    
+    f->classname  = name;
+    //f->testlist   = testlist;
+    f->suite      = suite;
+    return ret;
 }
 
 //! arglist: (argument ',')* (argument [',']
@@ -1337,6 +1479,24 @@ ExprASTPtr Parser::parse_yield_expr(){
         THROW_ERROR("yield not supported");
     }
     
+    return NULL;
+}
+
+ExprASTPtr Parser::parse_name(bool throwFlag){
+    if (m_curScanner->getToken()->nTokenType == TOK_VAR){
+        if (singleton_t<PyHelper>::instance_ptr()->isKeyword(m_curScanner->getToken()->strVal)){
+            if (throwFlag){
+                THROW_ERROR("keyword can't be var");
+            }
+            return NULL;
+        }
+        ExprASTPtr retExpr = new VariableExprAST(m_curScanner->getToken()->strVal);
+        m_curScanner->seek(1);
+        return retExpr;
+    }
+    if (throwFlag){
+        THROW_ERROR("not valid var given");
+    }
     return NULL;
 }
 

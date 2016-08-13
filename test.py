@@ -35,3 +35,14 @@ da = {
     3:4
 }
 
+def f(a=1, b=2):
+    q = 10
+    f = 20
+
+ww = 12334
+
+
+class foo:
+    fa = 11
+    def say(self):
+        self.a = 10

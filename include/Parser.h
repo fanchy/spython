@@ -200,6 +200,10 @@ public:
     //! yield_expr: 'yield' [testlist]
     ExprASTPtr parse_yield_expr();
     
+    
+    
+    ExprASTPtr parse_name(bool throwFlag = true);
+    
     void throwError(const std::string& err, int nLine = 0);
 private:
     template<typename T>

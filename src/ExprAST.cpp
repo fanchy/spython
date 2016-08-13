@@ -21,6 +21,24 @@ FloatExprAST::FloatExprAST(double v) : Val(v) {
     obj = new PyObjFloat(Val);
 }
 
+PyObjPtr PowerAST::eval(PyObjPtr context){
+    PyObjPtr ret = atom->eval(context);
+    //!TODO
+    return ret;
+}
+string PowerAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "PowerAST";
+    ret += "\n" + atom->dump(nDepth+1);
+    for (unsigned int i = 0; i < trailer.size(); ++i){
+        ret += "\n" + trailer[i]->dump(nDepth+1);
+    }
+    return ret;
+}
+
 PyObjPtr StmtAST::eval(PyObjPtr context){
     PyObjPtr ret;
     for (unsigned int i = 0; i < exprs.size(); ++i){
@@ -292,7 +310,7 @@ string DictorsetMakerExprAST::dump(int nDepth){
         ret += "-";
     }
     ret += "dict";
-    ret += "\ntestKey,Val";
+    ret += "\ntest Key,Val";
     for (unsigned int i = 0; i < testKey.size(); ++i){
         ret += "\n"+ testKey[i]->dump(nDepth+1);
         ret += "\n"+ testVal[i]->dump(nDepth+1);
@@ -315,6 +333,68 @@ PyObjPtr DictorsetMakerExprAST::eval(PyObjPtr context) {
     }
     return context;
 }
+
+string ParametersExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "parameters:fpdef,test";
+    for (unsigned int i = 0; i < fpdef.size(); ++i){
+        ret += "\n"+ fpdef[i]->dump(nDepth+1);
+    }
+    for (unsigned int i = 0; i < test.size(); ++i){
+        ret += "\n" + test[i]->dump(nDepth+1);
+    }
+
+    return ret;
+}
+
+PyObjPtr ParametersExprAST::eval(PyObjPtr context) {
+    //!TODO
+    return context;
+}
+
+string FuncDefExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "funcdef:name,parameters,suite:";
+    ret += "\n" + funcname->dump(nDepth+1);
+    ret += "\n" + parameters->dump(nDepth+1);
+    ret += "\n" + suite->dump(nDepth+1);
+    
+    return ret;
+}
+
+PyObjPtr FuncDefExprAST::eval(PyObjPtr context) {
+    //!TODO
+
+    return context;
+}
+
+string ClassDefExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += "classdef:name,testlist,suite:";
+    ret += "\n" + classname->dump(nDepth+1);
+    if (testlist)
+        ret += "\n" + testlist->dump(nDepth+1);
+    ret += "\n" + suite->dump(nDepth+1);
+    
+    return ret;
+}
+
+PyObjPtr ClassDefExprAST::eval(PyObjPtr context) {
+    //!TODO
+
+    return context;
+}
+
+
 
 PyObjPtr ForExprASTOld::eval(PyObjPtr context) {
     PyObjPtr iterObj = iterFunc->eval(context);
