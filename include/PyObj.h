@@ -13,17 +13,22 @@
 
 namespace ff {
 
+class PyIntHandler: public PyObjHandler{
+public:
+    virtual int getType() {
+        return PY_INT;
+    }
+};
 class PyObjInt:public PyObj {
 public:
     int value;
     PyObjInt(long n = 0):value(n) {
+        this->handler = singleton_t<PyIntHandler>::instance_ptr();
     }
     virtual void dump() {
         DMSG(("%ld(int)", value));
     }
-    virtual int getType() {
-        return PY_INT;
-    }
+    
     virtual bool handleEQ(PyObjPtr arg){
         if (arg && arg->getType() == this->getType()){
             return arg.cast<PyObjInt>()->value == this->value;
@@ -101,6 +106,7 @@ class PyObjModule:public PyObj {
 public:
     std::string moduleName;
     PyObjModule(const std::string& v):moduleName(v) {
+        this->handler = new PyObjHandler();
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjModule> >::instance_ptr()->objInfo;
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();

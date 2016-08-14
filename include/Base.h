@@ -150,6 +150,7 @@ public:
 
     int getType();
     int getFieldNum() const { return m_objStack.size(); }
+    std::string dump();
 
     virtual PyObjPtr& getVar(PyObjPtr& self, unsigned int nFieldIndex);
     virtual const ObjIdInfo& getObjIdInfo() = 0;
@@ -182,7 +183,10 @@ public:
     virtual PyObjPtr handleStr(PyContext& context){
         return NULL;
     }
-    
+
+    virtual std::string dump() {
+        return "";
+    }
 };
 
 class PyObjNone:public PyObj {

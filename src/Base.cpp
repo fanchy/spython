@@ -3,23 +3,28 @@
 
 using namespace std;
 using namespace ff;
-/*
-void PyObj::dump() {
-    DMSG(("dump type:%d\n", this->getType()));
+
+string PyObj::dump() {
+    string ret;
+    char msg[256] = {0};
+    snprintf(msg, sizeof(msg), "type:%d\n", this->getType());
+    ret += msg;
     const ObjIdInfo& p = this->getObjIdInfo();
     for (unsigned int i = 0; i < m_objStack.size(); ++i) {
         
         string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFiledName(p.nModuleId, p.nObjectId, i);
 
-        DMSG(("[%d-%d] %d %s = ", p.nModuleId, p.nObjectId, i, n.c_str()));
+        snprintf(msg, sizeof(msg), "[%d-%d] %d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
+        ret += msg;
         if (!m_objStack[i]) {
-            DMSG(("NULL\n"));
+            ret += "NULL\n";
             continue;
         }
-        m_objStack[i]->dump();
-        DMSG(("\n"));
+        ret += m_objStack[i]->dump();
+        ret += "\n";
     }
-}*/
+    return ret;
+}
 
 int PyObj::getType(){
     return handler->getType();

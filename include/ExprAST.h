@@ -206,15 +206,21 @@ public:
 };
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {
+    enum {
+        OP_ASSIGN = 0,
+    };
     std::string op;
     ExprASTPtr left, right;
-
+    int optype;
 public:
     BinaryExprAST(const std::string& o, ExprASTPtr l, ExprASTPtr r)
-        : op(o), left(l), right(r) {
+        : op(o), left(l), right(r),optype(-1) {
         
         this->name = op;
         //DMSG(("BinaryExprAST Op:%s,left=%s,right=%s\n", this->name.c_str(), left->name.c_str(), right->name.c_str()));
+        if (op == "="){
+            optype = OP_ASSIGN;
+        }
     }
     virtual int getType() {
         return EXPR_BIN;

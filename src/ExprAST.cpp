@@ -463,25 +463,20 @@ string ImportAST::dump(int nDepth){
 }
 
 PyObjPtr BinaryExprAST::eval(PyContext& context) {
-    /*
-    switch (op){
-        case TOK_ASSIGN:{
+    switch (optype){
+        case OP_ASSIGN:{
             //DMSG()("TOK_ASSIGN Op:%s %s %s begin\n", this->name.c_str(), left->name.c_str(), right->name.c_str());
 
             if (left->getType() == EXPR_INT || left->getType() == EXPR_STR){
                 throw PyException::buildException("can not assign to const value");
             }
             PyObjPtr rval = right->eval(context);
-            
-            if (left->getType() == EXPR_TUPLE)
-            {
-                PyObjPtr ret = left.cast<TupleExprAST>()->handleAssign(context, rval);
-                return ret;
-            }
+
             PyObjPtr& v = left->getFieldVal(context);
             v = rval;
             return rval;
         }break;
+        /*
         case TOK_EQ:{
             PyObjPtr lval = left->eval(context);
             PyObjPtr rval = right->eval(context);
@@ -524,11 +519,11 @@ PyObjPtr BinaryExprAST::eval(PyContext& context) {
             PyObjPtr& v = right->getFieldVal(lval);
             
             return v;
-        }break;
+        }break;*/
         default:
-            return context;
+            return NULL;
     }
-    */
+    
     return context.curstack;
 }
 

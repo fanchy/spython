@@ -3,6 +3,7 @@
 
 #include "Scanner.h"
 #include "Parser.h"
+#include "PyObj.h"
 
 using namespace std;
 using namespace ff;
@@ -31,10 +32,18 @@ int main(int argc, char** argv) {
         ExprASTPtr rootExpr = parser.parse(scanner);
     
         if (rootExpr){
-            printf("%s", rootExpr->dump(0).c_str());
+            printf("%s\n", rootExpr->dump(0).c_str());
 
             PyContext context;
-            rootExpr->eval(context);
+            context.curstack = new PyObjModule("__main__");
+            
+            PyObjPtr ret = rootExpr->eval(context);
+            if (!ret){
+                printf("eval Ê§°Ü£¡\n");
+                return 0;
+            }
+            string strObj = context.curstack->dump();
+            printf("ret:\n %s", strObj.c_str());
         }else{
             printf("parser.parse Ê§°Ü£¡\n");
         }
