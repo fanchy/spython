@@ -14,6 +14,12 @@ string PyIntHandler::handleStr(PyObjPtr& self) {
 bool PyIntHandler::handleBool(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjInt>()->value != 0;
 }
+bool PyIntHandler::handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    if (val->getType() == PY_INT && self.cast<PyObjInt>()->value == val.cast<PyObjInt>()->value){
+        return true;
+    }
+    return false;
+}
 
 PyObjPtr& PyIntHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     int nType   = val->getType();

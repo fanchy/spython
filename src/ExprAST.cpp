@@ -511,6 +511,14 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             PyObjPtr& lval = left->eval(context);
             return lval->handler->handleMod(context, lval, rval);
         }break;
+        case OP_EQ:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            if (lval->handler->handleEqual(context, lval, rval)){
+                return PyObjTool::buildBool(true);
+            }
+            return PyObjTool::buildBool(false);
+        }break;
         /*
         case TOK_EQ:{
             PyObjPtr lval = left->eval(context);

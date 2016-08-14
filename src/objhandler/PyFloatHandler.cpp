@@ -17,6 +17,13 @@ string PyFloatHandler::handleStr(PyObjPtr& self) {
 bool PyFloatHandler::handleBool(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjFloat>()->value != 0.0;
 }
+bool PyFloatHandler::handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    if (val->getType() == PY_INT && self.cast<PyObjInt>()->value == val.cast<PyObjInt>()->value){
+        return true;
+    }
+    return false;
+}
+
 
 PyObjPtr& PyFloatHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     int nType   = val->getType();

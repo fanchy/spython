@@ -215,6 +215,8 @@ class BinaryExprAST : public ExprAST {
         OP_MUL,
         OP_DIV,
         OP_MOD,
+        
+        OP_EQ,
     };
     std::string op;
     ExprASTPtr left, right;
@@ -241,6 +243,9 @@ public:
         }
         else if (op == "%"){
             optype = OP_MOD;
+        }
+        else if (op == "=="){
+            optype = OP_EQ;
         }
     }
     virtual int getType() {

@@ -193,8 +193,9 @@ public:
     virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    
+
     virtual bool handleBool(PyContext& context, PyObjPtr& self);
+    virtual bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
 
     virtual std::string dump(PyObjPtr& self) {
         return "";
@@ -211,6 +212,9 @@ public:
     }
     bool handleBool(PyContext& context, PyObjPtr& self){
         return false;
+    }
+    bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+        return val->getType() == PY_NONE;
     }
 };
 class PyObjNone:public PyObj {

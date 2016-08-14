@@ -19,7 +19,8 @@ public:
         return PY_INT;
     }
     virtual std::string handleStr(PyObjPtr& self);
-    bool handleBool(PyContext& context, PyObjPtr& self);
+    virtual bool handleBool(PyContext& context, PyObjPtr& self);
+    virtual bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     
     virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);

@@ -13,6 +13,7 @@
 
 #include "objhandler/PyIntHandler.h"
 #include "objhandler/PyFloatHandler.h"
+#include "objhandler/PyBoolHandler.h"
 
 namespace ff {
 
@@ -54,18 +55,9 @@ class PyObjBool:public PyObj {
 public:
     bool value;
     PyObjBool(bool n = false):value(n) {
+        this->handler = singleton_t<PyBoolHandler>::instance_ptr();
     }
-    virtual void dump() {
-        if (value){
-            DMSG(("True(bool)"));
-        }
-        else{
-            DMSG(("False(bool)"));
-        }
-    }
-    virtual int getType() {
-        return PY_BOOL;
-    }
+
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjBool> >::instance_ptr()->objInfo;
     }

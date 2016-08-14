@@ -129,7 +129,7 @@ public:
     //! comparison: expr (comp_op expr)*
     ExprASTPtr parse_comparison();
     //! comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not'
-    ExprASTPtr parse_comp_op();
+    ExprASTPtr parse_comp_op(ExprASTPtr& expr);
     //! expr: xor_expr ('|' xor_expr)*
     ExprASTPtr parse_expr();
     //! xor_expr: and_expr ('^' and_expr)*

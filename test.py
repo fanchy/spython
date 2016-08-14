@@ -18,7 +18,7 @@ while j:
     j = j - 1
     i = i + 1
     pass
-    if j:
+    if j == 10:
         break
 else:
     i = 1

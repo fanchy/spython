@@ -1057,12 +1057,22 @@ ExprASTPtr Parser::parse_not_test(){
 //! comparison: expr (comp_op expr)*
 ExprASTPtr Parser::parse_comparison(){
     ExprASTPtr expr = parse_expr();
-    return expr;
+    ExprASTPtr ret  = parse_comp_op(expr);
+    return ret;
 }
 
 //! comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not'
-ExprASTPtr Parser::parse_comp_op(){
-    return NULL;
+ExprASTPtr Parser::parse_comp_op(ExprASTPtr& expr){
+
+    if (m_curScanner->getToken()->strVal == "=" && m_curScanner->getToken(1)->strVal == "="){
+        m_curScanner->seek(2);
+        ExprASTPtr expr2 = parse_expr();
+        if (!expr2){
+            THROW_ERROR("expr needed after comp_op");
+        }
+        return new BinaryExprAST("==", expr, expr2);
+    }
+    return expr;
 }
 
 //! expr: xor_expr ('|' xor_expr)*
