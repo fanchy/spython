@@ -1,0 +1,35 @@
+#ifndef _PY_FLOAT_HANDLER_H_
+#define _PY_FLOAT_HANDLER_H_
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <vector>
+#include <stdexcept>
+
+#include "Base.h"
+#include "singleton.h"
+
+namespace ff {
+
+class PyFloatHandler: public PyObjHandler{
+public:
+    virtual int getType() {
+        return PY_INT;
+    }
+    virtual std::string handleStr(PyObjPtr& self);
+    bool handleBool(PyContext& context, PyObjPtr& self);
+    
+    virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+};
+
+
+}
+#endif
+
+

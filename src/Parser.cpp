@@ -1091,14 +1091,37 @@ ExprASTPtr Parser::parse_shift_expr(){
 
 //! arith_expr: term (('+'|'-') term)*
 ExprASTPtr Parser::parse_arith_expr(){
-    ExprASTPtr term = parse_term();
-    return term;
+    ExprASTPtr ret = parse_term();
+    while (m_curScanner->getToken()->strVal == "+" || m_curScanner->getToken()->strVal == "-"){
+        string op = m_curScanner->getToken()->strVal;
+        m_curScanner->seek(1);
+        
+        ExprASTPtr term = parse_term();
+        if (!term){
+            THROW_ERROR("term need after +/-");
+        }
+        ret = new BinaryExprAST(op, ret, term);
+    }
+    return ret;
 }
 
 //! term: factor (('*'|'/'|'%'|'//') factor)*
 ExprASTPtr Parser::parse_term(){
-    ExprASTPtr factor = parse_factor();
-    return factor;
+    ExprASTPtr ret = parse_factor();
+    while (m_curScanner->getToken()->strVal == "*" ||
+           m_curScanner->getToken()->strVal == "/" ||
+           m_curScanner->getToken()->strVal == "%" ){
+
+        string op = m_curScanner->getToken()->strVal;
+        m_curScanner->seek(1);
+        
+        ExprASTPtr term = parse_factor();
+        if (!term){
+            THROW_ERROR("term need after * / %");
+        }
+        ret = new BinaryExprAST(op, ret, term);
+    }
+    return ret;
 }
 
 //! factor: ('+'|'-'|'~') factor | power
@@ -1145,7 +1168,7 @@ ExprASTPtr Parser::parse_atom(){
         if (singleton_t<PyHelper>::instance_ptr()->isKeyword(m_curScanner->getToken()->strVal)){
             return NULL;
         }
-        retExpr = new VariableExprAST(m_curScanner->getToken()->strVal);
+        retExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken()->strVal);//new VariableExprAST(m_curScanner->getToken()->strVal);
     }
     else if (m_curScanner->getToken()->strVal == "["){
         m_curScanner->seek(1);
@@ -1490,7 +1513,7 @@ ExprASTPtr Parser::parse_name(bool throwFlag){
             }
             return NULL;
         }
-        ExprASTPtr retExpr = new VariableExprAST(m_curScanner->getToken()->strVal);
+        ExprASTPtr retExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken()->strVal);;//new VariableExprAST(m_curScanner->getToken()->strVal);
         m_curScanner->seek(1);
         return retExpr;
     }

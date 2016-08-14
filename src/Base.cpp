@@ -44,6 +44,16 @@ PyObjPtr& PyObjHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& 
 PyObjPtr& PyObjHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     PyException::buildException("handleDiv invalid");return self;
 }
+PyObjPtr& PyObjHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    PyException::buildException("handleMod invalid");return self;
+}
+bool PyObjHandler::handleBool(PyContext& context, PyObjPtr& self){
+    return false;
+}
+
+
+
+
 PyObjPtr& PyObj::getVar(PyObjPtr& self2, unsigned int nFieldIndex) {
     if (nFieldIndex < m_objStack.size()) {
         return m_objStack[nFieldIndex];

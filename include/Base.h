@@ -187,29 +187,36 @@ public:
         self = val;
         return self;
     }
+
     virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    
+    virtual bool handleBool(PyContext& context, PyObjPtr& self);
 
     virtual std::string dump(PyObjPtr& self) {
         return "";
     }
 };
 
-class PyObjNone:public PyObj {
+class PyNoneHandler: public PyObjHandler{
 public:
-    virtual void dump() {
-        DMSG(("None"));
-    }
     virtual int getType() {
         return PY_NONE;
     }
-    virtual bool handleEQ(PyObjPtr arg){
-        if (arg && arg->getType() == this->getType()){
-            return true;
-        }
+    virtual std::string handleStr(PyObjPtr& self){
+        return "None";
+    }
+    bool handleBool(PyContext& context, PyObjPtr& self){
         return false;
+    }
+};
+class PyObjNone:public PyObj {
+public:
+    PyObjNone(){
+        this->handler = singleton_t<PyNoneHandler>::instance_ptr();
     }
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjNone> >::instance_ptr()->objInfo;
@@ -276,6 +283,17 @@ public:
     }
     std::vector<PyObjPtr>   tmpcache;
     PyObjPtr curstack;//!cur using context
+};
+
+class FlowCtrlSignal: public std::exception{
+public:
+    enum{
+        RETURN = 0,
+        CONTINUE,
+        BREAK,
+    };
+    FlowCtrlSignal(int n = -1):nSignal(n) {}
+    int nSignal;
 };
 
 enum EEXPR_TYPE{ 

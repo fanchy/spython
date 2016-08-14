@@ -210,12 +210,16 @@ string IfExprAST::dump(int nDepth){
 PyObjPtr& IfExprAST::eval(PyContext& context) {
     for (unsigned int i = 0; i < ifTest.size(); ++i){
         PyObjPtr& caseBool = ifTest[i]->eval(context);
-        if (PyObjTool::handleBool(caseBool)){
+        if (caseBool->handler->handleBool(context, caseBool)){
             ifSuite[i]->eval(context);
-            return context.curstack;
+            return PyObjTool::buildNone();
         }
     }
-    return context.curstack;
+    if (elseSuite){
+        elseSuite->eval(context);
+        return PyObjTool::buildNone();
+    }
+    return PyObjTool::buildNone();
 }
 
 string WhileExprAST::dump(int nDepth){
@@ -233,16 +237,28 @@ string WhileExprAST::dump(int nDepth){
 }
 
 PyObjPtr& WhileExprAST::eval(PyContext& context) {
+    bool doElse = true;
     while (true){
-        PyObjPtr& caseBool = test->eval(context);
-        if (PyObjTool::handleBool(caseBool)){
-            suite->eval(context);
+        try{
+            PyObjPtr& caseBool = test->eval(context);
+            if (caseBool->handler->handleBool(context, caseBool)){
+                doElse = false;
+                suite->eval(context);
+            }
+            else{
+                break;
+            }
         }
-        else{
-            break;
+        catch(FlowCtrlSignal& s){
+            if (s.nSignal == FlowCtrlSignal::CONTINUE){
+                continue;
+            }
+            else if (s.nSignal == FlowCtrlSignal::BREAK){
+                break;
+            }
         }
     }
-    if (elseSuite){
+    if (doElse && elseSuite){
         elseSuite->eval(context);
     }
     return context.curstack;
@@ -467,9 +483,33 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
         case OP_ASSIGN:{
             PyObjPtr& rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-
             lval = rval;
             return lval;
+        }break;
+        case OP_ADD:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            return lval->handler->handleAdd(context, lval, rval);
+        }break;
+        case OP_SUB:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            return lval->handler->handleSub(context, lval, rval);
+        }break;
+        case OP_MUL:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            return lval->handler->handleMul(context, lval, rval);
+        }break;
+        case OP_DIV:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            return lval->handler->handleDiv(context, lval, rval);
+        }break;
+        case OP_MOD:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            return lval->handler->handleMod(context, lval, rval);
         }break;
         /*
         case TOK_EQ:{

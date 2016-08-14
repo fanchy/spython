@@ -11,20 +11,13 @@
 #include "Base.h"
 #include "singleton.h"
 
+#include "objhandler/PyIntHandler.h"
+#include "objhandler/PyFloatHandler.h"
+
 namespace ff {
 
-class PyIntHandler: public PyObjHandler{
-public:
-    virtual int getType() {
-        return PY_INT;
-    }
-    virtual std::string handleStr(PyObjPtr& self);
-    
-    virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-};
+#define THROW_EVAL_ERROR(X) throw PyException::buildException(X)
+
 class PyObjInt:public PyObj {
 public:
     long value;
@@ -51,20 +44,8 @@ class PyObjFloat:public PyObj {
 public:
     double value;
     PyObjFloat(double n = 0):value(n) {
+        this->handler = singleton_t<PyFloatHandler>::instance_ptr();
     }
-    virtual void dump() {
-        DMSG(("%f(float)", value));
-    }
-    virtual int getType() {
-        return PY_FLOAT;
-    }
-    virtual bool handleEQ(PyObjPtr arg){
-        if (arg && arg->getType() == this->getType()){
-            return arg.cast<PyObjInt>()->value == this->value;
-        }
-        return false;
-    }
-    
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjFloat> >::instance_ptr()->objInfo;
     }

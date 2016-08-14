@@ -172,6 +172,7 @@ public:
         return EXPR_BREAK_STMT;
     }
     virtual PyObjPtr& eval(PyContext& context) {
+        throw FlowCtrlSignal(FlowCtrlSignal::BREAK);
         return PyObjTool::buildNone();
     }
 public:
@@ -185,6 +186,7 @@ public:
         return EXPR_CONTINUE_STMT;
     }
     virtual PyObjPtr& eval(PyContext& context) {
+        throw FlowCtrlSignal(FlowCtrlSignal::CONTINUE);
         return PyObjTool::buildNone();
     }
 public:
@@ -208,18 +210,37 @@ public:
 class BinaryExprAST : public ExprAST {
     enum {
         OP_ASSIGN = 0,
+        OP_ADD,
+        OP_SUB,
+        OP_MUL,
+        OP_DIV,
+        OP_MOD,
     };
     std::string op;
     ExprASTPtr left, right;
     int optype;
 public:
-    BinaryExprAST(const std::string& o, ExprASTPtr l, ExprASTPtr r)
+    BinaryExprAST(const std::string& o, ExprASTPtr& l, ExprASTPtr& r)
         : op(o), left(l), right(r),optype(-1) {
-        
         this->name = op;
-        //DMSG(("BinaryExprAST Op:%s,left=%s,right=%s\n", this->name.c_str(), left->name.c_str(), right->name.c_str()));
+
         if (op == "="){
             optype = OP_ASSIGN;
+        }
+        else if (op == "+"){
+            optype = OP_ADD;
+        }
+        else if (op == "-"){
+            optype = OP_SUB;
+        }
+        else if (op == "*"){
+            optype = OP_MUL;
+        }
+        else if (op == "/"){
+            optype = OP_DIV;
+        }
+        else if (op == "%"){
+            optype = OP_MOD;
         }
     }
     virtual int getType() {

@@ -5,37 +5,6 @@
 using namespace std;
 using namespace ff;
 
-#define THROW_ERROR(X) throw PyException::buildException(X)
-
-string PyIntHandler::handleStr(PyObjPtr& self) {
-    char msg[64] = {0};
-    snprintf(msg, sizeof(msg), "%ld", self.cast<PyObjInt>()->value);
-    return string(msg);
-}
-PyObjPtr& PyIntHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    int nType   = val->getType();
-    long newVal = 0;
-    if (nType == PY_INT){
-        newVal = self.cast<PyObjInt>()->value + val.cast<PyObjInt>()->value;
-    }
-    else if (nType == PY_FLOAT){
-        newVal = self.cast<PyObjInt>()->value + long(val.cast<PyObjFloat>()->value);
-    }
-    else{
-        THROW_ERROR("can't add to int");
-    }
-    return context.cacheObj(new PyObjInt(newVal));
-}
-PyObjPtr& PyIntHandler::handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleSub invalid");return self;
-}
-PyObjPtr& PyIntHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleMul invalid");return self;
-}
-PyObjPtr& PyIntHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleDiv invalid");return self;
-}
-
 PyObjPtr PyObjFuncDef::handleCall(PyObjPtr context, list<PyObjPtr>& args){
     //DMSG(("PyObjFuncDef::handleCall...\n"));
     //DMSG(("PyObjFuncDef::handleCall2...\n"));
