@@ -18,10 +18,16 @@ public:
     virtual int getType() {
         return PY_INT;
     }
+    virtual std::string handleStr(PyObjPtr& self);
+    
+    virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
 };
 class PyObjInt:public PyObj {
 public:
-    int value;
+    long value;
     PyObjInt(long n = 0):value(n) {
         this->handler = singleton_t<PyIntHandler>::instance_ptr();
     }

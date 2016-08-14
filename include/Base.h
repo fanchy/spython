@@ -150,7 +150,7 @@ public:
 
     int getType();
     int getFieldNum() const { return m_objStack.size(); }
-    std::string dump();
+    static std::string dump(PyObjPtr& self);
 
     virtual PyObjPtr& getVar(PyObjPtr& self, unsigned int nFieldIndex);
     virtual const ObjIdInfo& getObjIdInfo() = 0;
@@ -180,11 +180,19 @@ public:
     virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args){
         return NULL;
     }
-    virtual PyObjPtr handleStr(PyContext& context){
-        return NULL;
+    virtual std::string handleStr(PyObjPtr& self){
+        return "";
     }
+    virtual PyObjPtr& handleAssign(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+        self = val;
+        return self;
+    }
+    virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
 
-    virtual std::string dump() {
+    virtual std::string dump(PyObjPtr& self) {
         return "";
     }
 };
@@ -237,7 +245,7 @@ public:
     ExprAST():nFieldId(-1){
     }
     virtual ~ExprAST() {}
-    virtual PyObjPtr eval(PyContext& context)  { return NULL;}
+    virtual PyObjPtr& eval(PyContext& context) = 0;
 
     virtual PyObjPtr& getFieldVal(PyContext& context);
     virtual int getType() {
@@ -262,6 +270,11 @@ typedef SmartPtr<ExprAST> ExprASTPtr;
 
 class PyContext{
 public:
+    PyObjPtr& cacheObj(PyObjPtr v){
+        tmpcache.push_back(v);
+        return tmpcache.back();
+    }
+    std::vector<PyObjPtr>   tmpcache;
     PyObjPtr curstack;//!cur using context
 };
 

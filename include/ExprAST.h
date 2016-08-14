@@ -17,7 +17,7 @@ public:
     long Val;
     PyObjPtr obj;
     NumberExprAST(long v);
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         return obj;
     }
     virtual int getType() {
@@ -29,7 +29,7 @@ public:
     double Val;
     PyObjPtr obj;
     FloatExprAST(double v);
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         return obj;
     }
     virtual int getType() {
@@ -41,7 +41,7 @@ public:
     std::string val;
     PyObjPtr obj;
     StrExprAST(const std::string& v) ;
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         return obj;
     }
     virtual int getType() {
@@ -55,7 +55,7 @@ public:
     VariableExprAST(const std::string &n) {
         this->name = n;
     }
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         return this->getFieldVal(context);
     }
     
@@ -107,7 +107,7 @@ public:
         return EXPR_POWER;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 };
 class StmtAST : public ExprAST {
 
@@ -119,7 +119,7 @@ public:
         return EXPR_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 public:
     std::vector<ExprASTPtr> exprs;
 };
@@ -132,7 +132,7 @@ public:
         return EXPR_PRINT_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 public:
     std::vector<ExprASTPtr> exprs;
 };
@@ -145,7 +145,7 @@ public:
         return EXPR_DEL_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 public:
     ExprASTPtr exprlist;
 };
@@ -158,7 +158,7 @@ public:
     virtual int getType() {
         return EXPR_PASS_STMT;
     }
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         return PyObjTool::buildNone();
     }
 public:
@@ -171,7 +171,7 @@ public:
     virtual int getType() {
         return EXPR_BREAK_STMT;
     }
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         return PyObjTool::buildNone();
     }
 public:
@@ -184,7 +184,7 @@ public:
     virtual int getType() {
         return EXPR_CONTINUE_STMT;
     }
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         return PyObjTool::buildNone();
     }
 public:
@@ -197,7 +197,7 @@ public:
     virtual int getType() {
         return EXPR_IMPORT_STMT;
     }
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         return PyObjTool::buildNone();
     }
     virtual std::string dump(int nDepth);
@@ -226,7 +226,7 @@ public:
         return EXPR_BIN;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     virtual PyObjPtr& getFieldVal(PyObjPtr& context);
 };
 
@@ -239,7 +239,7 @@ public:
         return EXPR_DEL_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 public:
     ExprASTPtr testlist;
 };
@@ -252,7 +252,7 @@ public:
         return EXPR_RAISE_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 public:
     std::vector<ExprASTPtr> exprs;
 };
@@ -265,7 +265,7 @@ public:
         return EXPR_GLOBAL_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 public:
     std::vector<ExprASTPtr> exprs;
 };
@@ -278,7 +278,7 @@ public:
         return EXPR_EXEC_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 public:
     std::vector<ExprASTPtr> exprs;
 };
@@ -291,7 +291,7 @@ public:
         return EXPR_ASSERT_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 public:
     std::vector<ExprASTPtr> exprs;
 };
@@ -312,7 +312,7 @@ public:
         return EXPR_AUGASSIGN;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     virtual PyObjPtr& getFieldVal(PyContext& context);
 };
 
@@ -348,7 +348,7 @@ public:
         return EXPR_FUNCDEF;
     }
 
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 };
 
 class  ClassCodeImpl: public ExprAST{
@@ -378,7 +378,7 @@ public:
         return EXPR_CLASSDEF;
     }
 
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 };
 
 //! if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
@@ -396,7 +396,7 @@ public:
         return EXPR_IF_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     
 };
 
@@ -415,7 +415,7 @@ public:
         return EXPR_WHILE_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     
 };
 //! for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
@@ -434,7 +434,7 @@ public:
         return EXPR_FOR_STMT;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     
 };
 //! listmaker: test ( list_for | (',' test)* [','] )
@@ -451,7 +451,7 @@ public:
         return EXPR_LISTMAKER;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     
 };
 
@@ -471,7 +471,7 @@ public:
         return EXPR_DICTORSETMAKER;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     
 };
 
@@ -488,7 +488,7 @@ public:
         return EXPR_PARAMETERS;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     
 };
 
@@ -507,7 +507,7 @@ public:
         return EXPR_FUNCDEF;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     
 };
 
@@ -526,7 +526,7 @@ public:
         return EXPR_CLASSDEF;
     }
     virtual std::string dump(int nDepth);
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     
 };
 
@@ -540,7 +540,7 @@ class ContinueExprAST : public ExprAST {
 public:
     ContinueExprAST(){
     }
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         //DMSG(("continue expr eval---------\n"));
         singleton_t<ForBreakContinueFlag>::instance_ptr()->flagContinue = true;
         return context.curstack;
@@ -554,7 +554,7 @@ class BreakExprAST : public ExprAST {
 public:
     BreakExprAST(){
     }
-    virtual PyObjPtr eval(PyContext& context) {
+    virtual PyObjPtr& eval(PyContext& context) {
         //DMSG(("break expr eval---------\n"));
         singleton_t<ForBreakContinueFlag>::instance_ptr()->flagBreak = true;
         return context.curstack;
@@ -577,7 +577,7 @@ public:
     virtual int getType() {
         return EXPR_FOR_STMT;
     }
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 };
 
 
@@ -593,7 +593,7 @@ public:
     virtual int getType() {
         return EXPR_TUPLE;
     }
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
     
     PyObjPtr handleAssign(PyObjPtr context, PyObjPtr value);
 };
@@ -609,7 +609,7 @@ public:
     virtual int getType() {
         return EXPR_CALL;
     }
-    virtual PyObjPtr eval(PyContext& context);
+    virtual PyObjPtr& eval(PyContext& context);
 public:
     ExprASTPtr varFuncName;
     ExprASTPtr argsTuple;

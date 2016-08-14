@@ -4,23 +4,26 @@
 using namespace std;
 using namespace ff;
 
-string PyObj::dump() {
-    string ret;
+string PyObj::dump(PyObjPtr& self) {
+    string ret = self->handler->dump(self);
+    if (ret.empty() == false)
+        return ret;
+    
     char msg[256] = {0};
-    snprintf(msg, sizeof(msg), "type:%d\n", this->getType());
+    snprintf(msg, sizeof(msg), "type:%d\n", self->getType());
     ret += msg;
-    const ObjIdInfo& p = this->getObjIdInfo();
-    for (unsigned int i = 0; i < m_objStack.size(); ++i) {
+    const ObjIdInfo& p = self->getObjIdInfo();
+    for (unsigned int i = 0; i < self->m_objStack.size(); ++i) {
         
         string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFiledName(p.nModuleId, p.nObjectId, i);
 
         snprintf(msg, sizeof(msg), "[%d-%d] %d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
         ret += msg;
-        if (!m_objStack[i]) {
+        if (!self->m_objStack[i]) {
             ret += "NULL\n";
             continue;
         }
-        ret += m_objStack[i]->dump();
+        ret += self->m_objStack[i]->handler->handleStr(self->m_objStack[i]);
         ret += "\n";
     }
     return ret;
@@ -29,7 +32,18 @@ string PyObj::dump() {
 int PyObj::getType(){
     return handler->getType();
 }
-
+PyObjPtr& PyObjHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    PyException::buildException("handleAdd invalid");return self;
+}
+PyObjPtr& PyObjHandler::handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    PyException::buildException("handleSub invalid");return self;
+}
+PyObjPtr& PyObjHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    PyException::buildException("handleMul invalid");return self;
+}
+PyObjPtr& PyObjHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    PyException::buildException("handleDiv invalid");return self;
+}
 PyObjPtr& PyObj::getVar(PyObjPtr& self2, unsigned int nFieldIndex) {
     if (nFieldIndex < m_objStack.size()) {
         return m_objStack[nFieldIndex];
