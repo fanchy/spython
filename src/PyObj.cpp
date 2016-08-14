@@ -55,5 +55,6 @@ PyObjPtr& PyObjClassObj::getVar(PyObjPtr& self, unsigned int nFieldIndex)
     if (PY_FUNC_DEF == ret->getType()){
         ret = new PyObjClassFunc(self, ret);
     }
+    
     return ret;
 }

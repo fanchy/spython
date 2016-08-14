@@ -32,6 +32,9 @@ int main(int argc, char** argv) {
     
         if (rootExpr){
             printf("%s", rootExpr->dump(0).c_str());
+
+            PyContext context;
+            rootExpr->eval(context);
         }else{
             printf("parser.parse Ê§°Ü£¡\n");
         }

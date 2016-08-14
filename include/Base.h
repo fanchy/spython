@@ -101,6 +101,8 @@ struct PyHelper{
     std::set<std::string>    m_allKeyword;
 }; 
 
+class PyContext;
+
 class ExprAST;
 class PyIter;
 typedef SmartPtr<PyIter> PyIterPtr;
@@ -138,43 +140,50 @@ struct ObjIdTypeTraits{
 
     ObjIdInfo objInfo;
 };
+class PyObjHandler;
 
 class PyObj {
 public:
     typedef SmartPtr<PyObj> PyObjPtr;
-    virtual ~PyObj() {
-    }
+    PyObj():m_pObjIdInfo(NULL), handler(NULL){}
+    virtual ~PyObj() {}
+
+    int getType();
+    int getFieldNum() const { return m_objStack.size(); }
 
     virtual PyObjPtr& getVar(PyObjPtr& self, unsigned int nFieldIndex);
+    virtual const ObjIdInfo& getObjIdInfo() = 0;
 
-    PyObj():m_pObjIdInfo(NULL){
-    }
-    virtual void dump();
-    PyMetaType* getMetaType();
+public:
+    std::vector<PyObjPtr>    m_objStack;
+    ObjIdInfo*               m_pObjIdInfo;
+    PyObjHandler*            handler;
+};
+typedef PyObj::PyObjPtr PyObjPtr;
 
+class PyObjHandler{
+public:
+    virtual ~PyObjHandler(){}
+    
     virtual int getType() {
         return 0;
+    }
+
+    //!比较是否相等 
+    virtual bool handleEQ(PyObjPtr& self, PyObjPtr& args){
+        return false;
+    }
+    virtual PyIterPtr getIter(){
+        return NULL;
     }
     virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args){
         return NULL;
     }
-
-    virtual bool handleEQ(PyObjPtr args){
-        return false;
-    }
-
-    virtual PyIterPtr getIter(){
+    virtual PyObjPtr handleStr(PyContext& context){
         return NULL;
     }
     
-    int getFieldNum() const { return m_objStack.size(); }
-    
-    virtual const ObjIdInfo& getObjIdInfo() = 0;
-public:
-    std::vector<PyObjPtr>    m_objStack;
-    ObjIdInfo*          m_pObjIdInfo;
 };
-typedef PyObj::PyObjPtr PyObjPtr;
 
 class PyObjNone:public PyObj {
 public:
@@ -224,10 +233,9 @@ public:
     ExprAST():nFieldId(-1){
     }
     virtual ~ExprAST() {}
-    virtual PyObjPtr eval(PyObjPtr context) {
-        return NULL;
-    }
-    virtual PyObjPtr& getFieldVal(PyObjPtr& context);
+    virtual PyObjPtr eval(PyContext& context)  { return NULL;}
+
+    virtual PyObjPtr& getFieldVal(PyContext& context);
     virtual int getType() {
         return 0;
     }
@@ -248,6 +256,10 @@ public:
 
 typedef SmartPtr<ExprAST> ExprASTPtr;
 
+class PyContext{
+public:
+    PyObjPtr curstack;//!cur using context
+};
 
 enum EEXPR_TYPE{ 
     EXPR_SINGLE_INPUT,

@@ -116,6 +116,7 @@ public:
 
 class PyObjTuple:public PyObj {
 public:
+    /*
     virtual void dump() {
         DMSG(("("));
         for (unsigned int i = 0; i < values.size(); ++i){
@@ -124,7 +125,7 @@ public:
                DMSG((","));
         }
         DMSG((")"));
-    }
+    }*/
     virtual int getType() {
         return PY_TUPLE;
     }

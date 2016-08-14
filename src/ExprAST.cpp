@@ -21,7 +21,7 @@ FloatExprAST::FloatExprAST(double v) : Val(v) {
     obj = new PyObjFloat(Val);
 }
 
-PyObjPtr PowerAST::eval(PyObjPtr context){
+PyObjPtr PowerAST::eval(PyContext& context){
     PyObjPtr ret = atom->eval(context);
     //!TODO
     return ret;
@@ -39,7 +39,7 @@ string PowerAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr StmtAST::eval(PyObjPtr context){
+PyObjPtr StmtAST::eval(PyContext& context){
     PyObjPtr ret;
     for (unsigned int i = 0; i < exprs.size(); ++i){
         ret = exprs[i]->eval(context);
@@ -58,7 +58,7 @@ string StmtAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr PrintAST::eval(PyObjPtr context){
+PyObjPtr PrintAST::eval(PyContext& context){
     PyObjPtr ret;
     for (unsigned int i = 0; i < exprs.size(); ++i){
         ret = exprs[i]->eval(context);
@@ -77,7 +77,7 @@ string PrintAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr DelAST::eval(PyObjPtr context){
+PyObjPtr DelAST::eval(PyContext& context){
     PyObjPtr ret = exprlist->eval(context);
     return ret;
 }
@@ -91,7 +91,7 @@ string DelAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr ReturnAST::eval(PyObjPtr context){
+PyObjPtr ReturnAST::eval(PyContext& context){
     if (!testlist){
         return PyObjTool::buildNone();
     }
@@ -109,7 +109,7 @@ string ReturnAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr RaiseAST::eval(PyObjPtr context){
+PyObjPtr RaiseAST::eval(PyContext& context){
     PyObjPtr ret;
     for (unsigned int i = 0; i < exprs.size(); ++i){
         ret = exprs[i]->eval(context);
@@ -128,7 +128,7 @@ string RaiseAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr GlobalAST::eval(PyObjPtr context){
+PyObjPtr GlobalAST::eval(PyContext& context){
     PyObjPtr ret;
     for (unsigned int i = 0; i < exprs.size(); ++i){
         ret = exprs[i]->eval(context);
@@ -147,7 +147,7 @@ string GlobalAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr ExecAST::eval(PyObjPtr context){
+PyObjPtr ExecAST::eval(PyContext& context){
     PyObjPtr ret;
     for (unsigned int i = 0; i < exprs.size(); ++i){
         ret = exprs[i]->eval(context);
@@ -166,7 +166,7 @@ string ExecAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr AssertAST::eval(PyObjPtr context){
+PyObjPtr AssertAST::eval(PyContext& context){
     PyObjPtr ret;
     for (unsigned int i = 0; i < exprs.size(); ++i){
         ret = exprs[i]->eval(context);
@@ -207,15 +207,15 @@ string IfExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr IfExprAST::eval(PyObjPtr context) {
+PyObjPtr IfExprAST::eval(PyContext& context) {
     for (unsigned int i = 0; i < ifTest.size(); ++i){
         PyObjPtr caseBool = ifTest[i]->eval(context);
         if (PyObjTool::handleBool(caseBool)){
             ifSuite[i]->eval(context);
-            return context;
+            return context.curstack;
         }
     }
-    return context;
+    return context.curstack;
 }
 
 string WhileExprAST::dump(int nDepth){
@@ -232,7 +232,7 @@ string WhileExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr WhileExprAST::eval(PyObjPtr context) {
+PyObjPtr WhileExprAST::eval(PyContext& context) {
     while (true){
         PyObjPtr caseBool = test->eval(context);
         if (PyObjTool::handleBool(caseBool)){
@@ -245,7 +245,7 @@ PyObjPtr WhileExprAST::eval(PyObjPtr context) {
     if (elseSuite){
         elseSuite->eval(context);
     }
-    return context;
+    return context.curstack;
 }
 
 string ForExprAST::dump(int nDepth){
@@ -263,7 +263,7 @@ string ForExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr ForExprAST::eval(PyObjPtr context) {
+PyObjPtr ForExprAST::eval(PyContext& context) {
     while (true){
         PyObjPtr caseBool = exprlist->eval(context);
         if (PyObjTool::handleBool(caseBool)){
@@ -276,7 +276,7 @@ PyObjPtr ForExprAST::eval(PyObjPtr context) {
     if (elseSuite){
         elseSuite->eval(context);
     }
-    return context;
+    return context.curstack;
 }
 
 string ListMakerExprAST::dump(int nDepth){
@@ -294,14 +294,14 @@ string ListMakerExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr ListMakerExprAST::eval(PyObjPtr context) {
+PyObjPtr ListMakerExprAST::eval(PyContext& context) {
     for (unsigned int i = 0; i < test.size(); ++i){
         test[i]->eval(context);
     }
     if (list_for){
         list_for->eval(context);
     }
-    return context;
+    return context.curstack;
 }
 
 string DictorsetMakerExprAST::dump(int nDepth){
@@ -324,14 +324,14 @@ string DictorsetMakerExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr DictorsetMakerExprAST::eval(PyObjPtr context) {
+PyObjPtr DictorsetMakerExprAST::eval(PyContext& context) {
     for (unsigned int i = 0; i < test.size(); ++i){
         test[i]->eval(context);
     }
     if (comp_for){
         comp_for->eval(context);
     }
-    return context;
+    return context.curstack;
 }
 
 string ParametersExprAST::dump(int nDepth){
@@ -350,9 +350,9 @@ string ParametersExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr ParametersExprAST::eval(PyObjPtr context) {
+PyObjPtr ParametersExprAST::eval(PyContext& context) {
     //!TODO
-    return context;
+    return context.curstack;
 }
 
 string FuncDefExprAST::dump(int nDepth){
@@ -368,10 +368,10 @@ string FuncDefExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr FuncDefExprAST::eval(PyObjPtr context) {
+PyObjPtr FuncDefExprAST::eval(PyContext& context) {
     //!TODO
 
-    return context;
+    return context.curstack;
 }
 
 string ClassDefExprAST::dump(int nDepth){
@@ -388,19 +388,19 @@ string ClassDefExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr ClassDefExprAST::eval(PyObjPtr context) {
+PyObjPtr ClassDefExprAST::eval(PyContext& context) {
     //!TODO
 
-    return context;
+    return context.curstack;
 }
 
 
 
-PyObjPtr ForExprASTOld::eval(PyObjPtr context) {
+PyObjPtr ForExprASTOld::eval(PyContext& context) {
     PyObjPtr iterObj = iterFunc->eval(context);
     if (!iterObj)
     {
-        return context;
+        return context.curstack;
     }
     //DMSG(("\n"));
     ForBreakContinueFlag* pFlag =  singleton_t<ForBreakContinueFlag>::instance_ptr();
@@ -418,7 +418,7 @@ PyObjPtr ForExprASTOld::eval(PyObjPtr context) {
 
             for (unsigned int i = 0; i < pTuple->values.size(); ++i){
                 
-                this->iterTuple->handleAssign(context, pTuple->values[i]);
+                //TODO this->iterTuple->handleAssign(context, pTuple->values[i]);
                 
                 //DMSG((" -------- ForExprAST::eval ------")); 
                 //pTuple->values[i]->dump();
@@ -440,7 +440,7 @@ PyObjPtr ForExprASTOld::eval(PyObjPtr context) {
                     break;
                 }
             }
-            return context;
+            return context.curstack;
         }
         break;
         default:
@@ -450,7 +450,7 @@ PyObjPtr ForExprASTOld::eval(PyObjPtr context) {
     for (unsigned int i = 0; i < forBody.size(); ++i){
         forBody[i]->eval(context);
     }
-    return context;
+    return context.curstack;
 }
 string ImportAST::dump(int nDepth){
     string ret;
@@ -462,7 +462,7 @@ string ImportAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr BinaryExprAST::eval(PyObjPtr context) {
+PyObjPtr BinaryExprAST::eval(PyContext& context) {
     /*
     switch (op){
         case TOK_ASSIGN:{
@@ -529,7 +529,7 @@ PyObjPtr BinaryExprAST::eval(PyObjPtr context) {
             return context;
     }
     */
-    return context;
+    return context.curstack;
 }
 
 PyObjPtr& BinaryExprAST::getFieldVal(PyObjPtr& context){
@@ -556,14 +556,15 @@ string BinaryExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr AugassignAST::eval(PyObjPtr context){
+PyObjPtr AugassignAST::eval(PyContext& context){
     return NULL;//!TODO
 }
-PyObjPtr& AugassignAST::getFieldVal(PyObjPtr& context){
+PyObjPtr& AugassignAST::getFieldVal(PyContext& context){
+    /*
     PyObjPtr lval = left->eval(context);
     PyObjPtr& v = right->getFieldVal(lval);
-    return v;
-    return context;
+    return v;*/
+    return context.curstack;
 }
 string AugassignAST::dump(int nDepth){
     string ret;
@@ -574,7 +575,7 @@ string AugassignAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr TupleExprAST::eval(PyObjPtr context){
+PyObjPtr TupleExprAST::eval(PyContext& context){
     PyObjTuple* tuple = new PyObjTuple();
     PyObjPtr ret = tuple;
     for (unsigned int i = 0; i < values.size(); ++i){
@@ -597,13 +598,13 @@ PyObjPtr TupleExprAST::handleAssign(PyObjPtr context, PyObjPtr val)
         throw PyException::buildException("tuple size not equal");
     }
     for (unsigned int i = 0; i < tuple->values.size(); ++i){
-        PyObjPtr& v =  this->values[i]->getFieldVal(context); 
-        v = tuple->values[i];
+        //!TODO PyObjPtr& v =  this->values[i]->getFieldVal(context); 
+        //v = tuple->values[i];
     }
     return val;
 }
 
-PyObjPtr FunctionAST::eval(PyObjPtr context) {
+PyObjPtr FunctionAST::eval(PyContext& context) {
     PyObjPtr obj = new PyObjFuncDef(codeImplptr);
     PyObjPtr& v = this->codeImplptr.cast<FuncCodeImpl>()->varAstforName->getFieldVal(context);
     v = obj;
@@ -611,6 +612,7 @@ PyObjPtr FunctionAST::eval(PyObjPtr context) {
 }
 
 PyObjPtr FuncCodeImpl::exeCode(PyObjPtr context, list<PyObjPtr>&  tmpArgsInput) {
+    /*TODO
     //DMSG(("FunctionAST::exeCode...\n"));
     list<PyObjPtr>::iterator it = tmpArgsInput.begin();
     for (unsigned int i = 0; i < argsDef.size() && it != tmpArgsInput.end(); ++i){
@@ -622,10 +624,12 @@ PyObjPtr FuncCodeImpl::exeCode(PyObjPtr context, list<PyObjPtr>&  tmpArgsInput) 
         body[i]->eval(context);
     }
     //DMSG(("FunctionAST eval name=%s\n", proto->name.c_str()));
+    */
     return context;
 }
 
-PyObjPtr ClassAST::eval(PyObjPtr context){
+PyObjPtr ClassAST::eval(PyContext& context){
+    /*TODO
     //DMSG(("ClassAST::eval...%d\n", classFieldCode.size()));
     PyObjPtr obj = new PyObjClassDef(codeImplptr);
     PyObjPtr& v = this->codeImplptr.cast<ClassCodeImpl>()->varAstforName->getFieldVal(context);
@@ -636,10 +640,13 @@ PyObjPtr ClassAST::eval(PyObjPtr context){
     }
     //obj->PyObj::dump();DMSG(("\n"));
     //DMSG(("ClassAST::eval...end\n"));
-    return obj;
+    
+    return obj;*/
+    return context.curstack;
 }
 
-PyObjPtr CallExprAST::eval(PyObjPtr context) {
+PyObjPtr CallExprAST::eval(PyContext& context) {
+    /*
     PyObjPtr e = varFuncName->eval(context);
     if (!e){
         throw PyException::buildException("null can't be called");
@@ -654,7 +661,7 @@ PyObjPtr CallExprAST::eval(PyObjPtr context) {
         argsObj.push_back(args[i]->eval(context));
     }
     
-    PyObjPtr ret = e->handleCall(e, argsObj);
+    PyObjPtr ret = e->handler->handleCall(e, argsObj);
     if (!ret){
         char msg[256] = {0};
         snprintf(msg, sizeof(msg), "[%d] can't be called", e->getType());
@@ -665,4 +672,6 @@ PyObjPtr CallExprAST::eval(PyObjPtr context) {
     //e->PyObj::dump();
     //DMSG(("CallExprAST dump end..\n"));
     return ret;
+    */
+    return context.curstack;
 }

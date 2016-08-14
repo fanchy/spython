@@ -3,7 +3,7 @@
 
 using namespace std;
 using namespace ff;
-
+/*
 void PyObj::dump() {
     DMSG(("dump type:%d\n", this->getType()));
     const ObjIdInfo& p = this->getObjIdInfo();
@@ -19,9 +19,13 @@ void PyObj::dump() {
         m_objStack[i]->dump();
         DMSG(("\n"));
     }
+}*/
+
+int PyObj::getType(){
+    return handler->getType();
 }
 
-PyObjPtr& PyObj::getVar(PyObjPtr& self, unsigned int nFieldIndex) {
+PyObjPtr& PyObj::getVar(PyObjPtr& self2, unsigned int nFieldIndex) {
     if (nFieldIndex < m_objStack.size()) {
         return m_objStack[nFieldIndex];
     }
@@ -140,7 +144,8 @@ bool PyObjTool::handleBool(PyObjPtr b){
 }
 
 
-PyObjPtr& ExprAST::getFieldVal(PyObjPtr& context){
+PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
+    PyObjPtr& context = pycontext.curstack;
     const ObjIdInfo& p = context->getObjIdInfo();
     if (p.nModuleId >= module2objcet2fieldIndex.size()){
         module2objcet2fieldIndex.resize(p.nModuleId + 1);
