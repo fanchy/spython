@@ -139,6 +139,7 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
     }
     //! augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' |
     //!             '<<=' | '>>=' | '**=' | '//=')
+    //! comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|
     switch (cLastOne){
         case '+':
         case '-':
@@ -184,6 +185,17 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
             }
             break;
         }
+        case '=':
+        case '!':
+        {
+            cLastOne = getCharNext(content, index);
+            if (cLastOne == '='){
+                retToken.strVal += '=';
+            }
+            else{
+                --index;
+            }
+        }break;
         default:
             break;
     }

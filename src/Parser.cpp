@@ -1038,14 +1038,33 @@ ExprASTPtr Parser::parse_test(){
 
 //! or_test: and_test ('or' and_test)*
 ExprASTPtr Parser::parse_or_test(){
-    ExprASTPtr and_test = parse_and_test();
-    return and_test;
+    ExprASTPtr ret = parse_and_test();
+    
+    while (m_curScanner->getToken()->strVal == "or"){
+        m_curScanner->seek(1);
+        
+        ExprASTPtr and_test = parse_and_test();
+        if (!and_test){
+            THROW_ERROR("test expr needed after or");
+        }
+        ret = new BinaryExprAST("or", ret, and_test);
+    }
+    return ret;
 }
 
 //! and_test: not_test ('and' not_test)*
 ExprASTPtr Parser::parse_and_test(){
-    ExprASTPtr not_test = parse_not_test();
-    return not_test;
+    ExprASTPtr ret = parse_not_test();
+    while (m_curScanner->getToken()->strVal == "and"){
+        m_curScanner->seek(1);
+        
+        ExprASTPtr not_test = parse_not_test();
+        if (!not_test){
+            THROW_ERROR("test expr needed after or");
+        }
+        ret = new BinaryExprAST("and", ret, not_test);
+    }
+    return ret;
 }
 
 //! not_test: 'not' not_test | comparison
@@ -1063,14 +1082,53 @@ ExprASTPtr Parser::parse_comparison(){
 
 //! comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not'
 ExprASTPtr Parser::parse_comp_op(ExprASTPtr& expr){
-
-    if (m_curScanner->getToken()->strVal == "=" && m_curScanner->getToken(1)->strVal == "="){
-        m_curScanner->seek(2);
+    string op = m_curScanner->getToken()->strVal;
+    if (op == "<" || op == ">" ||
+        op == "==" || op == ">=" ||
+        op == "<=" || op == "<>" ||
+        op == "!=" || op == "in"){
+        m_curScanner->seek(1);
         ExprASTPtr expr2 = parse_expr();
         if (!expr2){
             THROW_ERROR("expr needed after comp_op");
         }
-        return new BinaryExprAST("==", expr, expr2);
+        return new BinaryExprAST(op, expr, expr2);
+    }
+    else if (op == "not"){
+        if (m_curScanner->getToken(1)->strVal == "in"){
+            m_curScanner->seek(2);
+            ExprASTPtr expr2 = parse_expr();
+            if (!expr2){
+                THROW_ERROR("expr needed after comp_op");
+            }
+            return new BinaryExprAST("not in", expr, expr2);
+        }
+        else{
+            m_curScanner->seek(1);
+            ExprASTPtr expr2 = parse_expr();
+            if (!expr2){
+                THROW_ERROR("expr needed after comp_op");
+            }
+            return new BinaryExprAST(op, expr, expr2);
+        }
+    }
+    else if (op == "is"){
+        if (m_curScanner->getToken(1)->strVal == "not"){
+            m_curScanner->seek(2);
+            ExprASTPtr expr2 = parse_expr();
+            if (!expr2){
+                THROW_ERROR("expr needed after comp_op");
+            }
+            return new BinaryExprAST("is not", expr, expr2);
+        }
+        else{
+            m_curScanner->seek(1);
+            ExprASTPtr expr2 = parse_expr();
+            if (!expr2){
+                THROW_ERROR("expr needed after comp_op");
+            }
+            return new BinaryExprAST(op, expr, expr2);
+        }
     }
     return expr;
 }

@@ -217,6 +217,16 @@ class BinaryExprAST : public ExprAST {
         OP_MOD,
         
         OP_EQ,
+        OP_LESS,//<
+        OP_GREAT,//>
+        OP_LESSEQ, //<=
+        OP_GREATEQ, //>=
+        OP_NOTEQ, //!= not
+        OP_IN,
+        OP_NOTIN,
+        
+        OP_OR,
+        OP_AND,
     };
     std::string op;
     ExprASTPtr left, right;
@@ -244,8 +254,35 @@ public:
         else if (op == "%"){
             optype = OP_MOD;
         }
-        else if (op == "=="){
+        else if (op == "==" || op == "is"){
             optype = OP_EQ;
+        }
+        else if (op == "!=" or op == "not" or op == "<>"){
+            optype = OP_NOTEQ;
+        }
+        else if (op == "<"){
+            optype = OP_LESS;
+        }
+        else if (op == ">"){
+            optype = OP_GREAT;
+        }
+        else if (op == "<="){
+            optype = OP_LESSEQ;
+        }
+        else if (op == ">="){
+            optype = OP_GREATEQ;
+        }
+        else if (op == "in" || op == "is in"){
+            optype = OP_IN;
+        }
+        else if (op == "not in"){
+            optype = OP_NOTIN;
+        }
+        else if (op == "or"){
+            optype = OP_OR;
+        }
+        else if (op == "not in"){
+            optype = OP_AND;
         }
     }
     virtual int getType() {

@@ -519,6 +519,82 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             }
             return PyObjTool::buildBool(false);
         }break;
+        case OP_NOTEQ:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            if (lval->handler->handleEqual(context, lval, rval)){
+                return PyObjTool::buildBool(false);
+            }
+            return PyObjTool::buildBool(true);
+        }break;
+        case OP_LESS:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            if (lval->handler->handleGreatEqual(context, lval, rval)){
+                return PyObjTool::buildBool(false);
+            }
+            return PyObjTool::buildBool(true);
+        }break;
+        case OP_GREAT:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            if (lval->handler->handleLessEqual(context, lval, rval)){
+                return PyObjTool::buildBool(false);
+            }
+            return PyObjTool::buildBool(true);
+        }break;
+        case OP_LESSEQ:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            if (lval->handler->handleLessEqual(context, lval, rval)){
+                return PyObjTool::buildBool(true);
+            }
+            return PyObjTool::buildBool(false);
+        }break;
+        case OP_GREATEQ:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            if (lval->handler->handleGreatEqual(context, lval, rval)){
+                return PyObjTool::buildBool(true);
+            }
+            return PyObjTool::buildBool(false);
+        }break;
+        case OP_IN:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            if (lval->handler->handleIn(context, lval, rval)){
+                return PyObjTool::buildBool(true);
+            }
+            return PyObjTool::buildBool(false);
+        }break;
+        case OP_NOTIN:{
+            PyObjPtr& rval = right->eval(context);
+            PyObjPtr& lval = left->eval(context);
+            if (lval->handler->handleIn(context, lval, rval)){
+                return PyObjTool::buildBool(false);
+            }
+            return PyObjTool::buildBool(true);
+        }break;
+        case OP_OR:{
+            PyObjPtr& lval = left->eval(context);
+            if (lval->handler->handleBool(context, lval)){
+                return PyObjTool::buildBool(true);
+            }
+            
+            PyObjPtr& rval = right->eval(context);
+            if (rval->handler->handleBool(context, rval)){
+                return PyObjTool::buildBool(true);
+            }
+            return PyObjTool::buildBool(false);
+        }break;
+        case OP_AND:{
+            PyObjPtr& lval = left->eval(context);
+            PyObjPtr& rval = right->eval(context);
+            if (lval->handler->handleBool(context, lval) && rval->handler->handleBool(context, rval)){
+                return PyObjTool::buildBool(true);
+            }
+            return PyObjTool::buildBool(false);
+        }break;
         /*
         case TOK_EQ:{
             PyObjPtr lval = left->eval(context);

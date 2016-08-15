@@ -188,14 +188,18 @@ public:
         return self;
     }
 
+    virtual bool handleBool(PyContext& context, PyObjPtr& self);
+    virtual bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual bool handleLessEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual bool handleGreatEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual bool handleIn(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    
     virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
 
-    virtual bool handleBool(PyContext& context, PyObjPtr& self);
-    virtual bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
 
     virtual std::string dump(PyObjPtr& self) {
         return "";

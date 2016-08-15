@@ -20,6 +20,34 @@ bool PyIntHandler::handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val
     }
     return false;
 }
+bool PyIntHandler::handleLessEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    int nType   = val->getType();
+
+    if (nType == PY_INT){
+        return self.cast<PyObjInt>()->value <= val.cast<PyObjInt>()->value;
+    }
+    else if (nType == PY_FLOAT){
+        return double(self.cast<PyObjInt>()->value) <= val.cast<PyObjFloat>()->value;
+    }
+    else{
+        THROW_EVAL_ERROR("can't compare to int");
+    }
+    return false;
+}
+bool PyIntHandler::handleGreatEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    int nType   = val->getType();
+
+    if (nType == PY_INT){
+        return self.cast<PyObjInt>()->value >= val.cast<PyObjInt>()->value;
+    }
+    else if (nType == PY_FLOAT){
+        return double(self.cast<PyObjInt>()->value) >= val.cast<PyObjFloat>()->value;
+    }
+    else{
+        THROW_EVAL_ERROR("can't compare to int");
+    }
+    return false;
+}
 
 PyObjPtr& PyIntHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     int nType   = val->getType();
