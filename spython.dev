@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=3
 CompilerSettings=0000000100000000001000000
-UnitCount=19
+UnitCount=21
 
 [VersionInfo]
 Major=1
@@ -232,6 +232,26 @@ BuildCmd=
 
 [Unit19]
 FileName=src\objhandler\PyIntHandler.cpp
+CompileCpp=1
+Folder=src/objhandler
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit20]
+FileName=include\objhandler\PyFuncHandler.h
+CompileCpp=1
+Folder=include/objhandler
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit21]
+FileName=src\objhandler\PyFuncHandler.cpp
 CompileCpp=1
 Folder=src/objhandler
 Compile=1
