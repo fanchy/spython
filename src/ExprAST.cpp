@@ -385,9 +385,10 @@ string FuncDefExprAST::dump(int nDepth){
 }
 
 PyObjPtr& FuncDefExprAST::eval(PyContext& context) {
-    //!TODO
-
-    return context.curstack;
+    PyObjPtr& lval = funcname->eval(context);
+    PyObjPtr rval = new PyObjFuncDef("f", parameters, suite);
+    lval = rval;
+    return lval;
 }
 
 string ClassDefExprAST::dump(int nDepth){
@@ -717,32 +718,6 @@ PyObjPtr TupleExprAST::handleAssign(PyObjPtr context, PyObjPtr val)
         //v = tuple->values[i];
     }
     return val;
-}
-
-PyObjPtr& FunctionAST::eval(PyContext& context) {
-    context.tmpcache.push_back(new PyObjFuncDef(codeImplptr));
-    PyObjPtr& obj = context.tmpcache.back();
-    
-    PyObjPtr& v = this->codeImplptr.cast<FuncCodeImpl>()->varAstforName->getFieldVal(context);
-    v = obj;
-    return obj;
-}
-
-PyObjPtr FuncCodeImpl::exeCode(PyObjPtr context, list<PyObjPtr>&  tmpArgsInput) {
-    /*TODO
-    //DMSG(("FunctionAST::exeCode...\n"));
-    list<PyObjPtr>::iterator it = tmpArgsInput.begin();
-    for (unsigned int i = 0; i < argsDef.size() && it != tmpArgsInput.end(); ++i){
-        argsDef[i]->handleAssign(context, *it);
-        ++it;
-    }
-
-    for (unsigned int i = 0; i < body.size(); ++i){
-        body[i]->eval(context);
-    }
-    //DMSG(("FunctionAST eval name=%s\n", proto->name.c_str()));
-    */
-    return context;
 }
 
 PyObjPtr& ClassAST::eval(PyContext& context){

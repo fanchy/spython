@@ -177,6 +177,24 @@ public:
     }
 public:
 };
+class NotAST : public ExprAST {
+public:
+    NotAST(ExprASTPtr& e):expr(e){
+        this->name = "not";
+    }
+    virtual int getType() {
+        return EXPR_NOT_TEST;
+    }
+    virtual PyObjPtr& eval(PyContext& context) {
+        PyObjPtr& val = expr->eval(context);
+        if (val->handler->handleBool(context, val)){
+            return PyObjTool::buildBool(false);
+        }
+        return PyObjTool::buildBool(true);
+    }
+public:
+    ExprASTPtr expr;
+};
 class ContinueAST : public ExprAST {
 public:
     ContinueAST(){
@@ -281,7 +299,7 @@ public:
         else if (op == "or"){
             optype = OP_OR;
         }
-        else if (op == "not in"){
+        else if (op == "and"){
             optype = OP_AND;
         }
     }
@@ -379,40 +397,6 @@ public:
     virtual PyObjPtr& getFieldVal(PyContext& context);
 };
 
-
-class FuncCodeImpl: public ExprAST{
-public:
-    ExprASTPtr         varAstforName;
-    std::vector<ExprASTPtr> argsDef;
-    std::vector<ExprASTPtr> body;
-public:
-    FuncCodeImpl(){
-        //this->varAstforName = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(p->name);
-        //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
-    }
-    virtual PyObjPtr exeCode(PyObjPtr context, std::list<PyObjPtr>&  tmpArgsInput);
-    virtual int getType() {
-        return EXPR_FUNCDEF;
-    }
-};
-
-/// FunctionAST - This class represents a function definition itself.
-class FunctionAST: public ExprAST {
-public:
-    ExprASTPtr codeImplptr;
-public:
-    /*
-    FunctionAST():codeImplptr(new FuncCodeImpl()){
-        
-        //this->varAstforName = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(p->name);
-        //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
-    }*/
-    virtual int getType() {
-        return EXPR_FUNCDEF;
-    }
-
-    virtual PyObjPtr& eval(PyContext& context);
-};
 
 class  ClassCodeImpl: public ExprAST{
 public:
@@ -566,9 +550,7 @@ public:
     FuncDefExprAST(){
         this->name = "funcdef";
     }
-    virtual int getType() {
-        return EXPR_FUNCDEF;
-    }
+
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
     

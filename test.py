@@ -18,7 +18,12 @@ while j:
     j = j - 1
     i = i + 1
     pass
-    if 1 == 1 or 2 == 0:
+    if not j > 10:
         break
 else:
     i = 1
+    
+
+def f(a=1, b=2):
+    q = 10
+    f = 20

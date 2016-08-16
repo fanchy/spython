@@ -8,10 +8,7 @@ using namespace ff;
 PyObjPtr PyObjFuncDef::handleCall(PyObjPtr context, list<PyObjPtr>& args){
     //DMSG(("PyObjFuncDef::handleCall...\n"));
     //DMSG(("PyObjFuncDef::handleCall2...\n"));
-    return funcASTPtr.cast<FuncCodeImpl>()->exeCode(context, args);
-}
-void PyObjFuncDef::dump() {
-    DMSG(("%s(func)", funcASTPtr->name.c_str()));
+    return NULL;
 }
 
 PyObjPtr PyObjClassDef::handleCall(PyObjPtr self, list<PyObjPtr>& args){
@@ -30,9 +27,6 @@ PyObjPtr PyObjClassFunc::handleCall(PyObjPtr context, list<PyObjPtr>& args){
     //args.insert(args.begin(), classSelf);
     args.push_front(classSelf);
     return funcDefPtr.cast<PyObjFuncDef>()->handleCall(context, args);
-}
-void PyObjClassFunc::dump(){
-    DMSG(("%s(classfunc)", funcDefPtr.cast<PyObjFuncDef>()->funcASTPtr->name.c_str()));
 }
 
 void PyObjClassObj::dump() {

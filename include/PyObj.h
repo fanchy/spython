@@ -124,12 +124,12 @@ public:
 
 class PyObjFuncDef:public PyObj {
 public:
-    PyObjFuncDef(ExprASTPtr& v):funcASTPtr(v) {
+    PyObjFuncDef(const std::string& n, ExprASTPtr& p, ExprASTPtr& s):name(n), parameters(p), suite(s){
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
     }
-    virtual void dump();
+
     virtual int getType() {
         return PY_FUNC_DEF;
     }
@@ -137,7 +137,9 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
-    ExprASTPtr funcASTPtr;
+    std::string     name;
+    ExprASTPtr parameters;
+    ExprASTPtr suite;
     ObjIdInfo  selfObjInfo;
 };
 
@@ -146,7 +148,7 @@ class PyObjClassFunc:public PyObj {
 public:
     PyObjClassFunc(PyObjPtr& selfPtr, PyObjPtr& v):classSelf(selfPtr), funcDefPtr(v) {
     }
-    virtual void dump();
+
     virtual int getType() {
         return PY_CLASS_FUNC;
     }

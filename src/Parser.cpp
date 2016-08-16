@@ -1069,6 +1069,14 @@ ExprASTPtr Parser::parse_and_test(){
 
 //! not_test: 'not' not_test | comparison
 ExprASTPtr Parser::parse_not_test(){
+    if (m_curScanner->getToken()->strVal == "not"){
+        m_curScanner->seek(1);
+        ExprASTPtr not_test = parse_not_test();
+        if (!not_test){
+            THROW_ERROR("not test expr needed after not");
+        }
+        return new NotAST(not_test);
+    }
     ExprASTPtr comparison = parse_comparison();
     return comparison;
 }
@@ -1102,14 +1110,6 @@ ExprASTPtr Parser::parse_comp_op(ExprASTPtr& expr){
                 THROW_ERROR("expr needed after comp_op");
             }
             return new BinaryExprAST("not in", expr, expr2);
-        }
-        else{
-            m_curScanner->seek(1);
-            ExprASTPtr expr2 = parse_expr();
-            if (!expr2){
-                THROW_ERROR("expr needed after comp_op");
-            }
-            return new BinaryExprAST(op, expr, expr2);
         }
     }
     else if (op == "is"){

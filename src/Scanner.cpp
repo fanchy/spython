@@ -160,9 +160,17 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
         {
             char cLastOne2 = getCharNext(content, index);
             char cLastOne3 = getCharNext(content, index);
-            if (cLastOne == cLastOne2 && cLastOne3 == '='){
+            if (cLastOne2 == '='){
+                retToken.strVal += cLastOne2;
+                index -= 1;
+            }
+            else if (cLastOne == cLastOne2 && cLastOne3 == '='){
                 retToken.strVal += cLastOne2;
                 retToken.strVal += cLastOne3;
+            }
+            else if (cLastOne == '<' && cLastOne2 == '>'){
+                retToken.strVal += cLastOne2;
+                index -= 1;
             }
             else{
                 index -= 2;
