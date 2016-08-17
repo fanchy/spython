@@ -23,7 +23,6 @@ FloatExprAST::FloatExprAST(double v) : Val(v) {
 
 PyObjPtr& PowerAST::eval(PyContext& context){
     PyObjPtr& ret = atom->eval(context);
-    //!TODO
     return ret;
 }
 string PowerAST::dump(int nDepth){
@@ -386,7 +385,7 @@ string FuncDefExprAST::dump(int nDepth){
 
 PyObjPtr& FuncDefExprAST::eval(PyContext& context) {
     PyObjPtr& lval = funcname->eval(context);
-    PyObjPtr rval = new PyObjFuncDef("f", parameters, suite);
+    PyObjPtr rval = new PyObjFuncDef(funcname.cast<VariableExprAST>()->name, parameters, suite);
     lval = rval;
     return lval;
 }
@@ -483,6 +482,11 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
     switch (optype){
         case OP_ASSIGN:{
             PyObjPtr& rval = right->eval(context);
+            DMSG(("assign %s\n%s\n", left->dump(0).c_str(), right->dump(0).c_str()));
+            if (left->getType() == EXPR_VAR && left.cast<VariableExprAST>()->name == "j"){
+                
+                DMSG(("assign2 %s\n%s\n", left->dump(0).c_str(), right->dump(0).c_str()));
+            }
             PyObjPtr& lval = left->eval(context);
             lval = rval;
             return lval;
@@ -738,32 +742,6 @@ PyObjPtr& ClassAST::eval(PyContext& context){
 }
 
 PyObjPtr& CallExprAST::eval(PyContext& context) {
-    /*
-    PyObjPtr e = varFuncName->eval(context);
-    if (!e){
-        throw PyException::buildException("null can't be called");
-        return NULL;
-    }
-    //DMSG(("CallExprAST eval...%s %s %d\n", varFuncName->name.c_str(), argsTuple->name.c_str(), e->getType()));
-    
-    vector<ExprASTPtr>& args = argsTuple.cast<TupleExprAST>()->values;
-    list<PyObjPtr>    argsObj;
-
-    for (unsigned int  i = 0; i < args.size(); ++i){
-        argsObj.push_back(args[i]->eval(context));
-    }
-    
-    PyObjPtr ret = e->handler->handleCall(e, argsObj);
-    if (!ret){
-        char msg[256] = {0};
-        snprintf(msg, sizeof(msg), "[%d] can't be called", e->getType());
-        throw PyException::buildException(msg);
-        return NULL;
-    }
-    //DMSG(("CallExprAST dump begin..\n"));
-    //e->PyObj::dump();
-    //DMSG(("CallExprAST dump end..\n"));
-    return ret;
-    */
-    return context.curstack;
+    PyObjPtr& funcObj = preExpr->eval(context);
+    return funcObj->handler->handleCall(context, funcObj, funcObj);
 }

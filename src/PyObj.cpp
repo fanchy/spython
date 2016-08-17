@@ -5,10 +5,13 @@
 using namespace std;
 using namespace ff;
 
-PyObjPtr PyObjFuncDef::handleCall(PyObjPtr context, list<PyObjPtr>& args){
+PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self){
     //DMSG(("PyObjFuncDef::handleCall...\n"));
     //DMSG(("PyObjFuncDef::handleCall2...\n"));
-    return NULL;
+    PyContextBackUp backup(context);
+    context.curstack = self;
+    self->m_objStack.clear();
+    return suite->eval(context);
 }
 
 PyObjPtr PyObjClassDef::handleCall(PyObjPtr self, list<PyObjPtr>& args){
@@ -26,7 +29,7 @@ PyObjPtr PyObjClassFunc::handleCall(PyObjPtr context, list<PyObjPtr>& args){
     //DMSG(("PyObjClassFunc::handleCall...\n"));
     //args.insert(args.begin(), classSelf);
     args.push_front(classSelf);
-    return funcDefPtr.cast<PyObjFuncDef>()->handleCall(context, args);
+    return NULL;//funcDefPtr.cast<PyObjFuncDef>()->handleCall(context, args);
 }
 
 void PyObjClassObj::dump() {

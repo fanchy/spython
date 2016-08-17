@@ -98,7 +98,7 @@ class PowerAST : public ExprAST {
 public:
     ExprASTPtr                  atom;
     std::vector<ExprASTPtr>     trailer;
-
+    ExprASTPtr                  merge;
 public:
     PowerAST() {
         this->name = "power";
@@ -387,7 +387,6 @@ public:
         : op(o), left(l), right(r) {
         
         this->name = op;
-        //DMSG(("BinaryExprAST Op:%s,left=%s,right=%s\n", this->name.c_str(), left->name.c_str(), right->name.c_str()));
     }
     virtual int getType() {
         return EXPR_AUGASSIGN;
@@ -643,21 +642,23 @@ public:
     PyObjPtr handleAssign(PyObjPtr context, PyObjPtr value);
 };
 
-/// CallExprAST - Expression class for function calls.
-class CallExprAST : public ExprAST {
-
+class TrailerExprAST : public ExprAST {
 public:
-    CallExprAST(ExprASTPtr& c, ExprASTPtr& a)
-        : varFuncName(c), argsTuple(a) {
-        //DMSG(("build call %s\n", Callee->name.c_str()));
+    ExprASTPtr preExpr;
+};
+
+/// CallExprAST - Expression class for function calls.
+class CallExprAST : public TrailerExprAST {
+public:
+    CallExprAST() {
     }
     virtual int getType() {
         return EXPR_CALL;
     }
     virtual PyObjPtr& eval(PyContext& context);
 public:
-    ExprASTPtr varFuncName;
-    ExprASTPtr argsTuple;
+    ExprASTPtr func;
+    ExprASTPtr arglist;
 };
 
 

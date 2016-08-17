@@ -7,14 +7,20 @@ using namespace std;
 using namespace ff;
 
 string PyFuncHandler::handleStr(PyObjPtr& self) {
-    return self.cast<PyObjFuncDef>()->name;
+    char msg[128] = {0};
+    snprintf(msg, sizeof(msg), "<function %s at 0x%p>", self.cast<PyObjFuncDef>()->name.c_str(), self.get());
+    return string(msg);
 }
 bool PyFuncHandler::handleBool(PyContext& context, PyObjPtr& self){
-    return self.cast<PyObjInt>()->value != 0;
+    return true;
 }
 bool PyFuncHandler::handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    if (val->getType() == PY_INT && self.cast<PyObjInt>()->value == val.cast<PyObjInt>()->value){
+    if (val->getType() == EXPR_FUNCDEF && self.get() == val.get()){
         return true;
     }
     return false;
 }
+PyObjPtr& PyFuncHandler::handleCall(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    return self.cast<PyObjFuncDef>()->exeFunc(context, self);
+}
+

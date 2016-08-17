@@ -38,6 +38,10 @@ ExprASTPtr Parser::parse_file_input(){
                 stmt->dump(0);
                 allStmt->exprs.push_back(stmt);
             }else{
+                if (m_curScanner->getToken()->strVal == "\n"){
+                    m_curScanner->seek(1);
+                    continue;
+                }
                 printf("this->parse_stmt Ê§°Ü£¡%d %s\n", m_curScanner->seek(0), m_curScanner->getToken()->dump().c_str());
                 m_curScanner->seek(1);
             }
@@ -284,26 +288,24 @@ ExprASTPtr Parser::parse_expr_stmt(){
         }
         return augassign;
     }
+    else if (m_curScanner->getToken()->strVal == "="){
+        m_curScanner->seek(1);
+        
+        DMSG(("parse_expr_stmt 2 `=`"));
+        
+        ExprASTPtr yield_expr = parse_yield_expr();
+        if (yield_expr){
+            return new BinaryExprAST("=", testlist, yield_expr);
+        }
+        ExprASTPtr testlist2  = parse_testlist();
+        if (!testlist2){
+            THROW_ERROR("parse_expr_stmt failed assign-2");
+        }
+        
+        return new BinaryExprAST("=", testlist, testlist2);
+    }
     else{
-        if (m_curScanner->getToken()->strVal == "="){
-            m_curScanner->seek(1);
-            
-            DMSG(("parse_expr_stmt 2 `=`"));
-            
-            ExprASTPtr yield_expr = parse_yield_expr();
-            if (yield_expr){
-                return new BinaryExprAST("=", testlist, yield_expr);
-            }
-            ExprASTPtr testlist2  = parse_testlist();
-            if (!testlist2){
-                THROW_ERROR("parse_expr_stmt failed assign-2");
-            }
-            
-            return new BinaryExprAST("=", testlist, testlist2);
-        }
-        else{
-            THROW_ERROR("parse_expr_stmt failed");
-        }
+        return NULL;
     }
     
     return NULL;
@@ -1208,9 +1210,12 @@ ExprASTPtr Parser::parse_power(){
     PowerAST* p    = new PowerAST();
     ExprASTPtr ret = p;
     
-    p->atom = atom;
+    p->atom  = atom;
+    p->merge = atom;
     while (ExprASTPtr trailer = parse_trailer()){
+        trailer.cast<TrailerExprAST>()->preExpr = p->merge;
         p->trailer.push_back(trailer);
+        p->merge = trailer;
     }
     return ret;
 }
@@ -1332,13 +1337,16 @@ ExprASTPtr Parser::parse_lambdef(){
 ExprASTPtr Parser::parse_trailer(){
     if (m_curScanner->getToken()->strVal == "("){ //!call func
         m_curScanner->seek(1);
+        ExprASTPtr ret = new CallExprAST();
         if (m_curScanner->getToken()->strVal != ")"){
             ExprASTPtr arglist = parse_arglist();
             if (!arglist){
                 THROW_ERROR("arglist parse failed when parse trailer after (");
             }
+            ret.cast<CallExprAST>()->arglist = arglist;
         }
         m_curScanner->seek(1);
+        return ret;
     }
     else if (m_curScanner->getToken()->strVal == "["){ //!call [] operator
         m_curScanner->seek(1);
@@ -1498,12 +1506,18 @@ ExprASTPtr Parser::parse_classdef(){
 //!                          |'*' test (',' argument)* [',' '**' test] 
 //!                          |'**' test)
 ExprASTPtr Parser::parse_arglist(){
-    return NULL;
+    ExprASTPtr argument = parse_argument();
+    while (argument && m_curScanner->getToken()->strVal == ","){
+        m_curScanner->seek(1);
+        argument = parse_argument();
+    }
+    return argument;
 }
 
 //! argument: test [comp_for] | test '=' test
 ExprASTPtr Parser::parse_argument(){
-    return NULL;
+    ExprASTPtr test = parse_test();
+    return test;
 }
 
 //! list_iter: list_for | list_if

@@ -14,6 +14,7 @@
 #include "objhandler/PyIntHandler.h"
 #include "objhandler/PyFloatHandler.h"
 #include "objhandler/PyBoolHandler.h"
+#include "objhandler/PyFuncHandler.h"
 
 namespace ff {
 
@@ -128,19 +129,17 @@ public:
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
+        this->handler = singleton_t<PyFuncHandler>::instance_ptr();
     }
 
-    virtual int getType() {
-        return PY_FUNC_DEF;
-    }
-    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args);
+    PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self);
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
     std::string     name;
-    ExprASTPtr parameters;
-    ExprASTPtr suite;
-    ObjIdInfo  selfObjInfo;
+    ExprASTPtr      parameters;
+    ExprASTPtr      suite;
+    ObjIdInfo       selfObjInfo;
 };
 
 

@@ -199,7 +199,7 @@ public:
     virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-
+    virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, PyObjPtr& val);
 
     virtual std::string dump(PyObjPtr& self) {
         return "";
@@ -291,6 +291,19 @@ public:
     }
     std::vector<PyObjPtr>   tmpcache;
     PyObjPtr curstack;//!cur using context
+};
+
+struct PyContextBackUp{
+    PyContextBackUp(PyContext& c):context(c), curstack(c.curstack){
+    }
+    ~PyContextBackUp(){
+        rollback();
+    }
+    void rollback(){
+        context.curstack = curstack;
+    }
+    PyObjPtr   curstack;
+    PyContext& context;
 };
 
 class FlowCtrlSignal: public std::exception{

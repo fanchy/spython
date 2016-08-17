@@ -16,8 +16,10 @@ string PyObj::dump(PyObjPtr& self) {
     for (unsigned int i = 0; i < self->m_objStack.size(); ++i) {
         
         string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFiledName(p.nModuleId, p.nObjectId, i);
-
-        snprintf(msg, sizeof(msg), "[%d-%d] %d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
+        if (self->m_objStack.size() < 10)
+            snprintf(msg, sizeof(msg), "[%d-%d] %d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
+        else 
+            snprintf(msg, sizeof(msg), "[%d-%d] %02d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
         ret += msg;
         if (!self->m_objStack[i]) {
             ret += "NULL\n";
@@ -63,7 +65,9 @@ PyObjPtr& PyObjHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& 
 PyObjPtr& PyObjHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     PyException::buildException("handleMod invalid");return self;
 }
-
+PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    PyException::buildException("handleCall invalid");return self;
+}
 
 
 PyObjPtr& PyObj::getVar(PyObjPtr& self2, unsigned int nFieldIndex) {
