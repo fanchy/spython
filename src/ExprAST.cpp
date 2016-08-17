@@ -481,7 +481,7 @@ string ImportAST::dump(int nDepth){
 PyObjPtr& BinaryExprAST::eval(PyContext& context) {
     switch (optype){
         case OP_ASSIGN:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             DMSG(("assign %s\n%s\n", left->dump(0).c_str(), right->dump(0).c_str()));
             if (left->getType() == EXPR_VAR && left.cast<VariableExprAST>()->name == "j"){
                 
