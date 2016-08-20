@@ -6,12 +6,19 @@ using namespace std;
 using namespace ff;
 
 PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self){
-    //DMSG(("PyObjFuncDef::handleCall...\n"));
-    //DMSG(("PyObjFuncDef::handleCall2...\n"));
-    PyContextBackUp backup(context);
-    context.curstack = self;
-    self->m_objStack.clear();
-    return suite->eval(context);
+    DMSG(("PyObjFuncDef::exeFunc...\n"));
+    //try
+    {
+        PyContextBackUp backup(context);
+        context.curstack = self;
+        self->m_objStack.clear();
+        suite->eval(context);
+    }
+    /*
+    catch(ReturnSignal& s){
+        return context.cacheObj(s.ret);
+    }*/
+    return context.cacheObj(PyObjTool::buildNone());
 }
 
 PyObjPtr PyObjClassDef::handleCall(PyObjPtr self, list<PyObjPtr>& args){
@@ -43,7 +50,7 @@ PyObjPtr& PyObjClassObj::getVar(PyObjPtr& self, unsigned int nFieldIndex)
     }
 
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
-        m_objStack.push_back(PyObjTool::buildNone());
+        m_objStack.push_back(PyObjTool::buildNULL());
     }
     
     PyObjPtr& ret = m_objStack[nFieldIndex];

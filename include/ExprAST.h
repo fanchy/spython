@@ -159,7 +159,7 @@ public:
         return EXPR_PASS_STMT;
     }
     virtual PyObjPtr& eval(PyContext& context) {
-        return PyObjTool::buildNone();
+        return context.cacheObj(PyObjTool::buildNone());
     }
 public:
 };
@@ -173,7 +173,7 @@ public:
     }
     virtual PyObjPtr& eval(PyContext& context) {
         throw FlowCtrlSignal(FlowCtrlSignal::BREAK);
-        return PyObjTool::buildNone();
+        return context.cacheObj(PyObjTool::buildNone());
     }
 public:
 };
@@ -205,7 +205,7 @@ public:
     }
     virtual PyObjPtr& eval(PyContext& context) {
         throw FlowCtrlSignal(FlowCtrlSignal::CONTINUE);
-        return PyObjTool::buildNone();
+        return context.cacheObj(PyObjTool::buildNone());
     }
 public:
 };
@@ -218,7 +218,7 @@ public:
         return EXPR_IMPORT_STMT;
     }
     virtual PyObjPtr& eval(PyContext& context) {
-        return PyObjTool::buildNone();
+        return context.cacheObj(PyObjTool::buildNone());
     }
     virtual std::string dump(int nDepth);
 public:
@@ -655,6 +655,7 @@ public:
     virtual int getType() {
         return EXPR_CALL;
     }
+    virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
 public:
     ExprASTPtr func;

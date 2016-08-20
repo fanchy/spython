@@ -240,6 +240,7 @@ public:
 };
 
 struct PyObjTool{
+    static PyObjPtr  buildNULL();
     static PyObjPtr& buildNone();
     static PyObjPtr& buildBool(bool b);
     static bool handleBool(PyObjPtr b);
@@ -309,13 +310,20 @@ struct PyContextBackUp{
 class FlowCtrlSignal: public std::exception{
 public:
     enum{
-        RETURN = 0,
-        CONTINUE,
+        CONTINUE=0,
         BREAK,
     };
     FlowCtrlSignal(int n = -1):nSignal(n) {}
     int nSignal;
 };
+
+/*
+class ReturnSignal: public std::exception{
+public:
+    ReturnSignal(PyObjPtr& r):ret(r) {}
+    PyObjPtr ret;
+};
+*/
 
 enum EEXPR_TYPE{ 
     EXPR_SINGLE_INPUT,

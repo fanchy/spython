@@ -75,7 +75,7 @@ PyObjPtr& PyObj::getVar(PyObjPtr& self2, unsigned int nFieldIndex) {
         return m_objStack[nFieldIndex];
     }
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
-        m_objStack.push_back(PyObjTool::buildNone());
+        m_objStack.push_back(PyObjTool::buildNULL());
     }
     return m_objStack[nFieldIndex];
 }
@@ -153,6 +153,10 @@ struct NoneTraits{
 PyObjPtr& PyObjTool::buildNone(){
     return singleton_t<NoneTraits>::instance_ptr()->retPtr;
 }
+PyObjPtr PyObjTool::buildNULL(){
+    return PyObjTool::buildNone();
+}
+
 
 struct boolTrueTraits{
     boolTrueTraits(){
