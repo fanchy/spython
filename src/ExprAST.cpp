@@ -39,7 +39,7 @@ string PowerAST::dump(int nDepth){
 
 PyObjPtr& StmtAST::eval(PyContext& context){
     if (exprs.empty()){
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
     unsigned int i = 0;
     for (; i < exprs.size() - 1; ++i){
@@ -61,7 +61,7 @@ string StmtAST::dump(int nDepth){
 
 PyObjPtr& PrintAST::eval(PyContext& context){
     if (exprs.empty()){
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
     unsigned int i = 0;
     for (; i < exprs.size() -1; ++i){
@@ -98,10 +98,11 @@ string DelAST::dump(int nDepth){
 
 PyObjPtr& ReturnAST::eval(PyContext& context){
     if (!testlist){
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
     PyObjPtr& ret = testlist->eval(context);
-    //throw ReturnSignal(ret);
+    context.cacheResult(ret);
+    throw ReturnSignal();
     return ret;
 }
 string ReturnAST::dump(int nDepth){
@@ -117,7 +118,7 @@ string ReturnAST::dump(int nDepth){
 
 PyObjPtr& RaiseAST::eval(PyContext& context){
     if (exprs.empty()){
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
 
     unsigned int i = 0;
@@ -140,7 +141,7 @@ string RaiseAST::dump(int nDepth){
 
 PyObjPtr& GlobalAST::eval(PyContext& context){
     if (exprs.empty()){
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
     unsigned int i = 0;
     for (; i < exprs.size(); ++i){
@@ -162,7 +163,7 @@ string GlobalAST::dump(int nDepth){
 
 PyObjPtr& ExecAST::eval(PyContext& context){
     if (exprs.empty()){
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
     unsigned int i = 0;
     for (; i < exprs.size(); ++i){
@@ -184,7 +185,7 @@ string ExecAST::dump(int nDepth){
 
 PyObjPtr& AssertAST::eval(PyContext& context){
     if (exprs.empty()){
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
     unsigned int i = 0;
     for (; i < exprs.size(); ++i){
@@ -231,14 +232,14 @@ PyObjPtr& IfExprAST::eval(PyContext& context) {
         PyObjPtr& caseBool = ifTest[i]->eval(context);
         if (caseBool->handler->handleBool(context, caseBool)){
             ifSuite[i]->eval(context);
-            return context.cacheObj(PyObjTool::buildNone());
+            return context.cacheResult(PyObjTool::buildNone());
         }
     }
     if (elseSuite){
         elseSuite->eval(context);
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
-    return context.cacheObj(PyObjTool::buildNone());
+    return context.cacheResult(PyObjTool::buildNone());
 }
 
 string WhileExprAST::dump(int nDepth){
@@ -375,13 +376,13 @@ string ParametersExprAST::dump(int nDepth){
         ret += "-";
     }
     ret += "parameters:fpdef,test";
-    for (unsigned int i = 0; i < fpdef.size(); ++i){
-        ret += "\n"+ fpdef[i]->dump(nDepth+1);
+    for (unsigned int i = 0; i < allParam.size(); ++i){
+        ret += "\n"+ allParam[i].paramKey->dump(nDepth+1);
+        if (allParam[i].paramDefault){
+            ret += "\n"+ allParam[i].paramDefault->dump(nDepth+1);
+        }
     }
-    for (unsigned int i = 0; i < test.size(); ++i){
-        ret += "\n" + test[i]->dump(nDepth+1);
-    }
-
+    
     return ret;
 }
 
@@ -509,27 +510,27 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             return lval;
         }break;
         case OP_ADD:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             return lval->handler->handleAdd(context, lval, rval);
         }break;
         case OP_SUB:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             return lval->handler->handleSub(context, lval, rval);
         }break;
         case OP_MUL:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             return lval->handler->handleMul(context, lval, rval);
         }break;
         case OP_DIV:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             return lval->handler->handleDiv(context, lval, rval);
         }break;
         case OP_MOD:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             return lval->handler->handleMod(context, lval, rval);
         }break;
@@ -542,7 +543,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             return PyObjTool::buildBool(false);
         }break;
         case OP_NOTEQ:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleEqual(context, lval, rval)){
                 return PyObjTool::buildBool(false);
@@ -550,7 +551,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             return PyObjTool::buildBool(true);
         }break;
         case OP_LESS:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleGreatEqual(context, lval, rval)){
                 return PyObjTool::buildBool(false);
@@ -558,7 +559,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             return PyObjTool::buildBool(true);
         }break;
         case OP_GREAT:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleLessEqual(context, lval, rval)){
                 return PyObjTool::buildBool(false);
@@ -566,7 +567,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             return PyObjTool::buildBool(true);
         }break;
         case OP_LESSEQ:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleLessEqual(context, lval, rval)){
                 return PyObjTool::buildBool(true);
@@ -574,7 +575,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             return PyObjTool::buildBool(false);
         }break;
         case OP_GREATEQ:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleGreatEqual(context, lval, rval)){
                 return PyObjTool::buildBool(true);
@@ -582,7 +583,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             return PyObjTool::buildBool(false);
         }break;
         case OP_IN:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleIn(context, lval, rval)){
                 return PyObjTool::buildBool(true);
@@ -590,7 +591,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             return PyObjTool::buildBool(false);
         }break;
         case OP_NOTIN:{
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleIn(context, lval, rval)){
                 return PyObjTool::buildBool(false);
@@ -662,7 +663,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             return v;
         }break;*/
         default:
-            return context.cacheObj(PyObjTool::buildNone());
+            return context.cacheResult(PyObjTool::buildNone());
     }
     
     return context.curstack;
@@ -693,7 +694,7 @@ string BinaryExprAST::dump(int nDepth){
 }
 
 PyObjPtr& AugassignAST::eval(PyContext& context){
-    return context.cacheObj(PyObjTool::buildNone());//!TODO
+    return context.cacheResult(PyObjTool::buildNone());//!TODO
 }
 PyObjPtr& AugassignAST::getFieldVal(PyContext& context){
     /*
@@ -713,13 +714,12 @@ string AugassignAST::dump(int nDepth){
 
 PyObjPtr& TupleExprAST::eval(PyContext& context){
     PyObjTuple* tuple = new PyObjTuple();
-    context.tmpcache.push_back(tuple);
-    PyObjPtr& ret = context.tmpcache.back();
+    PyObjPtr ret = tuple;
     for (unsigned int i = 0; i < values.size(); ++i){
         PyObjPtr v = values[i]->eval(context);
         tuple->values.push_back(v);
     }
-    return ret;
+    return context.cacheResult(ret);
 }
 
 
@@ -767,5 +767,5 @@ std::string CallExprAST::dump(int nDepth){
 }
 PyObjPtr& CallExprAST::eval(PyContext& context) {
     PyObjPtr& funcObj = preExpr->eval(context);
-    return funcObj->handler->handleCall(context, funcObj, funcObj);
+    return funcObj->handler->handleCall(context, funcObj, arglist);
 }

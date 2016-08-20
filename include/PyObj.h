@@ -132,7 +132,7 @@ public:
         this->handler = singleton_t<PyFuncHandler>::instance_ptr();
     }
 
-    PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self);
+    PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist);
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }

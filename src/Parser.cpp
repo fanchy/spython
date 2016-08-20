@@ -140,17 +140,17 @@ ExprASTPtr Parser::parse_varargslist(){
         if (!fpdef){
             break;
         }
-        p->fpdef.push_back(fpdef);
-        
+        //p->fpdef.push_back(fpdef);
+        ExprASTPtr test;
         if (m_curScanner->getToken()->strVal == "="){
             m_curScanner->seek(1);
-            ExprASTPtr test = parse_test();
+            test = parse_test();
             if (!test){
                 THROW_ERROR("test parse failed when parse param after =");
             }
-            p->test.push_back(test);
+            //p->test.push_back(test);
         }
-        
+        p->addParam(fpdef, test, "");
         if (m_curScanner->getToken()->strVal != ","){
             break;
         }
@@ -1506,17 +1506,39 @@ ExprASTPtr Parser::parse_classdef(){
 //!                          |'*' test (',' argument)* [',' '**' test] 
 //!                          |'**' test)
 ExprASTPtr Parser::parse_arglist(){
-    ExprASTPtr argument = parse_argument();
+    ExprASTPtr ret = new FuncArglist;
+    ExprASTPtr argument = parse_argument(ret);
+
     while (argument && m_curScanner->getToken()->strVal == ","){
         m_curScanner->seek(1);
-        argument = parse_argument();
+        argument = parse_argument(ret);
     }
-    return argument;
+    return ret;
 }
 
 //! argument: test [comp_for] | test '=' test
-ExprASTPtr Parser::parse_argument(){
+ExprASTPtr Parser::parse_argument(ExprASTPtr& pFuncArglist){
+    int nIndex = m_curScanner->seek(0);
+    //DMSG(("parse_argument %d %s", nIndex, m_curScanner->getToken()->strVal.c_str()));
     ExprASTPtr test = parse_test();
+    if (!test){
+        return NULL;
+    }
+    if (m_curScanner->getToken()->strVal == "="){
+        m_curScanner->seek(1);
+        ExprASTPtr test2 = parse_test();
+        if (!test){
+            THROW_ERROR("argvalue needed after =");
+        }
+        int offset = nIndex - m_curScanner->seek(0);
+        if (m_curScanner->getToken(offset)->nTokenType == TOK_VAR){
+            test = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken(offset)->strVal);
+        }
+        pFuncArglist.cast<FuncArglist>()->addArg(test, test2, "=");
+    }
+    else{
+        pFuncArglist.cast<FuncArglist>()->addArg(NULL, test, "");
+    }
     return test;
 }
 

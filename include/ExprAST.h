@@ -159,7 +159,7 @@ public:
         return EXPR_PASS_STMT;
     }
     virtual PyObjPtr& eval(PyContext& context) {
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
 public:
 };
@@ -173,7 +173,7 @@ public:
     }
     virtual PyObjPtr& eval(PyContext& context) {
         throw FlowCtrlSignal(FlowCtrlSignal::BREAK);
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
 public:
 };
@@ -205,7 +205,7 @@ public:
     }
     virtual PyObjPtr& eval(PyContext& context) {
         throw FlowCtrlSignal(FlowCtrlSignal::CONTINUE);
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
 public:
 };
@@ -218,7 +218,7 @@ public:
         return EXPR_IMPORT_STMT;
     }
     virtual PyObjPtr& eval(PyContext& context) {
-        return context.cacheObj(PyObjTool::buildNone());
+        return context.cacheResult(PyObjTool::buildNone());
     }
     virtual std::string dump(int nDepth);
 public:
@@ -523,9 +523,21 @@ public:
 
 class ParametersExprAST: public ExprAST {
 public:
-    std::vector<ExprASTPtr>  fpdef;
-    std::vector<ExprASTPtr>  test;
-
+    struct ParameterInfo{
+        ParameterInfo(){
+        }
+        ParameterInfo(const ParameterInfo& src){
+            paramKey     = src.paramKey;
+            paramDefault = src.paramDefault;
+            paramType    = src.paramType;
+        }
+        ExprASTPtr  paramKey;
+        ExprASTPtr  paramDefault;
+        std::string paramType; //!* **
+    };
+    //std::vector<ExprASTPtr>  fpdef;
+    //std::vector<ExprASTPtr>  test;
+    std::vector<ParameterInfo> allParam;
 public:
     ParametersExprAST(){
         this->name = "parameters";
@@ -535,7 +547,13 @@ public:
     }
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
-    
+    void addParam(ExprASTPtr k, ExprASTPtr v, std::string strType){
+        ParameterInfo info;
+        info.paramKey = k;
+        info.paramDefault = v;
+        info.paramType = strType;
+        allParam.push_back(info);
+    }
 };
 
 
@@ -640,6 +658,38 @@ public:
     virtual PyObjPtr& eval(PyContext& context);
     
     PyObjPtr handleAssign(PyObjPtr context, PyObjPtr value);
+};
+
+class FuncArglist : public ExprAST {
+public:
+    struct ArgInfo{
+        ArgInfo(const ArgInfo& src){
+            argType    = src.argType;
+            argKey     = src.argKey;
+            argVal     = src.argVal;
+        }
+        ArgInfo(){
+        }
+        std::string      argType; //! epmpty = * **
+        ExprASTPtr       argKey, argVal; //! k = 10
+    };
+    FuncArglist() {
+    }
+    virtual int getType() {
+        return EXPR_ARGLIST;
+    }
+    virtual PyObjPtr& eval(PyContext& context){
+        return context.cacheResult(PyObjTool::buildNone());
+    }
+    void addArg(ExprASTPtr k, ExprASTPtr v, const std::string& s){
+        ArgInfo info;
+        info.argType = s;
+        info.argKey  = k;
+        info.argVal  = v;
+        allArgs.push_back(info);
+    }
+public:
+    std::vector<ArgInfo>    allArgs;
 };
 
 class TrailerExprAST : public ExprAST {

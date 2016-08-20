@@ -30,11 +30,11 @@ PyObjPtr& PyFloatHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr
 
     if (nType == PY_INT){
         double newVal = self.cast<PyObjFloat>()->value + val.cast<PyObjInt>()->value;
-        return context.cacheObj(new PyObjFloat(newVal));
+        return context.cacheResult(new PyObjFloat(newVal));
     }
     else if (nType == PY_FLOAT){
         double newVal = self.cast<PyObjFloat>()->value + val.cast<PyObjFloat>()->value;
-        return context.cacheObj(new PyObjFloat(newVal));
+        return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
         THROW_EVAL_ERROR("can't add to float");
@@ -46,11 +46,11 @@ PyObjPtr& PyFloatHandler::handleSub(PyContext& context, PyObjPtr& self, PyObjPtr
 
     if (nType == PY_INT){
         double newVal = self.cast<PyObjFloat>()->value - val.cast<PyObjInt>()->value;
-        return context.cacheObj(new PyObjFloat(newVal));
+        return context.cacheResult(new PyObjFloat(newVal));
     }
     else if (nType == PY_FLOAT){
         double newVal = self.cast<PyObjFloat>()->value - val.cast<PyObjFloat>()->value;
-        return context.cacheObj(new PyObjFloat(newVal));
+        return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
         THROW_EVAL_ERROR("can't sub to int");
@@ -62,11 +62,11 @@ PyObjPtr& PyFloatHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr
 
     if (nType == PY_INT){
         double newVal = self.cast<PyObjFloat>()->value * val.cast<PyObjInt>()->value;
-        return context.cacheObj(new PyObjFloat(newVal));
+        return context.cacheResult(new PyObjFloat(newVal));
     }
     else if (nType == PY_FLOAT){
         double newVal = self.cast<PyObjFloat>()->value * val.cast<PyObjFloat>()->value;
-        return context.cacheObj(new PyObjFloat(newVal));
+        return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
         THROW_EVAL_ERROR("can't mul to int");
@@ -82,7 +82,7 @@ PyObjPtr& PyFloatHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr
             THROW_EVAL_ERROR("div by zero");
         }
         double newVal = self.cast<PyObjFloat>()->value / rval;
-        return context.cacheObj(new PyObjFloat(newVal));
+        return context.cacheResult(new PyObjFloat(newVal));
     }
     else if (nType == PY_FLOAT){
         double rval = val.cast<PyObjFloat>()->value;
@@ -90,7 +90,7 @@ PyObjPtr& PyFloatHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr
             THROW_EVAL_ERROR("div by zero");
         }
         double newVal = self.cast<PyObjFloat>()->value / rval;
-        return context.cacheObj(new PyObjFloat(newVal));
+        return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
         THROW_EVAL_ERROR("can't div to int");
@@ -106,7 +106,7 @@ PyObjPtr& PyFloatHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr
             THROW_EVAL_ERROR("div by zero");
         }
         long newVal = long(self.cast<PyObjFloat>()->value) % long(rval);
-        return context.cacheObj(new PyObjInt(newVal));
+        return context.cacheResult(new PyObjInt(newVal));
     }
     else if (nType == PY_FLOAT){
         double rval = val.cast<PyObjFloat>()->value;
@@ -114,7 +114,7 @@ PyObjPtr& PyFloatHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr
             THROW_EVAL_ERROR("div by zero");
         }
         long newVal = long(self.cast<PyObjFloat>()->value) % long(rval);
-        return context.cacheObj(new PyObjInt(newVal));
+        return context.cacheResult(new PyObjInt(newVal));
     }
     else{
         THROW_EVAL_ERROR("can't mod to int");

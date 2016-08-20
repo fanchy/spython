@@ -41,32 +41,32 @@ bool PyObjHandler::handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val
     return false;
 }
 bool PyObjHandler::handleLessEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleLessEqual invalid");return self; 
+    throw PyException::buildException("handleLessEqual invalid");return self; 
 }
 bool PyObjHandler::handleGreatEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleGreatEqual invalid");return self;
+    throw PyException::buildException("handleGreatEqual invalid");return self;
 }
 bool PyObjHandler::handleIn(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleIn invalid");return self;
+    throw PyException::buildException("handleIn invalid");return self;
 }
 
 PyObjPtr& PyObjHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleAdd invalid");return self;
+    throw PyException::buildException("handleAdd invalid");return self;
 }
 PyObjPtr& PyObjHandler::handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleSub invalid");return self;
+    throw PyException::buildException("handleSub invalid");return self;
 }
 PyObjPtr& PyObjHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleMul invalid");return self;
+    throw PyException::buildException("handleMul invalid");return self;
 }
 PyObjPtr& PyObjHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleDiv invalid");return self;
+    throw PyException::buildException("handleDiv invalid");return self;
 }
 PyObjPtr& PyObjHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleMod invalid");return self;
+    throw PyException::buildException("handleMod invalid");return self;
 }
-PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    PyException::buildException("handleCall invalid");return self;
+PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist){
+    throw PyException::buildException("handleCall invalid");return self;
 }
 
 

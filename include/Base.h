@@ -162,74 +162,6 @@ public:
 };
 typedef PyObj::PyObjPtr PyObjPtr;
 
-class PyObjHandler{
-public:
-    virtual ~PyObjHandler(){}
-    
-    virtual int getType() {
-        return 0;
-    }
-
-    //!比较是否相等 
-    virtual bool handleEQ(PyObjPtr& self, PyObjPtr& args){
-        return false;
-    }
-    virtual PyIterPtr getIter(){
-        return NULL;
-    }
-    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args){
-        return NULL;
-    }
-    virtual std::string handleStr(PyObjPtr& self){
-        return "";
-    }
-    virtual PyObjPtr& handleAssign(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-        self = val;
-        return self;
-    }
-
-    virtual bool handleBool(PyContext& context, PyObjPtr& self);
-    virtual bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual bool handleLessEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual bool handleGreatEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual bool handleIn(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    
-    virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-
-    virtual std::string dump(PyObjPtr& self) {
-        return "";
-    }
-};
-
-class PyNoneHandler: public PyObjHandler{
-public:
-    virtual int getType() {
-        return PY_NONE;
-    }
-    virtual std::string handleStr(PyObjPtr& self){
-        return "None";
-    }
-    bool handleBool(PyContext& context, PyObjPtr& self){
-        return false;
-    }
-    bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-        return val->getType() == PY_NONE;
-    }
-};
-class PyObjNone:public PyObj {
-public:
-    PyObjNone(){
-        this->handler = singleton_t<PyNoneHandler>::instance_ptr();
-    }
-    virtual const ObjIdInfo& getObjIdInfo(){
-        return singleton_t<ObjIdTypeTraits<PyObjNone> >::instance_ptr()->objInfo;
-    }
-};
 
 class PyIter{
 public:
@@ -284,13 +216,86 @@ public:
 
 typedef SmartPtr<ExprAST> ExprASTPtr;
 
+class PyObjHandler{
+public:
+    virtual ~PyObjHandler(){}
+    
+    virtual int getType() {
+        return 0;
+    }
+
+    //!比较是否相等 
+    virtual bool handleEQ(PyObjPtr& self, PyObjPtr& args){
+        return false;
+    }
+    virtual PyIterPtr getIter(){
+        return NULL;
+    }
+    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args){
+        return NULL;
+    }
+    virtual std::string handleStr(PyObjPtr& self){
+        return "";
+    }
+    virtual PyObjPtr& handleAssign(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+        self = val;
+        return self;
+    }
+
+    virtual bool handleBool(PyContext& context, PyObjPtr& self);
+    virtual bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual bool handleLessEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual bool handleGreatEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual bool handleIn(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    
+    virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist);
+
+    virtual std::string dump(PyObjPtr& self) {
+        return "";
+    }
+};
+
+class PyNoneHandler: public PyObjHandler{
+public:
+    virtual int getType() {
+        return PY_NONE;
+    }
+    virtual std::string handleStr(PyObjPtr& self){
+        return "None";
+    }
+    bool handleBool(PyContext& context, PyObjPtr& self){
+        return false;
+    }
+    bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+        return val->getType() == PY_NONE;
+    }
+};
+class PyObjNone:public PyObj {
+public:
+    PyObjNone(){
+        this->handler = singleton_t<PyNoneHandler>::instance_ptr();
+    }
+    virtual const ObjIdInfo& getObjIdInfo(){
+        return singleton_t<ObjIdTypeTraits<PyObjNone> >::instance_ptr()->objInfo;
+    }
+};
 class PyContext{
 public:
-    PyObjPtr& cacheObj(PyObjPtr v){
-        tmpcache.push_back(v);
-        return tmpcache.back();
+    PyObjPtr& cacheResult(PyObjPtr v){
+        evalResult = v;
+        return evalResult;
     }
-    std::vector<PyObjPtr>   tmpcache;
+    PyObjPtr& getCacheResult(){
+        return evalResult;
+    }
+    //std::vector<PyObjPtr>   tmpcache;
+    
+    PyObjPtr                evalResult;
     PyObjPtr curstack;//!cur using context
 };
 
@@ -317,13 +322,11 @@ public:
     int nSignal;
 };
 
-/*
+
 class ReturnSignal: public std::exception{
 public:
-    ReturnSignal(PyObjPtr& r):ret(r) {}
-    PyObjPtr ret;
 };
-*/
+
 
 enum EEXPR_TYPE{ 
     EXPR_SINGLE_INPUT,

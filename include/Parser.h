@@ -180,7 +180,7 @@ public:
     //!                          |'**' test)
     ExprASTPtr parse_arglist();
     //! argument: test [comp_for] | test '=' test
-    ExprASTPtr parse_argument();
+    ExprASTPtr parse_argument(ExprASTPtr& pFuncArglist);
     //! list_iter: list_for | list_if
     ExprASTPtr parse_list_iter();
     //! list_for: 'for' exprlist 'in' testlist_safe [list_iter]

@@ -21,7 +21,7 @@ public:
     virtual std::string handleStr(PyObjPtr& self);
     virtual bool handleBool(PyContext& context, PyObjPtr& self);
     virtual bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist);
     
 };
 

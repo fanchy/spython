@@ -24,8 +24,10 @@
     # i = 1
     
 
-def f(a=1, b=2):
-    q = a * 3
-    r = b * 4
+def f(a, c =1, b =2):
+    #q = a * 3
+    #r = b * 4
+    return b-a
 o = 23
-s = f(2, 3)
+s = f(10, b=5)
+#print(s)
