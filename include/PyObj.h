@@ -24,6 +24,7 @@
 #include "objhandler/PyFuncHandler.h"
 #include "objhandler/PyTupleHandler.h"
 #include "objhandler/PyDictHandler.h"
+#include "objhandler/PyStrHandler.h"
 
 namespace ff {
 
@@ -78,13 +79,9 @@ class PyObjStr:public PyObj {
 public:
     std::string value;
     PyObjStr(const std::string& v):value(v) {
+        this->handler = singleton_t<PyStrHandler>::instance_ptr();
     }
-    virtual void dump() {
-        DMSG(("%s(str)", value.c_str()));
-    }
-    virtual int getType() const {
-        return PY_STR;
-    }
+
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo;
     }
