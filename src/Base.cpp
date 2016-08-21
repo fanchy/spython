@@ -68,7 +68,9 @@ PyObjPtr& PyObjHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& 
 PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist){
     throw PyException::buildException("handleCall invalid");return self;
 }
-
+size_t PyObjHandler::handleHash(const PyObjPtr& self){
+    return size_t(self.get());
+}
 
 PyObjPtr& PyObj::getVar(PyObjPtr& self2, unsigned int nFieldIndex) {
     if (nFieldIndex < m_objStack.size()) {

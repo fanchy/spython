@@ -48,6 +48,7 @@ enum PyObjType{
     PY_MOD,
     PY_BOOL,
     PY_TUPLE,
+    PY_DICT,
 };
 
 typedef  int TokenType;
@@ -254,6 +255,7 @@ public:
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist);
+    virtual size_t    handleHash(const PyObjPtr& self);
 
     virtual std::string dump(PyObjPtr& self) {
         return "";

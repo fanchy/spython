@@ -41,7 +41,7 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& 
             
             const string& strVarName = paramInfo.paramKey.cast<VariableExprAST>()->name;
             map<string, PyObjPtr>::iterator it = nameArg2Index.find(strVarName);
-            if (it != nameArg2Index.end()){
+            if (it != nameArg2Index.end() && paramInfo.paramType.empty()){//!如果定义了*a, **b,不用去获取具名参数 
                 //!命中具名参数, 检测是否有重复赋值
                 if (allValue.size() > hasConsumeArg){
                     throw PyException::buildException("got multiple values for keyword argument");
@@ -52,7 +52,35 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& 
                 nameArg2Index.erase(it);
             }
             else{
-                if (allValue.size() > hasConsumeArg){
+                if (paramInfo.paramType.empty() == false){
+                    if (paramInfo.paramType == "*"){
+                        PyObjPtr pVal = new PyObjTuple();
+                        PyObjPtr& ref = paramInfo.paramKey->eval(context);
+                        ref = pVal;
+                        
+                        for (unsigned int m = hasConsumeArg; m < allValue.size(); ++m){
+                            FuncArglist::ArgInfo& argInfo = parg->allArgs[m];
+                            if (argInfo.argType == "=" || argInfo.argType == "**"){
+                                break;
+                            }
+                            pVal.cast<PyObjTuple>()->values.push_back(allValue[m]);
+                        }
+                    }
+                    else if (paramInfo.paramType == "**"){
+                        PyObjPtr pVal = new PyObjDict();
+                        PyObjPtr& ref = paramInfo.paramKey->eval(context);
+                        ref = pVal;
+                        
+                        for (unsigned int m = hasConsumeArg; m < allValue.size(); ++m){
+                            FuncArglist::ArgInfo& argInfo = parg->allArgs[m];
+                            if (argInfo.argType != "=" && argInfo.argType != "**"){
+                                break;
+                            }
+                            pVal.cast<PyObjTuple>()->values[pVal] = allValue[m];
+                        }
+                    }
+                }
+                else if (allValue.size() > hasConsumeArg){
                     //!如果这个参数是具名参数，那么要跳过
                     PyObjPtr& ref = paramInfo.paramKey->eval(context);
                     ref = allValue[hasConsumeArg];

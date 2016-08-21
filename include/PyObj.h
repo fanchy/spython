@@ -7,6 +7,13 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
+/*
+#ifdef __GNUC__
+#include <ext/hash_map>
+#else
+#include <hash_map>
+#endif
+*/
 
 #include "Base.h"
 #include "singleton.h"
@@ -122,6 +129,22 @@ public:
     std::vector<PyObjPtr> values;
 };
 
+class PyObjDict:public PyObj {
+public:
+    struct HashUtil{
+        size_t operator()(const PyObjPtr& a) const {
+            return size_t(a.get());
+        }
+    };
+    virtual int getType() {
+        return PY_DICT;
+    }
+    virtual const ObjIdInfo& getObjIdInfo(){
+        return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
+    }
+
+    //map<PyObjPtr, PyObjPtr, HashUtil> values;
+};
 
 class PyObjFuncDef:public PyObj {
 public:
