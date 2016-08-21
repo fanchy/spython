@@ -765,7 +765,22 @@ std::string CallExprAST::dump(int nDepth){
     ret += this->name + "(call)" + preExpr->dump(nDepth+1);
     return ret;
 }
+
+
 PyObjPtr& CallExprAST::eval(PyContext& context) {
-    PyObjPtr& funcObj = preExpr->eval(context);
-    return funcObj->handler->handleCall(context, funcObj, arglist);
+    PyObjPtr funcObj = preExpr->eval(context);
+
+    FuncArglist* parg = arglist.cast<FuncArglist>();
+    vector<ArgTypeInfo>& allArgsTypeInfo = parg->allArgsTypeInfo;
+
+    vector<PyObjPtr> allValue;
+
+    for (unsigned int i = 0; i < parg->allArgs.size(); ++i){
+        FuncArglist::ArgInfo& argInfo = parg->allArgs[i];
+        DMSG(("PyObjFuncDef::argType...%s\n", argInfo.argType.c_str()));
+        PyObjPtr& v = argInfo.argVal->eval(context);
+        allValue.push_back(v);
+    }
+    
+    return funcObj->handler->handleCall(context, funcObj, allArgsTypeInfo, allValue, parg->bHasAssignArg);
 }

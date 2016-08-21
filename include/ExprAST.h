@@ -673,7 +673,7 @@ public:
         std::string      argType; //! epmpty = * **
         ExprASTPtr       argKey, argVal; //! k = 10
     };
-    FuncArglist() {
+    FuncArglist():bHasAssignArg(false) {
     }
     virtual int getType() {
         return EXPR_ARGLIST;
@@ -687,9 +687,20 @@ public:
         info.argKey  = k;
         info.argVal  = v;
         allArgs.push_back(info);
+        
+        ArgTypeInfo info2;
+        info2.argType = s;
+        info2.argKey  = k.cast<VariableExprAST>()->name;
+        allArgsTypeInfo.push_back(info2);
+        
+        if (s == "="){
+            bHasAssignArg = true;
+        }
     }
 public:
-    std::vector<ArgInfo>    allArgs;
+    std::vector<ArgInfo>        allArgs;
+    std::vector<ArgTypeInfo>    allArgsTypeInfo;
+    bool                        bHasAssignArg;//!是否有具名参数，有的话，传入参数顺序可能打乱 
 };
 
 class TrailerExprAST : public ExprAST {
@@ -701,12 +712,14 @@ public:
 class CallExprAST : public TrailerExprAST {
 public:
     CallExprAST() {
+        arglist = new FuncArglist();
     }
     virtual int getType() {
         return EXPR_CALL;
     }
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
+    
 public:
     ExprASTPtr func;
     ExprASTPtr arglist;

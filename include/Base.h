@@ -219,6 +219,17 @@ public:
 
 typedef SmartPtr<ExprAST> ExprASTPtr;
 
+struct ArgTypeInfo{
+    std::string      argType; //! epmpty = * **
+    std::string      argKey;
+    ArgTypeInfo(){
+    }
+    ArgTypeInfo(const ArgTypeInfo& src){
+        argType = src.argType;
+        argKey  = src.argKey;
+    }
+};
+
 class PyObjHandler{
 public:
     virtual ~PyObjHandler(){}
@@ -269,7 +280,8 @@ public:
     virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist);
+    virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, 
+                                 std::vector<PyObjPtr>& argAssignVal, bool bHasAssignArg);
     virtual std::size_t    handleHash(const PyObjPtr& self) const;
 
     virtual std::string dump(PyObjPtr& self) {
@@ -301,6 +313,8 @@ public:
         return singleton_t<ObjIdTypeTraits<PyObjNone> >::instance_ptr()->objInfo;
     }
 };
+typedef PyObjNone PyCallTmpStack;
+
 class PyContext{
 public:
     PyObjPtr& cacheResult(PyObjPtr v){
@@ -441,6 +455,7 @@ enum EEXPR_TYPE{
     EXPR_TUPLE,
     EXPR_CALL
 };
+
 
 }
 #endif

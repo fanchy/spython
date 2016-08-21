@@ -20,7 +20,7 @@ bool PyFuncHandler::handleEqual(PyContext& context, const PyObjPtr& self, const 
     }
     return false;
 }
-PyObjPtr& PyFuncHandler::handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist){
-    return self.cast<PyObjFuncDef>()->exeFunc(context, self, arglist);
+PyObjPtr& PyFuncHandler::handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal, bool bHasAssignArg){
+    return self.cast<PyObjFuncDef>()->exeFunc(context, self, allArgsVal, argAssignVal, bHasAssignArg);
 }
 

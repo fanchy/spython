@@ -65,7 +65,7 @@ PyObjPtr& PyObjHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& 
 PyObjPtr& PyObjHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     throw PyException::buildException("handleMod invalid");return self;
 }
-PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist){
+PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal, bool bHasAssignArg){
     throw PyException::buildException("handleCall invalid");return self;
 }
 size_t PyObjHandler::handleHash(const PyObjPtr& self) const{

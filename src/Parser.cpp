@@ -1519,7 +1519,7 @@ ExprASTPtr Parser::parse_classdef(){
 //!                          |'*' test (',' argument)* [',' '**' test] 
 //!                          |'**' test)
 ExprASTPtr Parser::parse_arglist(){
-    ExprASTPtr ret = new FuncArglist;
+    ExprASTPtr ret = new FuncArglist();
     ExprASTPtr argument = parse_argument(ret);
 
     while (argument && m_curScanner->getToken()->strVal == ","){
