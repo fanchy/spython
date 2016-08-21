@@ -149,7 +149,7 @@ public:
     PyObj():m_pObjIdInfo(NULL), handler(NULL){}
     virtual ~PyObj() {}
 
-    int getType();
+    int getType() const;
     int getFieldNum() const { return m_objStack.size(); }
     static std::string dump(PyObjPtr& self);
 
@@ -176,6 +176,8 @@ struct PyObjTool{
     static PyObjPtr  buildNULL();
     static PyObjPtr& buildNone();
     static PyObjPtr& buildBool(bool b);
+    static PyObjPtr& buildTrue();
+    static PyObjPtr& buildFalse();
     static bool handleBool(PyObjPtr b);
 }; 
 
@@ -221,7 +223,7 @@ class PyObjHandler{
 public:
     virtual ~PyObjHandler(){}
     
-    virtual int getType() {
+    virtual int getType() const {
         return 0;
     }
 
@@ -235,7 +237,7 @@ public:
     virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args){
         return NULL;
     }
-    virtual std::string handleStr(PyObjPtr& self){
+    virtual std::string handleStr(const PyObjPtr& self) const{
         return "";
     }
     virtual PyObjPtr& handleAssign(PyContext& context, PyObjPtr& self, PyObjPtr& val){
@@ -243,11 +245,24 @@ public:
         return self;
     }
 
-    virtual bool handleBool(PyContext& context, PyObjPtr& self);
-    virtual bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual bool handleLessEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual bool handleGreatEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-    virtual bool handleIn(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;
+    virtual bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
+    virtual bool handleLessEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
+    virtual bool handleGreatEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
+    virtual bool handleIn(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
+    
+    virtual bool handleLess(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
+        if (self->handler->handleGreatEqual(context, self, val) == false){
+            return true;
+        }
+        return false;
+    }
+    virtual bool handleGreat(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
+        if (self->handler->handleLessEqual(context, self, val) == false){
+            return true;
+        }
+        return false;
+    }
     
     virtual PyObjPtr& handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
@@ -255,7 +270,7 @@ public:
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist);
-    virtual size_t    handleHash(const PyObjPtr& self);
+    virtual std::size_t    handleHash(const PyObjPtr& self) const;
 
     virtual std::string dump(PyObjPtr& self) {
         return "";
@@ -267,13 +282,13 @@ public:
     virtual int getType() {
         return PY_NONE;
     }
-    virtual std::string handleStr(PyObjPtr& self){
+    virtual std::string handleStr(const PyObjPtr& self) const{
         return "None";
     }
-    bool handleBool(PyContext& context, PyObjPtr& self){
+    bool handleBool(PyContext& context, const PyObjPtr& self){
         return false;
     }
-    bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val){
         return val->getType() == PY_NONE;
     }
 };

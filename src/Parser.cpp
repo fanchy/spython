@@ -158,6 +158,19 @@ ExprASTPtr Parser::parse_varargslist(){
     }
     while (true);
     
+    if (m_curScanner->getToken()->strVal == "*"){
+        if (m_curScanner->getToken(1)->strVal == "*"){
+            m_curScanner->seek(2);
+            ExprASTPtr eName = parse_name(true);
+            p->addParam(eName, NULL, "**");
+        }
+        else{
+            m_curScanner->seek(1);
+            ExprASTPtr eName = parse_name(true);
+            p->addParam(eName, NULL, "*");
+        }
+    }
+    
     return ret;
 }
 

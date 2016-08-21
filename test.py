@@ -24,10 +24,10 @@
     # i = 1
     
 
-def f(a, c =1, b =2, *d):
+def f(a, c =1, b =2, **d):
     #q = a * 3
     #r = b * 4
-    return b-a
+    return d
 o = 23
-s = f(10, b=5,d=90)
+s = f(10, 5, 4, 5, 6)
 #print(s)

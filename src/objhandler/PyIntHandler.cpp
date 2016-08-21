@@ -6,21 +6,21 @@
 using namespace std;
 using namespace ff;
 
-string PyIntHandler::handleStr(PyObjPtr& self) {
+string PyIntHandler::handleStr(const PyObjPtr& self) const {
     char msg[64] = {0};
     snprintf(msg, sizeof(msg), "%ld", self.cast<PyObjInt>()->value);
     return string(msg);
 }
-bool PyIntHandler::handleBool(PyContext& context, PyObjPtr& self){
+bool PyIntHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return self.cast<PyObjInt>()->value != 0;
 }
-bool PyIntHandler::handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+bool PyIntHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     if (val->getType() == PY_INT && self.cast<PyObjInt>()->value == val.cast<PyObjInt>()->value){
         return true;
     }
     return false;
 }
-bool PyIntHandler::handleLessEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+bool PyIntHandler::handleLessEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     int nType   = val->getType();
 
     if (nType == PY_INT){
@@ -34,7 +34,7 @@ bool PyIntHandler::handleLessEqual(PyContext& context, PyObjPtr& self, PyObjPtr&
     }
     return false;
 }
-bool PyIntHandler::handleGreatEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+bool PyIntHandler::handleGreatEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     int nType   = val->getType();
 
     if (nType == PY_INT){

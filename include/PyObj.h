@@ -22,6 +22,8 @@
 #include "objhandler/PyFloatHandler.h"
 #include "objhandler/PyBoolHandler.h"
 #include "objhandler/PyFuncHandler.h"
+#include "objhandler/PyTupleHandler.h"
+#include "objhandler/PyDictHandler.h"
 
 namespace ff {
 
@@ -80,7 +82,7 @@ public:
     virtual void dump() {
         DMSG(("%s(str)", value.c_str()));
     }
-    virtual int getType() {
+    virtual int getType() const {
         return PY_STR;
     }
     virtual const ObjIdInfo& getObjIdInfo(){
@@ -98,7 +100,7 @@ public:
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
     }
-    virtual int getType() {
+    virtual int getType() const {
         return PY_MOD;
     }
     virtual const ObjIdInfo& getObjIdInfo(){
@@ -109,19 +111,10 @@ public:
 
 class PyObjTuple:public PyObj {
 public:
-    /*
-    virtual void dump() {
-        DMSG(("("));
-        for (unsigned int i = 0; i < values.size(); ++i){
-            values[i]->dump();
-            if (i < values.size() - 1)
-               DMSG((","));
-        }
-        DMSG((")"));
-    }*/
-    virtual int getType() {
-        return PY_TUPLE;
+    PyObjTuple(){
+        this->handler = singleton_t<PyTupleHandler>::instance_ptr();
     }
+
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
@@ -132,18 +125,29 @@ public:
 class PyObjDict:public PyObj {
 public:
     struct HashUtil{
-        size_t operator()(const PyObjPtr& a) const {
+        std::size_t operator()(const PyObjPtr& a) const {
             return size_t(a.get());
         }
     };
-    virtual int getType() {
-        return PY_DICT;
+    
+    //map的比较函数
+    struct cmp_key
+    {
+        bool operator()(const PyObjPtr &k1, const PyObjPtr &k2)const
+        {
+            std::size_t a = k1->handler->handleHash(k1);
+            std::size_t b = k2->handler->handleHash(k2);
+            return a < b;
+        }
+    };
+    PyObjDict(){
+        this->handler = singleton_t<PyDictHandler>::instance_ptr();
     }
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
-
-    //map<PyObjPtr, PyObjPtr, HashUtil> values;
+    typedef std::map<PyObjPtr, PyObjPtr, cmp_key> DictMap;
+    DictMap values;
 };
 
 class PyObjFuncDef:public PyObj {

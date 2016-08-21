@@ -31,22 +31,22 @@ string PyObj::dump(PyObjPtr& self) {
     return ret;
 }
 
-int PyObj::getType(){
+int PyObj::getType() const{
     return handler->getType();
 }
-bool PyObjHandler::handleBool(PyContext& context, PyObjPtr& self){
+bool PyObjHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return false;
 }
-bool PyObjHandler::handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+bool PyObjHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     return false;
 }
-bool PyObjHandler::handleLessEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+bool PyObjHandler::handleLessEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     throw PyException::buildException("handleLessEqual invalid");return self; 
 }
-bool PyObjHandler::handleGreatEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+bool PyObjHandler::handleGreatEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     throw PyException::buildException("handleGreatEqual invalid");return self;
 }
-bool PyObjHandler::handleIn(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+bool PyObjHandler::handleIn(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     throw PyException::buildException("handleIn invalid");return self;
 }
 
@@ -68,7 +68,7 @@ PyObjPtr& PyObjHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& 
 PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist){
     throw PyException::buildException("handleCall invalid");return self;
 }
-size_t PyObjHandler::handleHash(const PyObjPtr& self){
+size_t PyObjHandler::handleHash(const PyObjPtr& self) const{
     return size_t(self.get());
 }
 
@@ -178,6 +178,12 @@ PyObjPtr& PyObjTool::buildBool(bool b){
     if (b){
         return singleton_t<boolTrueTraits>::instance_ptr()->retPtr;
     }
+    return singleton_t<boolFalseTraits>::instance_ptr()->retPtr;
+}
+PyObjPtr& PyObjTool::buildTrue(){
+    return singleton_t<boolTrueTraits>::instance_ptr()->retPtr;
+}
+PyObjPtr& PyObjTool::buildFalse(){
     return singleton_t<boolFalseTraits>::instance_ptr()->retPtr;
 }
 

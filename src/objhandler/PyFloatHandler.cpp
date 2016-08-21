@@ -8,16 +8,16 @@ using namespace std;
 using namespace ff;
 
 
-string PyFloatHandler::handleStr(PyObjPtr& self) {
+string PyFloatHandler::handleStr(const PyObjPtr& self)  const{
     char msg[64] = {0};
     snprintf(msg, sizeof(msg), "%g", self.cast<PyObjFloat>()->value);
     return string(msg);
 }
 
-bool PyFloatHandler::handleBool(PyContext& context, PyObjPtr& self){
+bool PyFloatHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return self.cast<PyObjFloat>()->value != 0.0;
 }
-bool PyFloatHandler::handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+bool PyFloatHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     if (val->getType() == PY_INT && self.cast<PyObjInt>()->value == val.cast<PyObjInt>()->value){
         return true;
     }

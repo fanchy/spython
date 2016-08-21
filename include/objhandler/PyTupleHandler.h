@@ -1,5 +1,5 @@
-#ifndef _PY_INT_HANDLER_H_
-#define _PY_INT_HANDLER_H_
+#ifndef _PY_TUPLE_HANDLER_H_
+#define _PY_TUPLE_HANDLER_H_
 
 #include <iostream>
 #include <string>
@@ -13,10 +13,10 @@
 
 namespace ff {
 
-class PyIntHandler: public PyObjHandler{
+class PyTupleHandler: public PyObjHandler{
 public:
     virtual int getType() const {
-        return PY_INT;
+        return PY_TUPLE;
     }
     virtual std::string handleStr(const PyObjPtr& self) const;
     virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;

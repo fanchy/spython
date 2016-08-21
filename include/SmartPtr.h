@@ -91,6 +91,7 @@ public:
     void         reset();
     object_t&    operator*();
     object_t*    operator->();
+    const object_t*    operator->() const;
     bool         operator==(const self_type_t& p);
     bool         operator==(const object_t* p);
     self_type_t& operator=(const self_type_t& src_);
@@ -115,6 +116,11 @@ public:
     
     template<typename R>
     R* cast()
+    {
+        return (R*)m_dest_ptr;
+    }
+    template<typename R>
+    const R* cast() const
     {
         return (R*)m_dest_ptr;
     }
@@ -188,6 +194,12 @@ typename SmartPtr<T>::object_t&    SmartPtr<T>::operator*()
 
 template<typename T>
 typename SmartPtr<T>::object_t*    SmartPtr<T>::operator->()
+{
+    FF_ASSERT(NULL != m_dest_ptr);
+    return m_dest_ptr;
+}
+template<typename T>
+const typename  SmartPtr<T>::object_t*    SmartPtr<T>::operator->() const
 {
     FF_ASSERT(NULL != m_dest_ptr);
     return m_dest_ptr;

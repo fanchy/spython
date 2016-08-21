@@ -538,85 +538,85 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             PyObjPtr& rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleEqual(context, lval, rval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(false);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case OP_NOTEQ:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleEqual(context, lval, rval)){
-                return PyObjTool::buildBool(false);
+                return context.cacheResult(PyObjTool::buildFalse());
             }
-            return PyObjTool::buildBool(true);
+            return context.cacheResult(PyObjTool::buildTrue());
         }break;
         case OP_LESS:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleGreatEqual(context, lval, rval)){
-                return PyObjTool::buildBool(false);
+            if (lval->handler->handleLess(context, lval, rval)){
+                return context.cacheResult(PyObjTool::buildFalse());
             }
-            return PyObjTool::buildBool(true);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case OP_GREAT:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleLessEqual(context, lval, rval)){
-                return PyObjTool::buildBool(false);
+            if (lval->handler->handleGreat(context, lval, rval)){
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(true);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case OP_LESSEQ:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleLessEqual(context, lval, rval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(false);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case OP_GREATEQ:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleGreatEqual(context, lval, rval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(false);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case OP_IN:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleIn(context, lval, rval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(false);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case OP_NOTIN:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleIn(context, lval, rval)){
-                return PyObjTool::buildBool(false);
+                return context.cacheResult(PyObjTool::buildFalse());
             }
-            return PyObjTool::buildBool(true);
+            return context.cacheResult(PyObjTool::buildTrue());
         }break;
         case OP_OR:{
             PyObjPtr& lval = left->eval(context);
             if (lval->handler->handleBool(context, lval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
             
             PyObjPtr& rval = right->eval(context);
             if (rval->handler->handleBool(context, rval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(false);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case OP_AND:{
             PyObjPtr& lval = left->eval(context);
             PyObjPtr& rval = right->eval(context);
             if (lval->handler->handleBool(context, lval) && rval->handler->handleBool(context, rval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(false);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         /*
         case TOK_EQ:{
@@ -627,9 +627,9 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             //rval->dump();
             //DMSG(("BinaryExprAST Op:%s begin\n", this->name.c_str()));
             if (lval && rval && lval->handleEQ(rval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(false);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case TOK_AND:{
             PyObjPtr lval = left->eval(context);
@@ -639,9 +639,9 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             //rval->dump();
             //DMSG(("BinaryExprAST TOK_AND Op:%s begin\n", this->name.c_str()));
             if (PyObjTool::handleBool(lval) && PyObjTool::handleBool(rval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(false);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case TOK_OR:{
             PyObjPtr lval = left->eval(context);
@@ -651,9 +651,9 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             //rval->dump();
             //DMSG(("BinaryExprAST TOK_OR Op:%s end\n", this->name.c_str()));
             if (PyObjTool::handleBool(lval) || PyObjTool::handleBool(rval)){
-                return PyObjTool::buildBool(true);
+                return context.cacheResult(PyObjTool::buildTrue());
             }
-            return PyObjTool::buildBool(false);
+            return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case TOK_FIELD:{
             PyObjPtr lval = left->eval(context);

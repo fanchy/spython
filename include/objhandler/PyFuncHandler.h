@@ -15,12 +15,12 @@ namespace ff {
 
 class PyFuncHandler: public PyObjHandler{
 public:
-    virtual int getType() {
+    virtual int getType() const {
         return EXPR_FUNCDEF;
     }
-    virtual std::string handleStr(PyObjPtr& self);
-    virtual bool handleBool(PyContext& context, PyObjPtr& self);
-    virtual bool handleEqual(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual std::string handleStr(const PyObjPtr& self) const;
+    virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;
+    virtual bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist);
     
 };

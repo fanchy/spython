@@ -11,7 +11,7 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& 
     {
         vector<PyObjPtr> allValue;
         FuncArglist* parg = NULL;
-        map<string, PyObjPtr> nameArg2Index;//!是否有具名参数 
+        map<string, PyObjPtr> nameArg2Value;//!是否有具名参数 
         if (arglist){
             parg = arglist.cast<FuncArglist>();
             for (unsigned int i = 0; i < parg->allArgs.size(); ++i){
@@ -25,7 +25,7 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& 
                     PyObjPtr v = argInfo.argVal->eval(context);
                     if (argInfo.argKey->getType() == EXPR_VAR)
                     {
-                        nameArg2Index[argInfo.argKey.cast<VariableExprAST>()->name] = v;
+                        nameArg2Value[argInfo.argKey.cast<VariableExprAST>()->name] = v;
                     }
                 } 
             }
@@ -40,8 +40,8 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& 
             ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[j];
             
             const string& strVarName = paramInfo.paramKey.cast<VariableExprAST>()->name;
-            map<string, PyObjPtr>::iterator it = nameArg2Index.find(strVarName);
-            if (it != nameArg2Index.end() && paramInfo.paramType.empty()){//!如果定义了*a, **b,不用去获取具名参数 
+            map<string, PyObjPtr>::iterator it = nameArg2Value.find(strVarName);
+            if (it != nameArg2Value.end() && paramInfo.paramType.empty()){//!如果定义了*a, **b,不用去获取具名参数 
                 //!命中具名参数, 检测是否有重复赋值
                 if (allValue.size() > hasConsumeArg){
                     throw PyException::buildException("got multiple values for keyword argument");
@@ -49,7 +49,7 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& 
                 
                 PyObjPtr& ref = paramInfo.paramKey->eval(context);
                 ref = it->second;
-                nameArg2Index.erase(it);
+                nameArg2Value.erase(it);
             }
             else{
                 if (paramInfo.paramType.empty() == false){
@@ -71,12 +71,15 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& 
                         PyObjPtr& ref = paramInfo.paramKey->eval(context);
                         ref = pVal;
                         
-                        for (unsigned int m = hasConsumeArg; m < allValue.size(); ++m){
+                        for (unsigned int m = hasConsumeArg; m < parg->allArgs.size(); ++m){
                             FuncArglist::ArgInfo& argInfo = parg->allArgs[m];
-                            if (argInfo.argType != "=" && argInfo.argType != "**"){
+                            if (argInfo.argType != "=" || argInfo.argKey->getType() != EXPR_VAR){
                                 break;
                             }
-                            pVal.cast<PyObjTuple>()->values[pVal] = allValue[m];
+                            const string& keyName = argInfo.argKey.cast<VariableExprAST>()->name;
+                            PyObjPtr tmpKey = new PyObjStr(keyName);
+                            pVal.cast<PyObjDict>()->values[tmpKey] = nameArg2Value[keyName];
+                            nameArg2Value.erase(keyName);
                         }
                     }
                 }
