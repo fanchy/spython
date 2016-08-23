@@ -30,4 +30,4 @@ def f(a, c =1, b =2, **d):
     return d
 o = 23
 s = f(10, b=5, c=4, e=5, f=6)
-#print(s)
+print(s)

@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=3
 CompilerSettings=0000000100000000001000000
-UnitCount=25
+UnitCount=27
 
 [VersionInfo]
 Major=1
@@ -294,6 +294,26 @@ BuildCmd=
 FileName=include\objhandler\PyDictHandler.h
 CompileCpp=1
 Folder=include/objhandler
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit26]
+FileName=include\objhandler\PyStrHandler.h
+CompileCpp=1
+Folder=include/objhandler
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit27]
+FileName=src\objhandler\PyStrHandler.cpp
+CompileCpp=1
+Folder=src/objhandler
 Compile=1
 Link=1
 Priority=1000

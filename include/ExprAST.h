@@ -690,7 +690,8 @@ public:
         
         ArgTypeInfo info2;
         info2.argType = s;
-        info2.argKey  = k.cast<VariableExprAST>()->name;
+        if (k)
+            info2.argKey  = k.cast<VariableExprAST>()->name;
         allArgsTypeInfo.push_back(info2);
         
         if (s == "="){

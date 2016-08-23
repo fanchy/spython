@@ -150,7 +150,8 @@ PyObjPtr& PyObjClassObj::getVar(PyObjPtr& self, unsigned int nFieldIndex)
     return ret;
 }
 
-PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal, bool bHasAssignArg){
+
+PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
     DMSG(("PyObjFuncDef::exeFunc...\n"));
     try
     {
@@ -194,8 +195,73 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
                     }
                 }
             }
+            else if (allArgsVal.size() > hasConsumeArg && allArgsVal[hasConsumeArg].argType == "="){
+                //!如果这个参数是具名参数，后边的全部都是具名参数了
+                unsigned int fromIndex = hasConsumeArg;
+                for (unsigned m = j; m < pParametersExprAST->allParam.size(); ++m){
+                    if (paramInfo.paramType == "*" || paramInfo.paramType == "**"){
+                        for (unsigned int n = fromIndex; n < allArgsVal.size(); ++n){
+                            ArgTypeInfo& argInfo = allArgsVal[n];
+                            if (paramInfo.paramType == "*"){
+                                PyObjPtr pVal = new PyObjTuple();
+                                PyObjPtr& ref = paramInfo.paramKey->eval(context);
+                                ref = pVal;
+                                
+                                for (unsigned int m = hasConsumeArg; m < allArgsVal.size(); ++m){
+                                    ArgTypeInfo& argInfo = allArgsVal[m];
+                                    if (argInfo.argType == "=" || argInfo.argType == "**"){
+                                        break;
+                                    }
+                                    pVal.cast<PyObjTuple>()->values.push_back(argAssignVal[m]);
+                                }
+                            }
+                            else if (paramInfo.paramType == "**"){
+                                PyObjPtr pVal = new PyObjDict();
+                                PyObjPtr& ref = paramInfo.paramKey->eval(context);
+                                ref = pVal;
+                                
+                                for (unsigned int m = hasConsumeArg; m < allArgsVal.size(); ++m){
+                                    ArgTypeInfo& argInfo = allArgsVal[m];
+                                    if (argInfo.argType != "="){
+                                        throw PyException::buildException("given more arg");
+                                    }
+                                    const string& keyName = argInfo.argKey;
+                                    PyObjPtr tmpKey = new PyObjStr(keyName);
+                                    pVal.cast<PyObjDict>()->values[tmpKey] = argAssignVal[m];
+                                }
+                            }
+                        }
+                        continue;
+                    }
+                    const string& strArgName = paramInfo.paramKey.cast<VariableExprAST>()->name;
+                    bool hitFlag = false;
+                    for (unsigned int n = fromIndex; n < allArgsVal.size(); ++n){
+                        ArgTypeInfo& argInfo = allArgsVal[n];
+                        if (argInfo.argKey == strArgName){//!hit
+                            PyObjPtr& ref = paramInfo.paramKey->eval(context);
+                            ref = argAssignVal[n];
+                            hitFlag = true;
+                            ++hasConsumeArg;
+                            break;
+                        }
+                    }
+                    if (hitFlag){
+                        continue;
+                    }
+                    else if(paramInfo.paramDefault){//!如果有默认值 
+                        PyObjPtr v = paramInfo.paramDefault->eval(context);
+                        PyObjPtr& ref = paramInfo.paramKey->eval(context);
+                        ref = v;
+                    }
+                    else{
+                        throw PyException::buildException("need more arg num");
+                    }
+                }
+                
+                
+                break;
+            }
             else if (allArgsVal.size() > hasConsumeArg){
-                //!如果这个参数是具名参数，那么要跳过
                 PyObjPtr& ref = paramInfo.paramKey->eval(context);
                 ref = argAssignVal[hasConsumeArg];
                 ++hasConsumeArg;

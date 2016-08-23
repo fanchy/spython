@@ -281,7 +281,7 @@ public:
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, 
-                                 std::vector<PyObjPtr>& argAssignVal, bool bHasAssignArg);
+                                 std::vector<PyObjPtr>& argAssignVal);
     virtual std::size_t    handleHash(const PyObjPtr& self) const;
 
     virtual std::string dump(PyObjPtr& self) {

@@ -782,5 +782,5 @@ PyObjPtr& CallExprAST::eval(PyContext& context) {
         allValue.push_back(v);
     }
     
-    return funcObj->handler->handleCall(context, funcObj, allArgsTypeInfo, allValue, parg->bHasAssignArg);
+    return funcObj->handler->handleCall(context, funcObj, allArgsTypeInfo, allValue);
 }
