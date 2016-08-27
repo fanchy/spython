@@ -775,11 +775,67 @@ PyObjPtr& CallExprAST::eval(PyContext& context) {
 
     vector<PyObjPtr> allValue;
 
+    if (false == parg->bNeedRerangeArgs){
+        for (unsigned int i = 0; i < parg->allArgs.size(); ++i){
+            FuncArglist::ArgInfo& argInfo = parg->allArgs[i];
+            DMSG(("PyObjFuncDef::argType...%s\n", argInfo.argType.c_str()));
+            PyObjPtr& v = argInfo.argVal->eval(context);
+            allValue.push_back(v);
+        }
+        
+        return funcObj->handler->handleCall(context, funcObj, allArgsTypeInfo, allValue);
+    }
+    
+    vector<ArgTypeInfo>    newArgTypeInfo;
+    
     for (unsigned int i = 0; i < parg->allArgs.size(); ++i){
         FuncArglist::ArgInfo& argInfo = parg->allArgs[i];
         DMSG(("PyObjFuncDef::argType...%s\n", argInfo.argType.c_str()));
-        PyObjPtr& v = argInfo.argVal->eval(context);
-        allValue.push_back(v);
+        ArgTypeInfo tmpInfo;
+        if (argInfo.argType.empty()){
+            newArgTypeInfo.push_back(tmpInfo);
+            PyObjPtr& v = argInfo.argVal->eval(context);
+            allValue.push_back(v);
+        }
+        else if (argInfo.argType == "="){
+            tmpInfo.argType = "=";
+            tmpInfo.argKey = argInfo.argKey;
+            newArgTypeInfo.push_back(tmpInfo);
+            PyObjPtr& v = argInfo.argVal->eval(context);
+            allValue.push_back(v);
+        }
+        else if (argInfo.argType == "*"){
+            PyObjPtr pVal = argInfo.argVal->eval(context);
+            if (pVal->getType() != PY_TUPLE){
+                throw PyException::buildException("tuple needed after *");
+            }
+            
+            for (int i = 0; i < pVal.cast<PyObjTuple>()->values.size(); ++i){
+                newArgTypeInfo.push_back(tmpInfo);
+            }
+            allValue.insert(allValue.end(), pVal.cast<PyObjTuple>()->values.begin(), pVal.cast<PyObjTuple>()->values.end());
+        }
+        else if (argInfo.argType == "**"){
+            PyObjPtr pVal = argInfo.argVal->eval(context);
+            if (pVal->getType() != PY_DICT){
+                throw PyException::buildException("dict needed after **");
+            }
+            
+            PyObjDict::DictMap::iterator it = pVal.cast<PyObjDict>()->values.begin();
+            
+            for (; it != pVal.cast<PyObjDict>()->values.end(); ++it){
+                const PyObjPtr& pKey = it->first;
+                if (pKey->getType() != PY_STR){
+                    throw PyException::buildException("dict key must string");
+                }
+                tmpInfo.argType = "=";
+                tmpInfo.argKey = pKey.cast<PyObjStr>()->value;
+                newArgTypeInfo.push_back(tmpInfo);
+                
+                PyObjPtr& v = it->second;
+                allValue.push_back(v);
+            }
+        }
     }
     
     return funcObj->handler->handleCall(context, funcObj, allArgsTypeInfo, allValue);

@@ -673,7 +673,7 @@ public:
         std::string      argType; //! epmpty = * **
         ExprASTPtr       argKey, argVal; //! k = 10
     };
-    FuncArglist():bHasAssignArg(false) {
+    FuncArglist():bNeedRerangeArgs(false) {
     }
     virtual int getType() {
         return EXPR_ARGLIST;
@@ -694,14 +694,14 @@ public:
             info2.argKey  = k.cast<VariableExprAST>()->name;
         allArgsTypeInfo.push_back(info2);
         
-        if (s == "="){
-            bHasAssignArg = true;
+        if (s == "*" || s == "**"){
+            bNeedRerangeArgs = true;
         }
     }
 public:
     std::vector<ArgInfo>        allArgs;
     std::vector<ArgTypeInfo>    allArgsTypeInfo;
-    bool                        bHasAssignArg;//!是否有具名参数，有的话，传入参数顺序可能打乱 
+    bool                        bNeedRerangeArgs;//!是否有* 和 ** 参数有的话，顺序需要重新整理 
 };
 
 class TrailerExprAST : public ExprAST {
