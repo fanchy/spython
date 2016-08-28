@@ -119,7 +119,7 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
         do {
             cLastOne = getCharNext(content, index);
             if (cLastOne == tmpC){
-                cLastOne = getCharNext(content, index);
+                //cLastOne = getCharNext(content, index);
                 break;
             }
             retToken.strVal += cLastOne;

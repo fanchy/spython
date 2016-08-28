@@ -156,7 +156,7 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
     {
         DMSG(("PyObjFuncDef::exeFunc...%u\n", allArgsVal.size()));
         PyContextBackUp backup(context);
-        context.curstack = new PyCallTmpStack();
+        context.curstack = new PyCallTmpStack(this->getObjIdInfo());
 
         ParametersExprAST* pParametersExprAST = parameters.cast<ParametersExprAST>();
         unsigned int hasConsumeArg = 0;
@@ -241,6 +241,9 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
                     }
                 }
                 break;
+            }
+            else{
+                throw PyException::buildException("arg not assign value");
             }
         }
         

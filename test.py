@@ -24,8 +24,10 @@
     # i = 1
     
 
-def f1(**a):
-    return a
+def f1(a, b, c):
+    return a + b
+
+e = {'a':1, 'b':2, 'c':5}
+s= f1(**e)
 
 
-s= f1(a=3, b =5)

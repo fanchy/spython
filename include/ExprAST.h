@@ -506,7 +506,7 @@ public:
     std::vector<ExprASTPtr>  testKey;
     std::vector<ExprASTPtr>  testVal;
     
-    std::vector<ExprASTPtr>  test;
+    //std::vector<ExprASTPtr>  test;
     ExprASTPtr               comp_for;
 
 public:
@@ -650,14 +650,11 @@ public:
 public:
     TupleExprAST(){
         this->name = "tuple";
-        //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
     }
     virtual int getType() {
         return EXPR_TUPLE;
     }
     virtual PyObjPtr& eval(PyContext& context);
-    
-    PyObjPtr handleAssign(PyObjPtr context, PyObjPtr value);
 };
 
 class FuncArglist : public ExprAST {

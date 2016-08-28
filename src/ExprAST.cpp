@@ -281,7 +281,7 @@ PyObjPtr& WhileExprAST::eval(PyContext& context) {
     if (doElse && elseSuite){
         elseSuite->eval(context);
     }
-    return context.curstack;
+    return context.cacheResult(PyObjTool::buildNone());
 }
 
 string ForExprAST::dump(int nDepth){
@@ -312,7 +312,7 @@ PyObjPtr& ForExprAST::eval(PyContext& context) {
     if (elseSuite){
         elseSuite->eval(context);
     }
-    return context.curstack;
+    return context.cacheResult(PyObjTool::buildNone());
 }
 
 string ListMakerExprAST::dump(int nDepth){
@@ -337,7 +337,7 @@ PyObjPtr& ListMakerExprAST::eval(PyContext& context) {
     if (list_for){
         list_for->eval(context);
     }
-    return context.curstack;
+    return context.cacheResult(PyObjTool::buildNone());
 }
 
 string DictorsetMakerExprAST::dump(int nDepth){
@@ -351,9 +351,9 @@ string DictorsetMakerExprAST::dump(int nDepth){
         ret += "\n"+ testKey[i]->dump(nDepth+1);
         ret += "\n"+ testVal[i]->dump(nDepth+1);
     }
-    for (unsigned int i = 0; i < test.size(); ++i){
+    /*for (unsigned int i = 0; i < test.size(); ++i){
         ret += "\ntest\n" + test[i]->dump(nDepth+1);
-    }
+    }*/
     if (comp_for){
         ret += "\ncomp_for\n" + comp_for->dump(nDepth+1);
     }
@@ -361,13 +361,17 @@ string DictorsetMakerExprAST::dump(int nDepth){
 }
 
 PyObjPtr& DictorsetMakerExprAST::eval(PyContext& context) {
-    for (unsigned int i = 0; i < test.size(); ++i){
-        test[i]->eval(context);
+    PyObjPtr ret = new PyObjDict();
+    for (unsigned int i = 0; i < testKey.size(); ++i){
+        PyObjPtr pObjKey = testKey[i]->eval(context);
+        ret.cast<PyObjDict>()->values[pObjKey] = testVal[i]->eval(context);
+        
     }
     if (comp_for){
         comp_for->eval(context);
     }
-    return context.curstack;
+    
+    return context.cacheResult(ret);
 }
 
 string ParametersExprAST::dump(int nDepth){
@@ -503,7 +507,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
     switch (optype){
         case OP_ASSIGN:{
             PyObjPtr rval = right->eval(context);
-            DMSG(("assign %s\n%s,%s\n", left->dump(0).c_str(), right->dump(0).c_str(), rval->handler->handleStr(rval).c_str()));
+            //DMSG(("assign %s\n%s,%s\n", left->dump(0).c_str(), right->dump(0).c_str(), rval->handler->handleStr(rval).c_str()));
 
             PyObjPtr& lval = left->eval(context);
             lval = rval;
@@ -722,25 +726,6 @@ PyObjPtr& TupleExprAST::eval(PyContext& context){
     return context.cacheResult(ret);
 }
 
-
-PyObjPtr TupleExprAST::handleAssign(PyObjPtr context, PyObjPtr val)
-{
-    if (val->getType() != PY_TUPLE){
-        throw PyException::buildException("tuple assign invalid");
-    }
-    
-    PyObjTuple* tuple = val.cast<PyObjTuple>();
-
-    if (this->values.size() != tuple->values.size()){
-        throw PyException::buildException("tuple size not equal");
-    }
-    for (unsigned int i = 0; i < tuple->values.size(); ++i){
-        //!TODO PyObjPtr& v =  this->values[i]->getFieldVal(context); 
-        //v = tuple->values[i];
-    }
-    return val;
-}
-
 PyObjPtr& ClassAST::eval(PyContext& context){
     /*TODO
     //DMSG(("ClassAST::eval...%d\n", classFieldCode.size()));
@@ -810,7 +795,7 @@ PyObjPtr& CallExprAST::eval(PyContext& context) {
                 throw PyException::buildException("tuple needed after *");
             }
             
-            for (int i = 0; i < pVal.cast<PyObjTuple>()->values.size(); ++i){
+            for (unsigned int i = 0; i < pVal.cast<PyObjTuple>()->values.size(); ++i){
                 newArgTypeInfo.push_back(tmpInfo);
             }
             allValue.insert(allValue.end(), pVal.cast<PyObjTuple>()->values.begin(), pVal.cast<PyObjTuple>()->values.end());
@@ -838,5 +823,5 @@ PyObjPtr& CallExprAST::eval(PyContext& context) {
         }
     }
     
-    return funcObj->handler->handleCall(context, funcObj, allArgsTypeInfo, allValue);
+    return funcObj->handler->handleCall(context, funcObj, newArgTypeInfo, allValue);
 }

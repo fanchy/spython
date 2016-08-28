@@ -1274,6 +1274,46 @@ ExprASTPtr Parser::parse_atom(){
             m_curScanner->seek(1);
         }
     }
+    else if (m_curScanner->getToken()->strVal == "("){
+        m_curScanner->seek(1);
+        if (m_curScanner->getToken()->strVal == ")"){
+            m_curScanner->seek(1);
+            THROW_ERROR("() empty invalid");
+        }
+        else{
+            //parse_testlist_comp: test ( comp_for | (',' test)* [','] )
+            ExprASTPtr test = parse_test();
+            
+            if (m_curScanner->getToken()->strVal == ")"){
+               m_curScanner->seek(1);
+               return test;
+            }
+            
+            if (m_curScanner->getToken()->strVal != ","){
+                THROW_ERROR(", needed when define tuple value");
+            }
+            TupleExprAST* p = new TupleExprAST();
+            retExpr = p;
+            p->values.push_back(test);
+            
+            while (m_curScanner->getToken()->strVal == ","){
+                m_curScanner->seek(1);
+                test = parse_test();
+                if (!test){
+                    break;
+                }
+                p->values.push_back(test);
+            }
+            
+            if (m_curScanner->getToken()->strVal != ")"){
+                THROW_ERROR(") needed after (");
+            }
+            
+            m_curScanner->seek(1);
+            return retExpr;
+        }
+        
+    }
     else if (m_curScanner->getToken()->strVal == "{"){
         m_curScanner->seek(1);
         if (m_curScanner->getToken()->strVal == "}"){
@@ -1428,12 +1468,13 @@ ExprASTPtr Parser::parse_testlist(){
 //! dictorsetmaker: ( (test ':' test (comp_for | (',' test ':' test)* [','])) |
 //!                   (test (comp_for | (',' test)* [','])) )
 ExprASTPtr Parser::parse_dictorsetmaker(){
+    //DMSG(("cur:[%s]", m_curScanner->getToken()->strVal.c_str()));
     m_curScanner->skipEnterChar();
     ExprASTPtr testKey = parse_test();
     if (!testKey){
         return NULL;
     }
-    
+    //DMSG(("cur:[%s]", m_curScanner->getToken()->strVal.c_str()));
     DictorsetMakerExprAST* dict = new DictorsetMakerExprAST();
     ExprASTPtr ret = dict;
     
@@ -1520,11 +1561,33 @@ ExprASTPtr Parser::parse_classdef(){
 //!                          |'**' test)
 ExprASTPtr Parser::parse_arglist(){
     ExprASTPtr ret = new FuncArglist();
-    ExprASTPtr argument = parse_argument(ret);
+    ExprASTPtr argument;
+    if (m_curScanner->getToken()->strVal != "*"){
+        argument = parse_argument(ret);
+    }
 
     while (argument && m_curScanner->getToken()->strVal == ","){
         m_curScanner->seek(1);
         argument = parse_argument(ret);
+    }
+
+    if (m_curScanner->getToken()->strVal == "*"){
+        if (m_curScanner->getToken(1)->strVal != "*"){
+            m_curScanner->seek(1);
+            ExprASTPtr test = parse_test();
+            if (!test){
+                THROW_ERROR("test needed after *");
+            }
+            ret.cast<FuncArglist>()->addArg(NULL, test, "*");
+        }
+        else{
+            m_curScanner->seek(2);
+            ExprASTPtr test = parse_test();
+            if (!test){
+                THROW_ERROR("test needed after **");
+            }
+            ret.cast<FuncArglist>()->addArg(NULL, test, "**");
+        }
     }
     return ret;
 }

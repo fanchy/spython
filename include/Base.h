@@ -308,10 +308,16 @@ class PyObjNone:public PyObj {
 public:
     PyObjNone(){
         this->handler = singleton_t<PyNoneHandler>::instance_ptr();
+        selfObjInfo   = singleton_t<ObjIdTypeTraits<PyObjNone> >::instance_ptr()->objInfo;
+    }
+    PyObjNone(const ObjIdInfo& m){
+        this->handler = singleton_t<PyNoneHandler>::instance_ptr();
+        selfObjInfo   = m;
     }
     virtual const ObjIdInfo& getObjIdInfo(){
-        return singleton_t<ObjIdTypeTraits<PyObjNone> >::instance_ptr()->objInfo;
+        return selfObjInfo;
     }
+    ObjIdInfo       selfObjInfo;
 };
 typedef PyObjNone PyCallTmpStack;
 
@@ -326,7 +332,7 @@ public:
     }
     //std::vector<PyObjPtr>   tmpcache;
     
-    PyObjPtr                evalResult;
+    PyObjPtr evalResult;
     PyObjPtr curstack;//!cur using context
 };
 
