@@ -430,9 +430,10 @@ string ClassDefExprAST::dump(int nDepth){
 }
 
 PyObjPtr& ClassDefExprAST::eval(PyContext& context) {
-    //!TODO
-
-    return context.curstack;
+    PyObjPtr rval = new PyObjClassDef(classname.cast<VariableExprAST>()->name, testlist, suite);
+    PyObjPtr& lval = classname->eval(context);
+    lval = rval;
+    return lval;
 }
 
 
@@ -763,7 +764,7 @@ PyObjPtr& CallExprAST::eval(PyContext& context) {
     if (false == parg->bNeedRerangeArgs){
         for (unsigned int i = 0; i < parg->allArgs.size(); ++i){
             FuncArglist::ArgInfo& argInfo = parg->allArgs[i];
-            DMSG(("PyObjFuncDef::argType...%s\n", argInfo.argType.c_str()));
+            //DMSG(("PyObjFuncDef::argType...%s\n", argInfo.argType.c_str()));
             PyObjPtr& v = argInfo.argVal->eval(context);
             allValue.push_back(v);
         }
@@ -775,7 +776,7 @@ PyObjPtr& CallExprAST::eval(PyContext& context) {
     
     for (unsigned int i = 0; i < parg->allArgs.size(); ++i){
         FuncArglist::ArgInfo& argInfo = parg->allArgs[i];
-        DMSG(("PyObjFuncDef::argType...%s\n", argInfo.argType.c_str()));
+        //DMSG(("PyObjFuncDef::argType...%s\n", argInfo.argType.c_str()));
         ArgTypeInfo tmpInfo;
         if (argInfo.argType.empty()){
             newArgTypeInfo.push_back(tmpInfo);

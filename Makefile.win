@@ -4,8 +4,8 @@
 CPP      = g++.exe -D__DEBUG__
 CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-OBJ      = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o
-LINKOBJ  = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o
+OBJ      = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o src/objhandler/PyClassHandler.o src/objhandler/PyClassInstanceHandler.o
+LINKOBJ  = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o src/objhandler/PyClassHandler.o src/objhandler/PyClassInstanceHandler.o
 LIBS     = -L"D:/Program Files (x86)/Dev-Cpp/MinGW64/lib32" -L"D:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc -m32 -g3
 INCS     = -I"D:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"./include"
 CXXINCS  = -I"D:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++" -I"./include"
@@ -62,3 +62,9 @@ src/objhandler/PyDictHandler.o: src/objhandler/PyDictHandler.cpp
 
 src/objhandler/PyStrHandler.o: src/objhandler/PyStrHandler.cpp
 	$(CPP) -c src/objhandler/PyStrHandler.cpp -o src/objhandler/PyStrHandler.o $(CXXFLAGS)
+
+src/objhandler/PyClassHandler.o: src/objhandler/PyClassHandler.cpp
+	$(CPP) -c src/objhandler/PyClassHandler.cpp -o src/objhandler/PyClassHandler.o $(CXXFLAGS)
+
+src/objhandler/PyClassInstanceHandler.o: src/objhandler/PyClassInstanceHandler.cpp
+	$(CPP) -c src/objhandler/PyClassInstanceHandler.cpp -o src/objhandler/PyClassInstanceHandler.o $(CXXFLAGS)

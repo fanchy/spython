@@ -25,6 +25,8 @@
 #include "objhandler/PyTupleHandler.h"
 #include "objhandler/PyDictHandler.h"
 #include "objhandler/PyStrHandler.h"
+#include "objhandler/PyClassHandler.h"
+#include "objhandler/PyClassInstanceHandler.h"
 
 namespace ff {
 
@@ -187,31 +189,26 @@ public:
 
 class PyObjClassDef:public PyObj {
 public:
-    PyObjClassDef(ExprASTPtr& v):classASTPtr(v) {
+    PyObjClassDef(const std::string& s, ExprASTPtr& a, ExprASTPtr& b):name(s), testlist(a), suite(b) {
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
+        this->handler = singleton_t<PyClassHandler>::instance_ptr();
     }
-    virtual void dump();
-    virtual int getType() {
-        return PY_CLASS_DEF;
-    }
-    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args);
+
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
-    ExprASTPtr classASTPtr;
+    std::string             name;
+    ExprASTPtr              testlist;
+    ExprASTPtr              suite;
     ObjIdInfo  selfObjInfo;
 };
 
-class PyObjClassObj:public PyObj {
+class PyObjClassInstance:public PyObj {
 public:
-    PyObjClassObj(PyObjPtr& v):classDefPtr(v){
-    }
-
-    virtual void dump();
-    virtual int getType() {
-        return PY_CLASS_OBJ;
+    PyObjClassInstance(PyObjPtr& v):classDefPtr(v){
+        this->handler = singleton_t<PyClassInstanceHandler>::instance_ptr();
     }
 
     virtual const ObjIdInfo& getObjIdInfo(){
