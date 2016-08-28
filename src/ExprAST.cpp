@@ -364,7 +364,7 @@ PyObjPtr& DictorsetMakerExprAST::eval(PyContext& context) {
     PyObjPtr ret = new PyObjDict();
     for (unsigned int i = 0; i < testKey.size(); ++i){
         PyObjPtr pObjKey = testKey[i]->eval(context);
-        ret.cast<PyObjDict>()->values[pObjKey] = testVal[i]->eval(context);
+        ret.cast<PyObjDict>()->value[pObjKey] = testVal[i]->eval(context);
         
     }
     if (comp_for){
@@ -457,7 +457,7 @@ PyObjPtr& ForExprASTOld::eval(PyContext& context) {
             }
             PyObjTuple* pTuple = iterObj.cast<PyObjTuple>();
 
-            for (unsigned int i = 0; i < pTuple->values.size(); ++i){
+            for (unsigned int i = 0; i < pTuple->value.size(); ++i){
                 
                 //TODO this->iterTuple->handleAssign(context, pTuple->values[i]);
                 
@@ -721,7 +721,7 @@ PyObjPtr& TupleExprAST::eval(PyContext& context){
     PyObjPtr ret = tuple;
     for (unsigned int i = 0; i < values.size(); ++i){
         PyObjPtr v = values[i]->eval(context);
-        tuple->values.push_back(v);
+        tuple->value.push_back(v);
     }
     return context.cacheResult(ret);
 }
@@ -795,10 +795,10 @@ PyObjPtr& CallExprAST::eval(PyContext& context) {
                 throw PyException::buildException("tuple needed after *");
             }
             
-            for (unsigned int i = 0; i < pVal.cast<PyObjTuple>()->values.size(); ++i){
+            for (unsigned int i = 0; i < pVal.cast<PyObjTuple>()->value.size(); ++i){
                 newArgTypeInfo.push_back(tmpInfo);
             }
-            allValue.insert(allValue.end(), pVal.cast<PyObjTuple>()->values.begin(), pVal.cast<PyObjTuple>()->values.end());
+            allValue.insert(allValue.end(), pVal.cast<PyObjTuple>()->value.begin(), pVal.cast<PyObjTuple>()->value.end());
         }
         else if (argInfo.argType == "**"){
             PyObjPtr pVal = argInfo.argVal->eval(context);
@@ -806,9 +806,9 @@ PyObjPtr& CallExprAST::eval(PyContext& context) {
                 throw PyException::buildException("dict needed after **");
             }
             
-            PyObjDict::DictMap::iterator it = pVal.cast<PyObjDict>()->values.begin();
+            PyObjDict::DictMap::iterator it = pVal.cast<PyObjDict>()->value.begin();
             
-            for (; it != pVal.cast<PyObjDict>()->values.end(); ++it){
+            for (; it != pVal.cast<PyObjDict>()->value.end(); ++it){
                 const PyObjPtr& pKey = it->first;
                 if (pKey->getType() != PY_STR){
                     throw PyException::buildException("dict key must string");

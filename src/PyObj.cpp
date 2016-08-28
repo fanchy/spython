@@ -263,7 +263,7 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
                     if (argInfo.argType == "=" || argInfo.argType == "**"){
                         break;
                     }
-                    pVal.cast<PyObjTuple>()->values.push_back(argAssignVal[m]);
+                    pVal.cast<PyObjTuple>()->value.push_back(argAssignVal[m]);
                 }
                 continue;
             }
@@ -279,7 +279,7 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
                     }
                     const string& keyName = argInfo.argKey;
                     PyObjPtr tmpKey = new PyObjStr(keyName);
-                    pVal.cast<PyObjDict>()->values[tmpKey] = argAssignVal[m];
+                    pVal.cast<PyObjDict>()->value[tmpKey] = argAssignVal[m];
                 }
                 continue;
             }

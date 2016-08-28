@@ -116,7 +116,7 @@ public:
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
 
-    std::vector<PyObjPtr> values;
+    std::vector<PyObjPtr> value;
 };
 
 class PyObjDict:public PyObj {
@@ -144,7 +144,7 @@ public:
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
     typedef std::map<PyObjPtr, PyObjPtr, cmp_key> DictMap;
-    DictMap values;
+    DictMap value;
 };
 
 class PyObjFuncDef:public PyObj {

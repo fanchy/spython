@@ -9,11 +9,11 @@ using namespace ff;
 string PyTupleHandler::handleStr(const PyObjPtr& self) const {
     string ret;
     const PyObjTuple* pT = self.cast<PyObjTuple>();
-    for (size_t i = 0; i < pT->values.size(); ++i){
+    for (size_t i = 0; i < pT->value.size(); ++i){
         if (ret.empty())
-            ret += "("+pT->values[i]->handler->handleStr(pT->values[i]);
+            ret += "("+pT->value[i]->handler->handleStr(pT->value[i]);
         else
-            ret += ", " + pT->values[i]->handler->handleStr(pT->values[i]);
+            ret += ", " + pT->value[i]->handler->handleStr(pT->value[i]);
     }
     if (ret.empty()){
         ret = "()";
@@ -24,7 +24,7 @@ string PyTupleHandler::handleStr(const PyObjPtr& self) const {
     return ret;
 }
 bool PyTupleHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
-    return self.cast<PyObjTuple>()->values.empty() == false;
+    return self.cast<PyObjTuple>()->value.empty() == false;
 }
 bool PyTupleHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     if (val->getType() != self->getType()){
@@ -32,11 +32,11 @@ bool PyTupleHandler::handleEqual(PyContext& context, const PyObjPtr& self, const
     }
     const PyObjTuple* pT = self.cast<PyObjTuple>();
     const PyObjTuple* pV = val.cast<PyObjTuple>();
-    if (pT->values.size() != pV->values.size()){
+    if (pT->value.size() != pV->value.size()){
         return false;
     }
-    for (size_t i = 0; i < pT->values.size(); ++i){
-        if (pT->values[i]->handler->handleEqual(context, pT->values[i], pV->values[i]) == false){
+    for (size_t i = 0; i < pT->value.size(); ++i){
+        if (pT->value[i]->handler->handleEqual(context, pT->value[i], pV->value[i]) == false){
             return false;
         }
     }
@@ -49,8 +49,8 @@ bool PyTupleHandler::handleLessEqual(PyContext& context, const PyObjPtr& self, c
     const PyObjTuple* pT = self.cast<PyObjTuple>();
     const PyObjTuple* pV = val.cast<PyObjTuple>();
 
-    for (size_t i = 0; i < pT->values.size(); ++i){
-        if (pT->values[i]->handler->handleLessEqual(context, pT->values[i], pV->values[i])){
+    for (size_t i = 0; i < pT->value.size(); ++i){
+        if (pT->value[i]->handler->handleLessEqual(context, pT->value[i], pV->value[i])){
             return true;
         }
     }
@@ -63,8 +63,8 @@ bool PyTupleHandler::handleGreatEqual(PyContext& context, const PyObjPtr& self, 
     const PyObjTuple* pT = self.cast<PyObjTuple>();
     const PyObjTuple* pV = val.cast<PyObjTuple>();
 
-    for (size_t i = 0; i < pT->values.size(); ++i){
-        if (pT->values[i]->handler->handleGreatEqual(context, pT->values[i], pV->values[i])){
+    for (size_t i = 0; i < pT->value.size(); ++i){
+        if (pT->value[i]->handler->handleGreatEqual(context, pT->value[i], pV->value[i])){
             return true;
         }
     }
@@ -78,10 +78,10 @@ PyObjPtr& PyTupleHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr
 
     PyObjPtr ret   = new PyObjTuple();
     
-    ret.cast<PyObjTuple>()->values = self.cast<PyObjTuple>()->values;
-    ret.cast<PyObjTuple>()->values.insert(ret.cast<PyObjTuple>()->values.end(),
-                                            val.cast<PyObjTuple>()->values.begin(),
-                                            val.cast<PyObjTuple>()->values.end());
+    ret.cast<PyObjTuple>()->value = self.cast<PyObjTuple>()->value;
+    ret.cast<PyObjTuple>()->value.insert(ret.cast<PyObjTuple>()->value.end(),
+                                            val.cast<PyObjTuple>()->value.begin(),
+                                            val.cast<PyObjTuple>()->value.end());
     return context.cacheResult(ret);
 }
 PyObjPtr& PyTupleHandler::handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& val){
@@ -94,9 +94,9 @@ PyObjPtr& PyTupleHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr
         long newVal = self.cast<PyObjInt>()->value * val.cast<PyObjInt>()->value;
         
         for (long i = 0; i < newVal; ++i){
-            ret.cast<PyObjTuple>()->values.insert(ret.cast<PyObjTuple>()->values.end(),
-                                                    self.cast<PyObjTuple>()->values.begin(),
-                                                    self.cast<PyObjTuple>()->values.end());
+            ret.cast<PyObjTuple>()->value.insert(ret.cast<PyObjTuple>()->value.end(),
+                                                    self.cast<PyObjTuple>()->value.begin(),
+                                                    self.cast<PyObjTuple>()->value.end());
         }
 
         return context.cacheResult(ret);
