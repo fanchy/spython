@@ -16,6 +16,10 @@ PyObjPtr PyObjClassFunc::handleCall(PyObjPtr context, list<PyObjPtr>& args){
 
 PyObjPtr& PyObjClassInstance::getVar(PyObjPtr& self, unsigned int nFieldIndex)
 {
+    if (nFieldIndex < classDefPtr->m_objStack.size()){
+        return classDefPtr->getVar(classDefPtr, nFieldIndex);
+    }
+    
     if (nFieldIndex < m_objStack.size()) {
         return this->PyObj::getVar(self, nFieldIndex);
     }
@@ -25,11 +29,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyObjPtr& self, unsigned int nFieldIndex)
     }
     
     PyObjPtr& ret = m_objStack[nFieldIndex];
-    ret = classDefPtr->getVar(classDefPtr, nFieldIndex);
-    if (PY_FUNC_DEF == ret->getType()){
-        ret = new PyObjClassFunc(self, ret);
-    }
-    
+
     return ret;
 }
 

@@ -411,21 +411,6 @@ public:
     }
 };
 
-/// ClassAST - This class represents a class definition itself.
-
-class ClassAST: public ExprAST {
-public:
-    ExprASTPtr codeImplptr;
-    std::vector<ExprASTPtr> classFieldCode;
-public:
-    /*ClassAST():codeImplptr(new ClassCodeImpl()){
-    }*/
-    virtual int getType() {
-        return EXPR_CLASSDEF;
-    }
-
-    virtual PyObjPtr& eval(PyContext& context);
-};
 
 //! if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 class IfExprAST: public ExprAST {
@@ -704,6 +689,19 @@ public:
 class TrailerExprAST : public ExprAST {
 public:
     ExprASTPtr preExpr;
+};
+class DotGetFieldExprAST : public TrailerExprAST {
+public:
+    DotGetFieldExprAST(ExprASTPtr &n):fieldName(n) {
+    }
+    virtual int getType() {
+        return EXPR_DOT_GET_FIELD;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr& eval(PyContext& context);
+    
+public:
+    ExprASTPtr fieldName;
 };
 
 /// CallExprAST - Expression class for function calls.

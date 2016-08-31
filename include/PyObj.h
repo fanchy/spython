@@ -209,6 +209,9 @@ class PyObjClassInstance:public PyObj {
 public:
     PyObjClassInstance(PyObjPtr& v):classDefPtr(v){
         this->handler = singleton_t<PyClassInstanceHandler>::instance_ptr();
+        
+        selfObjInfo = classDefPtr->getObjIdInfo();
+        m_objStack.resize(classDefPtr->m_objStack.size(), PyObjTool::buildNULL());
     }
 
     virtual const ObjIdInfo& getObjIdInfo(){
@@ -216,7 +219,8 @@ public:
     }
     
     virtual PyObjPtr& getVar(PyObjPtr& self, unsigned int nFieldIndex);
-    PyObjPtr classDefPtr;
+    PyObjPtr            classDefPtr;
+    ObjIdInfo           selfObjInfo;
 };
 
 }

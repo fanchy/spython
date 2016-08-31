@@ -459,7 +459,8 @@ enum EEXPR_TYPE{
     EXPR_VAR,
     EXPR_BIN,
     EXPR_TUPLE,
-    EXPR_CALL
+    EXPR_CALL,
+    EXPR_DOT_GET_FIELD
 };
 
 

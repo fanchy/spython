@@ -24,14 +24,25 @@
     # i = 1
     
 
-def f1(a, b, c):
-    return a + b
+#def f1(a, b, c):
+    #return a + b
 
-s= f1(**{'a':1, 'b':2, 'c':5})
+#s= f1(**{'a':1, 'b':2, 'c':5})
 
 
-class foo:
+class Foo:
     a = 10
+    def go(self):
+        self.c = 20
+        return self
 
-f = foo()
-print(f)
+foo = Foo()
+#fa = Foo.a
+#fa = Foo.a
+foo.go(foo)
+#foo.c = 20
+fc = foo.c
+
+
+
+#print(f)

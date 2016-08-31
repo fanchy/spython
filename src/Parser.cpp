@@ -452,6 +452,7 @@ ExprASTPtr Parser::parse_continue_stmt(){
 //! return_stmt: 'return' [testlist]
 ExprASTPtr Parser::parse_return_stmt(){
     if (m_curScanner->getToken()->strVal == "return"){
+        DMSG(("curt:%s", m_curScanner->getToken()->strVal.c_str()));
         m_curScanner->seek(1);
         
         ExprASTPtr testlist = parse_testlist();
@@ -1388,6 +1389,7 @@ ExprASTPtr Parser::parse_lambdef(){
 
 //! trailer: '(' [arglist] ')' | '[' subscriptlist ']' | '.' NAME
 ExprASTPtr Parser::parse_trailer(){
+    DMSG(("cur:%s", m_curScanner->getToken()->strVal.c_str()));
     if (m_curScanner->getToken()->strVal == "("){ //!call func
         m_curScanner->seek(1);
         ExprASTPtr ret = new CallExprAST();
@@ -1416,8 +1418,10 @@ ExprASTPtr Parser::parse_trailer(){
         if (m_curScanner->getToken()->nTokenType != TOK_VAR){
             THROW_ERROR("name parse failed when parse trailer after .");
         }
+        DMSG(("cur2:%s", m_curScanner->getToken()->strVal.c_str()));
         ExprASTPtr name = parse_name();
-        return name;
+        DMSG(("cur3:%s", m_curScanner->getToken()->strVal.c_str()));
+        return new DotGetFieldExprAST(name);
     }
     return NULL;
 }

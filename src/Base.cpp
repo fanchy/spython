@@ -203,7 +203,7 @@ bool PyObjTool::handleBool(PyObjPtr b){
 
 
 PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
-    //DMSG(("filedname %s\n", this->name.c_str()));
+    DMSG(("filedname %s\n", this->name.c_str()));
     
     PyObjPtr& context = pycontext.curstack;
     const ObjIdInfo& p = context->getObjIdInfo();
@@ -217,8 +217,7 @@ PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
         object2index.resize(p.nObjectId + 1, -1);
         object2index[p.nObjectId] = context->getFieldNum();
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
-        
-        //DMSG(("filedname2 %s\n", this->name.c_str()));
+        DMSG(("filedname2 %s %d\n", this->name.c_str(), object2index[p.nObjectId]));
     }
     
     int& nIndex = object2index[p.nObjectId];

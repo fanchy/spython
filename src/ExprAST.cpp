@@ -433,6 +433,12 @@ PyObjPtr& ClassDefExprAST::eval(PyContext& context) {
     PyObjPtr rval = new PyObjClassDef(classname.cast<VariableExprAST>()->name, testlist, suite);
     PyObjPtr& lval = classname->eval(context);
     lval = rval;
+    if (suite){
+        PyContextBackUp backup(context);
+        context.curstack = rval;
+        
+        suite->eval(context);
+    }
     return lval;
 }
 
@@ -726,22 +732,23 @@ PyObjPtr& TupleExprAST::eval(PyContext& context){
     }
     return context.cacheResult(ret);
 }
-
-PyObjPtr& ClassAST::eval(PyContext& context){
-    /*TODO
-    //DMSG(("ClassAST::eval...%d\n", classFieldCode.size()));
-    PyObjPtr obj = new PyObjClassDef(codeImplptr);
-    PyObjPtr& v = this->codeImplptr.cast<ClassCodeImpl>()->varAstforName->getFieldVal(context);
-    v = obj;
-    
-    for (unsigned int i = 0; i < classFieldCode.size(); ++i){
-        classFieldCode[i]->eval(obj);
+//!dot get 
+string DotGetFieldExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
     }
-    //obj->PyObj::dump();DMSG(("\n"));
-    //DMSG(("ClassAST::eval...end\n"));
-    
-    return obj;*/
-    return context.curstack;
+    ret += preExpr->dump(0) + "." + fieldName->dump(0);
+    return ret;
+}
+
+PyObjPtr& DotGetFieldExprAST::eval(PyContext& context){
+    PyObjPtr obj = preExpr->eval(context);
+    PyContextBackUp backup(context);
+    context.curstack = obj;
+    string strObj = PyObj::dump(obj);
+    printf("%s:obj:\n %s", fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
+    return fieldName->eval(context);
 }
 std::string CallExprAST::dump(int nDepth){
     string ret;
