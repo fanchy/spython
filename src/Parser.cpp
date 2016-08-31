@@ -318,7 +318,7 @@ ExprASTPtr Parser::parse_expr_stmt(){
         return new BinaryExprAST("=", testlist, testlist2);
     }
     else{
-        return NULL;
+        return testlist;
     }
     
     return NULL;

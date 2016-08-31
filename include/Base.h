@@ -306,7 +306,7 @@ public:
 };
 class PyObjNone:public PyObj {
 public:
-    PyObjNone(){
+    PyObjNone(bool b = false):isNull(b){
         this->handler = singleton_t<PyNoneHandler>::instance_ptr();
         selfObjInfo   = singleton_t<ObjIdTypeTraits<PyObjNone> >::instance_ptr()->objInfo;
     }
@@ -318,7 +318,10 @@ public:
         return selfObjInfo;
     }
     ObjIdInfo       selfObjInfo;
+    bool            isNull;
 };
+#define IS_NULL(o) ((o)->getType() == PY_NONE && (o).cast<PyObjNone>()->isNull)
+
 typedef PyObjNone PyCallTmpStack;
 
 class PyContext{

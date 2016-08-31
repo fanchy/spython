@@ -16,19 +16,21 @@ PyObjPtr PyObjClassFunc::handleCall(PyObjPtr context, list<PyObjPtr>& args){
 
 PyObjPtr& PyObjClassInstance::getVar(PyObjPtr& self, unsigned int nFieldIndex)
 {
-    if (nFieldIndex < classDefPtr->m_objStack.size()){
-        return classDefPtr->getVar(classDefPtr, nFieldIndex);
+    PyObjPtr& ret = classDefPtr->getVar(classDefPtr, nFieldIndex);
+
+    if (false == IS_NULL(ret)){
+        return ret;
     }
-    
+
     if (nFieldIndex < m_objStack.size()) {
-        return this->PyObj::getVar(self, nFieldIndex);
+        ret = this->PyObj::getVar(self, nFieldIndex);
     }
 
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
         m_objStack.push_back(PyObjTool::buildNULL());
     }
     
-    PyObjPtr& ret = m_objStack[nFieldIndex];
+    ret = m_objStack[nFieldIndex];
 
     return ret;
 }

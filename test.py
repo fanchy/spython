@@ -39,8 +39,10 @@ class Foo:
 foo = Foo()
 #fa = Foo.a
 #fa = Foo.a
+
 foo.go(foo)
-#foo.c = 20
+
+foo.c = 20
 fc = foo.c
 
 

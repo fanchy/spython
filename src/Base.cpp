@@ -152,12 +152,17 @@ struct NoneTraits{
     }
     PyObjPtr retPtr;
 };
-
+struct NULLTraits{
+    NULLTraits(){
+        retPtr = new PyObjNone(true);
+    }
+    PyObjPtr retPtr;
+};
 PyObjPtr& PyObjTool::buildNone(){
     return singleton_t<NoneTraits>::instance_ptr()->retPtr;
 }
 PyObjPtr PyObjTool::buildNULL(){
-    return PyObjTool::buildNone();
+    return singleton_t<NULLTraits>::instance_ptr()->retPtr;
 }
 
 
