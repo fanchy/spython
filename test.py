@@ -30,6 +30,7 @@
 #s= f1(**{'a':1, 'b':2, 'c':5})
 class F:
     def hi(self):
+        self.d = 99
         print('hi')
         return 1023
 
@@ -58,5 +59,5 @@ print('fc', fc)
 
 
 fhi = foo.hi()
-
+fd  = foo.d
 # a, b, c = (1, 2, 3)
