@@ -519,6 +519,10 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
     switch (optype){
         case OP_ASSIGN:{
             PyObjPtr rval = right->eval(context);
+            
+            if (left->getType() == EXPR_DOT_GET_FIELD){ //!special process class instance filed assign
+                return left.cast<DotGetFieldExprAST>()->assignToField(context, rval);
+            }
             //DMSG(("assign %s\n%s,%s\n", left->dump(0).c_str(), right->dump(0).c_str(), rval->handler->handleStr(rval).c_str()));
 
             PyObjPtr& lval = left->eval(context);
@@ -634,50 +638,6 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             }
             return context.cacheResult(PyObjTool::buildFalse());
         }break;
-        /*
-        case TOK_EQ:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr rval = right->eval(context);
-            //DMSG(("BinaryExprAST Op:%s begin\n", this->name.c_str()));
-            //lval->dump();
-            //rval->dump();
-            //DMSG(("BinaryExprAST Op:%s begin\n", this->name.c_str()));
-            if (lval && rval && lval->handleEQ(rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case TOK_AND:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr rval = right->eval(context);
-            //DMSG(("BinaryExprAST TOK_AND Op:%s begin\n", this->name.c_str()));
-            //lval->dump();
-            //rval->dump();
-            //DMSG(("BinaryExprAST TOK_AND Op:%s begin\n", this->name.c_str()));
-            if (PyObjTool::handleBool(lval) && PyObjTool::handleBool(rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case TOK_OR:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr rval = right->eval(context);
-            //DMSG(("BinaryExprAST TOK_OR Op:%s begin\n", this->name.c_str()));
-            //lval->dump();
-            //rval->dump();
-            //DMSG(("BinaryExprAST TOK_OR Op:%s end\n", this->name.c_str()));
-            if (PyObjTool::handleBool(lval) || PyObjTool::handleBool(rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case TOK_FIELD:{
-            PyObjPtr lval = left->eval(context);
-            //DMSG(("BinaryExprAST TOK_FIELD Op:%s %s %s begin\n", this->name.c_str(), left->name.c_str(), right->name.c_str()));
-            PyObjPtr& v = right->getFieldVal(lval);
-            
-            return v;
-        }break;*/
         default:
             return context.cacheResult(PyObjTool::buildNone());
     }
@@ -685,21 +645,6 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
     return context.curstack;
 }
 
-PyObjPtr& BinaryExprAST::getFieldVal(PyObjPtr& context){
-    /*
-    switch (op){
-        case TOK_FIELD:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr& v = right->getFieldVal(lval);
-            return v;
-        }
-        break;
-        default:
-            return context;
-    }
-    */
-    return context;
-}
 string BinaryExprAST::dump(int nDepth){
     string ret;
     for (int i = 0; i < nDepth; ++i){
@@ -751,10 +696,26 @@ PyObjPtr& DotGetFieldExprAST::eval(PyContext& context){
     PyObjPtr obj = preExpr->eval(context);
     PyContextBackUp backup(context);
     context.curstack = obj;
-    string strObj = PyObj::dump(obj);
-    //printf("%s:obj:\n %s", fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
+    //string strObj = PyObj::dump(obj);
+    //printf("%p %s:obj:\n %s", obj.get(), fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
     return fieldName->eval(context);
 }
+
+PyObjPtr& DotGetFieldExprAST::assignToField(PyContext& context, PyObjPtr& v){
+    PyObjPtr obj = preExpr->eval(context);
+    if (obj->getType() == PY_CLASS_INST){
+        return obj.cast<PyObjClassInstance>()->assignToField(context, obj, fieldName, v);
+    }
+    
+    PyContextBackUp backup(context);
+    context.curstack = obj;
+    //string strObj = PyObj::dump(obj);
+    //printf("%s:obj:\n %s", fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
+    PyObjPtr& ref = fieldName->eval(context);
+    ref = v;
+    return ref;
+}
+
 std::string CallExprAST::dump(int nDepth){
     string ret;
     for (int i = 0; i < nDepth; ++i){

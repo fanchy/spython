@@ -59,11 +59,6 @@ public:
         return this->getFieldVal(context);
     }
     
-    PyObjPtr handleAssign(PyObjPtr context, PyObjPtr val){
-        //PyObjPtr& v = this->getFieldVal(context);
-        //v = val;
-        return val;
-    }
     virtual int getType() {
         return EXPR_VAR;
     }
@@ -308,7 +303,6 @@ public:
     }
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
-    virtual PyObjPtr& getFieldVal(PyObjPtr& context);
 };
 
 class ReturnAST : public ExprAST {
@@ -700,6 +694,7 @@ public:
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
     
+    PyObjPtr& assignToField(PyContext& context, PyObjPtr& v);
 public:
     ExprASTPtr fieldName;
 };

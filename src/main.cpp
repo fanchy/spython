@@ -42,8 +42,8 @@ int main(int argc, char** argv) {
                 printf("eval Ê§°Ü£¡\n");
                 return 0;
             }
-            //string strObj = PyObj::dump(context.curstack);
-            //printf("ret:\n %s", strObj.c_str());
+            string strObj = PyObj::dump(context.curstack);
+            printf("ret:\n %s", strObj.c_str());
         }else{
             printf("parser.parse Ê§°Ü£¡\n");
         }

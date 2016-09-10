@@ -15,9 +15,33 @@ bool PyObjFuncDef::hasSelfParam(){
     }
     return false;
 }
+PyObjPtr& PyObjClassInstance::assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v){
+    PyContextBackUp backup(context);
+    context.curstack = self;
+    
+    unsigned int nFieldIndex = fieldName->getFieldIndex(context);
 
+    for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
+        m_objStack.push_back(PyObjTool::buildNULL());
+    }
+    
+    PyObjPtr& ret = m_objStack[nFieldIndex];
+    ret = v;
+    return ret;
+}
 PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex)
 {
+    if (nFieldIndex < m_objStack.size()) {
+        PyObjPtr& ret = m_objStack[nFieldIndex];
+        //DMSG(("PyObjClassInstance::getVar...%u %d, %ds", nFieldIndex, ret->getType(), ret->handler->handleStr(ret).c_str()));
+        if (false == IS_NULL(ret)){
+            if (ret->getType() == EXPR_FUNCDEF){
+                return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
+            }
+            return ret;
+        }
+    }
+    
     PyObjPtr& ret = classDefPtr->getVar(context, classDefPtr, nFieldIndex);
 
     if (false == IS_NULL(ret)){
@@ -25,10 +49,6 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
             return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
         }
         return ret;
-    }
-
-    if (nFieldIndex < m_objStack.size()) {
-        ret = this->PyObj::getVar(context, self, nFieldIndex);
     }
 
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){

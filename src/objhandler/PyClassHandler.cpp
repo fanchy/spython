@@ -17,7 +17,7 @@ bool PyClassHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return true;
 }
 bool PyClassHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
-    if (val->getType() == EXPR_CLASSDEF && self.get() == val.get()){
+    if (val->getType() == PY_CLASS_DEF && self.get() == val.get()){
         return true;
     }
     return false;

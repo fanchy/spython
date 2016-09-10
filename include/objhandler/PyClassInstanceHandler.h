@@ -18,7 +18,7 @@ public:
     PyClassInstanceHandler();
     
     virtual int getType() const {
-        return PY_CLASS_OBJ;
+        return PY_CLASS_INST;
     }
     virtual std::string handleStr(const PyObjPtr& self) const;
     virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;

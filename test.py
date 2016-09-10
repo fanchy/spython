@@ -39,13 +39,15 @@ class Foo:
         return a
 
 foo = Foo()
+foo.c = 201
+foo.a = 20
 Fa = Foo.a
 fa = foo.a
-
+print('fa', Fa, fa)
 foo.go()
 
-foo.c = 202
+#foo.c = 202
 fc = foo.c
-print 1, 2, 3
+#print 1, 2, 3
 print('fc', fc)
 #print(f)

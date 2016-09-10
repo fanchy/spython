@@ -203,7 +203,7 @@ public:
         this->handler = singleton_t<PyClassInstanceHandler>::instance_ptr();
         
         selfObjInfo = classDefPtr->getObjIdInfo();
-        m_objStack.resize(classDefPtr->m_objStack.size(), PyObjTool::buildNULL());
+        //m_objStack.resize(classDefPtr->m_objStack.size(), PyObjTool::buildNULL());
     }
 
     virtual const ObjIdInfo& getObjIdInfo(){
@@ -211,6 +211,10 @@ public:
     }
     
     virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
+    
+    PyObjPtr& assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v); //!special process field assign
+    
+    
     PyObjPtr            classDefPtr;
     ObjIdInfo           selfObjInfo;
 };

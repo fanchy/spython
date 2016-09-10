@@ -44,7 +44,7 @@ enum PyObjType{
     PY_FUNC_DEF,
     PY_CLASS_FUNC,
     PY_CLASS_DEF,
-    PY_CLASS_OBJ,
+    PY_CLASS_INST,
     PY_MOD,
     PY_BOOL,
     PY_TUPLE,
@@ -198,6 +198,7 @@ public:
     virtual ~ExprAST() {}
     virtual PyObjPtr& eval(PyContext& context) = 0;
 
+    unsigned int getFieldIndex(PyContext& context);
     virtual PyObjPtr& getFieldVal(PyContext& context);
     virtual int getType() {
         return 0;
@@ -214,7 +215,7 @@ public:
         ret += tmp;
         return ret;
     }
-    std::vector<std::vector<int> >  module2objcet2fieldIndex;
+    std::vector<std::vector<unsigned int> >  module2objcet2fieldIndex;
 };
 
 typedef SmartPtr<ExprAST> ExprASTPtr;

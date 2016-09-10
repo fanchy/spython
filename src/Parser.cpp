@@ -1231,7 +1231,7 @@ ExprASTPtr Parser::parse_power(){
         p->trailer.push_back(trailer);
         p->merge = trailer;
     }
-    return ret;
+    return p->merge;
 }
 
 //! atom: ('(' [yield_expr|testlist_comp] ')' |
