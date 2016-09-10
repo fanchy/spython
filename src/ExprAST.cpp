@@ -435,7 +435,13 @@ string ClassDefExprAST::dump(int nDepth){
 }
 
 PyObjPtr& ClassDefExprAST::eval(PyContext& context) {
-    PyObjPtr rval = new PyObjClassDef(classname.cast<VariableExprAST>()->name, testlist, suite);
+    vector<PyObjPtr> parentClass;
+
+    if (testlist){
+        PyObjPtr inheritClass = testlist->eval(context);
+        parentClass = inheritClass.cast<PyObjTuple>()->value;
+    }
+    PyObjPtr rval = new PyObjClassDef(classname.cast<VariableExprAST>()->name, parentClass, suite);
     PyObjPtr& lval = classname->eval(context);
     lval = rval;
     if (suite){
@@ -522,6 +528,9 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context) {
             
             if (left->getType() == EXPR_DOT_GET_FIELD){ //!special process class instance filed assign
                 return left.cast<DotGetFieldExprAST>()->assignToField(context, rval);
+            }
+            else if (left->getType() == EXPR_TUPLE){ //!special process assign for tuple
+                return left.cast<TupleExprAST>()->assignToField(context, rval);
             }
             //DMSG(("assign %s\n%s,%s\n", left->dump(0).c_str(), right->dump(0).c_str(), rval->handler->handleStr(rval).c_str()));
 
@@ -681,6 +690,26 @@ PyObjPtr& TupleExprAST::eval(PyContext& context){
         tuple->value.push_back(v);
     }
     return context.cacheResult(ret);
+}
+
+PyObjPtr& TupleExprAST::assignToField(PyContext& context, PyObjPtr& v){
+    if (v->getType() != PY_TUPLE){
+        throw PyException::buildException("value must be tuple");
+    }
+    
+    PyObjTuple* tuple = v.cast<PyObjTuple>();
+    if (values.size() != tuple->value.size()){
+        throw PyException::buildException("value size invalid");
+    }
+    
+    for (unsigned int i = 0; i < values.size(); ++i){
+        if (values[i]->getType() != EXPR_VAR){
+            throw PyException::buildException("left tuple must be var");
+        }
+        PyObjPtr& ref = values[i]->eval(context);
+        ref = tuple->value[i];
+    }
+    return v;
 }
 //!dot get 
 string DotGetFieldExprAST::dump(int nDepth){

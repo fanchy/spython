@@ -215,7 +215,7 @@ public:
         ret += tmp;
         return ret;
     }
-    std::vector<std::vector<unsigned int> >  module2objcet2fieldIndex;
+    std::vector<std::vector<int> >  module2objcet2fieldIndex;
 };
 
 typedef SmartPtr<ExprAST> ExprASTPtr;

@@ -390,22 +390,6 @@ public:
     virtual PyObjPtr& getFieldVal(PyContext& context);
 };
 
-
-class  ClassCodeImpl: public ExprAST{
-public:
-    ExprASTPtr         varAstforName;
-public:
-    ClassCodeImpl(){
-        //this->varAstforName = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(p->name);
-        //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
-    }
-
-    virtual int getType() {
-        return EXPR_CLASSDEF;
-    }
-};
-
-
 //! if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 class IfExprAST: public ExprAST {
 public:
@@ -556,7 +540,7 @@ public:
 class ClassDefExprAST: public ExprAST {
 public:
     ExprASTPtr              classname;
-    ExprASTPtr              testlist;
+    ExprASTPtr              testlist;//! inherit parent class
     ExprASTPtr              suite;
 
 public:
@@ -634,6 +618,7 @@ public:
         return EXPR_TUPLE;
     }
     virtual PyObjPtr& eval(PyContext& context);
+    PyObjPtr& assignToField(PyContext& context, PyObjPtr& v);
 };
 
 class FuncArglist : public ExprAST {

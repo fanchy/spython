@@ -1466,6 +1466,23 @@ ExprASTPtr Parser::parse_exprlist(){
 //! testlist: test (',' test)* [',']
 ExprASTPtr Parser::parse_testlist(){
     ExprASTPtr retExpr = parse_test();
+
+    if (m_curScanner->getToken()->strVal == ","){
+        ExprASTPtr ret = new TupleExprAST();
+        ret.cast<TupleExprAST>()->values.push_back(retExpr);
+        
+        while (m_curScanner->getToken()->strVal == ","){
+            m_curScanner->seek(1);
+            
+            ExprASTPtr test = parse_test();
+            if (!test){
+                break;
+            }
+            ret.cast<TupleExprAST>()->values.push_back(test);
+        }
+        return ret;
+    }
+
     return retExpr;
 }
 
@@ -1544,6 +1561,19 @@ ExprASTPtr Parser::parse_classdef(){
     }
     ExprASTPtr name = parse_name();
 
+    if (m_curScanner->getToken()->strVal == "("){ //!inherit parent class
+        m_curScanner->seek(1);
+        ExprASTPtr testlist = parse_testlist();
+        if (!testlist){
+            THROW_ERROR("name needed after class");
+        }
+        if (m_curScanner->getToken()->strVal != ")"){
+            THROW_ERROR(") needed after class (");
+        }
+        m_curScanner->seek(1);
+        f->testlist   = testlist;
+    }
+    
     if (m_curScanner->getToken()->strVal != ":"){
         THROW_ERROR(": needed after class");
     }
@@ -1658,21 +1688,24 @@ ExprASTPtr Parser::parse_testlist1(){
     if (!test){
         return NULL;
     }
-    StmtAST* stmp = new StmtAST();
-    ExprASTPtr ret= stmp;
     
-    stmp->exprs.push_back(test);
-    
-    while (m_curScanner->getToken()->strVal == ","){
-        m_curScanner->seek(1);
+    if (m_curScanner->getToken()->strVal == ","){
+        ExprASTPtr ret = new TupleExprAST();
+        ret.cast<TupleExprAST>()->values.push_back(test);
         
-        test = parse_test();
-        if (!test){
-            THROW_ERROR("test expr needed when parse testlist1 after ,");
+        while (m_curScanner->getToken()->strVal == ","){
+            m_curScanner->seek(1);
+            
+            ExprASTPtr test = parse_test();
+            if (!test){
+                break;
+            }
+            ret.cast<TupleExprAST>()->values.push_back(test);
         }
-        stmp->exprs.push_back(test);
+        return ret;
     }
-    return NULL;
+    
+    return test;
 }
 
 //! encoding_decl: NAME

@@ -181,7 +181,7 @@ public:
 
 class PyObjClassDef:public PyObj {
 public:
-    PyObjClassDef(const std::string& s, ExprASTPtr& a, ExprASTPtr& b):name(s), testlist(a), suite(b) {
+    PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a, ExprASTPtr& b):name(s), parentClass(a), suite(b) {
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
@@ -192,7 +192,7 @@ public:
         return selfObjInfo;
     }
     std::string             name;
-    ExprASTPtr              testlist;
+    std::vector<PyObjPtr>   parentClass;
     ExprASTPtr              suite;
     ObjIdInfo  selfObjInfo;
 };

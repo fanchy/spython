@@ -51,6 +51,18 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
         return ret;
     }
 
+    //!parent class
+    PyObjClassDef* po = classDefPtr.cast<PyObjClassDef>();
+    for (unsigned int i = 0; i <= po->parentClass.size(); ++i){
+        ret = po->parentClass[i]->getVar(context, po->parentClass[i], nFieldIndex);
+        if (false == IS_NULL(ret)){
+            if (ret->getType() == EXPR_FUNCDEF){
+                return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
+            }
+            return ret;
+        }
+    }
+
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
         m_objStack.push_back(PyObjTool::buildNULL());
     }

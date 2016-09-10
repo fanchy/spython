@@ -214,7 +214,7 @@ unsigned int ExprAST::getFieldIndex(PyContext& pycontext){
         module2objcet2fieldIndex.resize(p.nModuleId + 1);
     }
 
-    vector<unsigned int>& object2index = module2objcet2fieldIndex[p.nModuleId];
+    vector<int>& object2index = module2objcet2fieldIndex[p.nModuleId];
     
     if (p.nObjectId >= object2index.size()){
         object2index.resize(p.nObjectId + 1, -1);
@@ -223,12 +223,12 @@ unsigned int ExprAST::getFieldIndex(PyContext& pycontext){
         //DMSG(("filedname2 %s %d\n", this->name.c_str(), object2index[p.nObjectId]));
     }
     
-    unsigned int& nIndex = object2index[p.nObjectId];
+    int& nIndex = object2index[p.nObjectId];
     if (nIndex < 0){
         nIndex = context->getFieldNum();
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
     }
-    return nIndex;
+    return (unsigned int)nIndex;
 }
 PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
     //DMSG(("filedname %s\n", this->name.c_str()));

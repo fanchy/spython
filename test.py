@@ -29,7 +29,6 @@
 
 #s= f1(**{'a':1, 'b':2, 'c':5})
 
-
 class Foo:
     a = 10
     def go(self):
@@ -51,3 +50,6 @@ fc = foo.c
 #print 1, 2, 3
 print('fc', fc)
 #print(f)
+
+
+a, b, c = (1, 2, 3)
