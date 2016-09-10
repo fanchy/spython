@@ -21,7 +21,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
     PyObjPtr& ret = classDefPtr->getVar(context, classDefPtr, nFieldIndex);
 
     if (false == IS_NULL(ret)){
-        if (ret->getType() == EXPR_FUNCDEF && ret.cast<PyObjFuncDef>()->hasSelfParam()){
+        if (ret->getType() == EXPR_FUNCDEF){
             return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
         }
         return ret;

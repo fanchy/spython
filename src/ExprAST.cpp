@@ -60,14 +60,19 @@ string StmtAST::dump(int nDepth){
 }
 
 PyObjPtr& PrintAST::eval(PyContext& context){
-    if (exprs.empty()){
-        return context.cacheResult(PyObjTool::buildNone());
+    for (unsigned int i = 0; i < exprs.size(); ++i){
+        PyObjPtr v = exprs[i]->eval(context);
+        string   s = v->handler->handleStr(v);
+        
+        if (i == 0){
+            printf("%s", s.c_str());
+        }
+        else{
+            printf(" %s", s.c_str());
+        }
     }
-    unsigned int i = 0;
-    for (; i < exprs.size() -1; ++i){
-        exprs[i]->eval(context);
-    }
-    return exprs[i]->eval(context);
+    printf("\n");
+    return context.cacheResult(PyObjTool::buildNone());
 }
 
 string PrintAST::dump(int nDepth){
@@ -747,7 +752,7 @@ PyObjPtr& DotGetFieldExprAST::eval(PyContext& context){
     PyContextBackUp backup(context);
     context.curstack = obj;
     string strObj = PyObj::dump(obj);
-    printf("%s:obj:\n %s", fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
+    //printf("%s:obj:\n %s", fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
     return fieldName->eval(context);
 }
 std::string CallExprAST::dump(int nDepth){

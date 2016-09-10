@@ -15,7 +15,7 @@ string PyObj::dump(PyObjPtr& self) {
     const ObjIdInfo& p = self->getObjIdInfo();
     for (unsigned int i = 0; i < self->m_objStack.size(); ++i) {
         
-        string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFiledName(p.nModuleId, p.nObjectId, i);
+        string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFieldName(p.nModuleId, p.nObjectId, i);
         if (self->m_objStack.size() < 10)
             snprintf(msg, sizeof(msg), "[%d-%d] %d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
         else 
@@ -208,7 +208,7 @@ bool PyObjTool::handleBool(PyObjPtr b){
 
 
 PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
-    DMSG(("filedname %s\n", this->name.c_str()));
+    //DMSG(("filedname %s\n", this->name.c_str()));
     
     PyObjPtr& context = pycontext.curstack;
     const ObjIdInfo& p = context->getObjIdInfo();

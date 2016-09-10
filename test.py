@@ -46,7 +46,6 @@ foo.go()
 
 foo.c = 202
 fc = foo.c
-fd = foo.say(123)
-
-
+print 1, 2, 3
+print('fc', fc)
 #print(f)

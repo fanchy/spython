@@ -66,16 +66,16 @@ enum ETokenType {
 class PyMetaType{
 public:
     inline int allocFieldId(const std::string& name){
-        std::map<std::string, int>::iterator it = name2filed.find(name);
-        if (it != name2filed.end()){
+        std::map<std::string, int>::iterator it = name2field.find(name);
+        if (it != name2field.end()){
             return it->second;
         }
-        int n = name2filed.size();
-        name2filed[name] = n;
+        int n = name2field.size();
+        name2field[name] = n;
         return n;
     }
     inline std::string id2name(int nFieldId){
-        for (std::map<std::string, int>::iterator it = name2filed.begin(); it != name2filed.end(); ++it){
+        for (std::map<std::string, int>::iterator it = name2field.begin(); it != name2field.end(); ++it){
             if (it->second == nFieldId){
                 return it->first;
             }
@@ -84,7 +84,7 @@ public:
     }
 
 private:
-    std::map<std::string, int> name2filed;
+    std::map<std::string, int> name2field;
 };
 
 class ParseHelper;
@@ -123,7 +123,7 @@ struct ObjFieldMetaData{
     //!module id -> objectid -> fieldid -> fieldname
     std::map<int, std::map<int,  std::map<int, std::string> > >        module2object2fieldname;
 
-    const std::string& getFiledName(int moduleid, int objectid, int nFieldId) {
+    const std::string& getFieldName(int moduleid, int objectid, int nFieldId) {
         return module2object2fieldname[moduleid][objectid][nFieldId];
     }
     int allocObjId() {
