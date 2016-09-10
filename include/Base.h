@@ -142,7 +142,7 @@ struct ObjIdTypeTraits{
     ObjIdInfo objInfo;
 };
 class PyObjHandler;
-
+class PyContext;
 class PyObj {
 public:
     typedef SmartPtr<PyObj> PyObjPtr;
@@ -153,7 +153,7 @@ public:
     int getFieldNum() const { return m_objStack.size(); }
     static std::string dump(PyObjPtr& self);
 
-    virtual PyObjPtr& getVar(PyObjPtr& self, unsigned int nFieldIndex);
+    virtual PyObjPtr& getVar(PyContext& c, PyObjPtr& self, unsigned int nFieldIndex);
     virtual const ObjIdInfo& getObjIdInfo() = 0;
 
 public:

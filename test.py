@@ -35,16 +35,18 @@ class Foo:
     def go(self):
         self.c = 20
         return self
+    def say(a):
+        return a
 
 foo = Foo()
-#fa = Foo.a
-#fa = Foo.a
+Fa = Foo.a
+fa = foo.a
 
-foo.go(foo)
+foo.go()
 
-foo.c = 20
+foo.c = 202
 fc = foo.c
-
+fd = foo.say(123)
 
 
 #print(f)

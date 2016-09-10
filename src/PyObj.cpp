@@ -5,25 +5,30 @@
 using namespace std;
 using namespace ff;
 
-
-PyObjPtr PyObjClassFunc::handleCall(PyObjPtr context, list<PyObjPtr>& args){
-    //DMSG(("PyObjClassFunc::handleCall...\n"));
-    //args.insert(args.begin(), classSelf);
-    args.push_front(classSelf);
-    return NULL;//funcDefPtr.cast<PyObjFuncDef>()->handleCall(context, args);
+bool PyObjFuncDef::hasSelfParam(){
+    ParametersExprAST* pParametersExprAST = parameters.cast<ParametersExprAST>();
+    if (pParametersExprAST->allParam.empty() == false){
+        ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[0];
+        if (paramInfo.paramKey->getType() == EXPR_VAR && paramInfo.paramKey.cast<VariableExprAST>()->name == "self"){
+            return true;
+        }
+    }
+    return false;
 }
 
-
-PyObjPtr& PyObjClassInstance::getVar(PyObjPtr& self, unsigned int nFieldIndex)
+PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex)
 {
-    PyObjPtr& ret = classDefPtr->getVar(classDefPtr, nFieldIndex);
+    PyObjPtr& ret = classDefPtr->getVar(context, classDefPtr, nFieldIndex);
 
     if (false == IS_NULL(ret)){
+        if (ret->getType() == EXPR_FUNCDEF && ret.cast<PyObjFuncDef>()->hasSelfParam()){
+            return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
+        }
         return ret;
     }
 
     if (nFieldIndex < m_objStack.size()) {
-        ret = this->PyObj::getVar(self, nFieldIndex);
+        ret = this->PyObj::getVar(context, self, nFieldIndex);
     }
 
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
@@ -46,6 +51,18 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
         ParametersExprAST* pParametersExprAST = parameters.cast<ParametersExprAST>();
         unsigned int hasConsumeArg = 0;
         unsigned int hasAssignArgNum = 0;
+        
+        if (classInstance){//!self param
+            if (pParametersExprAST->allParam.empty()){
+                throw PyException::buildException("too many arg num");
+            }
+            ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[0];
+            
+            PyObjPtr& ref = paramInfo.paramKey->eval(context);
+            ref = classInstance;
+            ++hasAssignArgNum;
+        }
+        
         for (; hasAssignArgNum < pParametersExprAST->allParam.size(); ++hasAssignArgNum){
             unsigned int j = hasAssignArgNum;
             ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[j];
@@ -70,6 +87,7 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
                 PyObjPtr& ref = paramInfo.paramKey->eval(context);
                 ref = argAssignVal[hasConsumeArg];
                 ++hasConsumeArg;
+                ++hasAssignArgNum;
             }
             else if (allArgsVal[hasConsumeArg].argType == "="){//!具名参数  f(a=1, b=2, c=3)
                 //!如果这个参数是具名参数，后边的全部都是具名参数了

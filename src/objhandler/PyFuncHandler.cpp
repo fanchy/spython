@@ -15,7 +15,7 @@ bool PyFuncHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return true;
 }
 bool PyFuncHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
-    if (val->getType() == EXPR_FUNCDEF && self.get() == val.get()){
+    if (self.get() == val.get()){
         return true;
     }
     return false;

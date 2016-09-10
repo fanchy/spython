@@ -72,7 +72,7 @@ size_t PyObjHandler::handleHash(const PyObjPtr& self) const{
     return size_t(self.get());
 }
 
-PyObjPtr& PyObj::getVar(PyObjPtr& self2, unsigned int nFieldIndex) {
+PyObjPtr& PyObj::getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex) {
     //DMSG(("nFieldIndex %d\n", nFieldIndex));
     if (nFieldIndex < m_objStack.size()) {
         return m_objStack[nFieldIndex];
@@ -231,6 +231,6 @@ PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
     }
     
-    return context->getVar(context, nIndex);
+    return context->getVar(pycontext, context, nIndex);
 }
 

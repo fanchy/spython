@@ -164,27 +164,19 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
+    
+    PyObjPtr forkClassFunc(PyObjPtr& obj){
+        PyObjFuncDef* ret  = new PyObjFuncDef(name, parameters, suite);
+        ret->classInstance = obj;
+        return ret;
+    }
+    bool hasSelfParam();
+    
     std::string     name;
     ExprASTPtr      parameters;
     ExprASTPtr      suite;
     ObjIdInfo       selfObjInfo;
-};
-
-
-class PyObjClassFunc:public PyObj {
-public:
-    PyObjClassFunc(PyObjPtr& selfPtr, PyObjPtr& v):classSelf(selfPtr), funcDefPtr(v) {
-    }
-
-    virtual int getType() {
-        return PY_CLASS_FUNC;
-    }
-    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args);
-    virtual const ObjIdInfo& getObjIdInfo(){
-        return funcDefPtr.cast<PyObjFuncDef>()->getObjIdInfo();
-    }
-    PyObjPtr   classSelf;
-    PyObjPtr   funcDefPtr;
+    PyObjPtr        classInstance;
 };
 
 class PyObjClassDef:public PyObj {
@@ -218,7 +210,7 @@ public:
         return classDefPtr.cast<PyObjClassDef>()->getObjIdInfo();
     }
     
-    virtual PyObjPtr& getVar(PyObjPtr& self, unsigned int nFieldIndex);
+    virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
     PyObjPtr            classDefPtr;
     ObjIdInfo           selfObjInfo;
 };
