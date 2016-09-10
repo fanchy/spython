@@ -28,16 +28,22 @@
     #return a + b
 
 #s= f1(**{'a':1, 'b':2, 'c':5})
+class F:
+    def hi(self):
+        print('hi')
+        return 1023
 
-class Foo:
+class Foo(F):
     a = 10
     def go(self):
         self.c = 20
+        print('go')
         return self
     def say(a):
         return a
 
 foo = Foo()
+ee = foo.hi()
 foo.c = 201
 foo.a = 20
 Fa = Foo.a
@@ -45,11 +51,12 @@ fa = foo.a
 print('fa', Fa, fa)
 foo.go()
 
-#foo.c = 202
+foo.c = 202
 fc = foo.c
-#print 1, 2, 3
+print 1, 2, 3
 print('fc', fc)
-#print(f)
 
 
-a, b, c = (1, 2, 3)
+fhi = foo.hi()
+
+# a, b, c = (1, 2, 3)

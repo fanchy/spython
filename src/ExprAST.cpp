@@ -439,9 +439,16 @@ PyObjPtr& ClassDefExprAST::eval(PyContext& context) {
 
     if (testlist){
         PyObjPtr inheritClass = testlist->eval(context);
-        parentClass = inheritClass.cast<PyObjTuple>()->value;
+        if (inheritClass->getType() == PY_TUPLE){
+            parentClass = inheritClass.cast<PyObjTuple>()->value;
+        }
+        else{
+            parentClass.push_back(inheritClass);
+        }
     }
     PyObjPtr rval = new PyObjClassDef(classname.cast<VariableExprAST>()->name, parentClass, suite);
+    rval.cast<PyObjClassDef>()->processInheritInfo(context, rval);
+    
     PyObjPtr& lval = classname->eval(context);
     lval = rval;
     if (suite){
@@ -666,13 +673,7 @@ string BinaryExprAST::dump(int nDepth){
 PyObjPtr& AugassignAST::eval(PyContext& context){
     return context.cacheResult(PyObjTool::buildNone());//!TODO
 }
-PyObjPtr& AugassignAST::getFieldVal(PyContext& context){
-    /*
-    PyObjPtr lval = left->eval(context);
-    PyObjPtr& v = right->getFieldVal(lval);
-    return v;*/
-    return context.curstack;
-}
+
 string AugassignAST::dump(int nDepth){
     string ret;
     for (int i = 0; i < nDepth; ++i){
@@ -725,8 +726,8 @@ PyObjPtr& DotGetFieldExprAST::eval(PyContext& context){
     PyObjPtr obj = preExpr->eval(context);
     PyContextBackUp backup(context);
     context.curstack = obj;
-    //string strObj = PyObj::dump(obj);
-    //printf("%p %s:obj:\n %s", obj.get(), fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
+    string strObj = PyObj::dump(obj);
+    printf("%p %s:obj:\n %s", obj.get(), fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
     return fieldName->eval(context);
 }
 

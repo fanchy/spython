@@ -150,7 +150,7 @@ public:
     virtual ~PyObj() {}
 
     int getType() const;
-    int getFieldNum() const { return m_objStack.size(); }
+    virtual int getFieldNum() const { return m_objStack.size(); }
     static std::string dump(PyObjPtr& self);
 
     virtual PyObjPtr& getVar(PyContext& c, PyObjPtr& self, unsigned int nFieldIndex);
@@ -321,7 +321,7 @@ public:
     ObjIdInfo       selfObjInfo;
     bool            isNull;
 };
-#define IS_NULL(o) ((o)->getType() == PY_NONE && (o).cast<PyObjNone>()->isNull)
+#define IS_NULL(o) (o.get() == NULL || (o)->getType() == 0 || ((o)->getType() == PY_NONE && (o).cast<PyObjNone>()->isNull))
 
 typedef PyObjNone PyCallTmpStack;
 

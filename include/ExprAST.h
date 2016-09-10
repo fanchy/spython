@@ -387,7 +387,6 @@ public:
     }
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
-    virtual PyObjPtr& getFieldVal(PyContext& context);
 };
 
 //! if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]

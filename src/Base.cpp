@@ -162,7 +162,7 @@ PyObjPtr& PyObjTool::buildNone(){
     return singleton_t<NoneTraits>::instance_ptr()->retPtr;
 }
 PyObjPtr PyObjTool::buildNULL(){
-    return singleton_t<NULLTraits>::instance_ptr()->retPtr;
+    return NULL;//singleton_t<NULLTraits>::instance_ptr()->retPtr;
 }
 
 
@@ -220,7 +220,7 @@ unsigned int ExprAST::getFieldIndex(PyContext& pycontext){
         object2index.resize(p.nObjectId + 1, -1);
         object2index[p.nObjectId] = context->getFieldNum();
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
-        //DMSG(("filedname2 %s %d\n", this->name.c_str(), object2index[p.nObjectId]));
+        DMSG(("filedname2 %s %s %d\n", context->handler->handleStr(context).c_str(), this->name.c_str(), object2index[p.nObjectId]));
     }
     
     int& nIndex = object2index[p.nObjectId];

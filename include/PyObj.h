@@ -181,16 +181,13 @@ public:
 
 class PyObjClassDef:public PyObj {
 public:
-    PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a, ExprASTPtr& b):name(s), parentClass(a), suite(b) {
-        selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
-        //!different function has different object id 
-        selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
-        this->handler = singleton_t<PyClassHandler>::instance_ptr();
-    }
-
+    PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a, ExprASTPtr& b);
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
+    std::map<std::string, PyObjPtr> getAllFieldData();
+    void processInheritInfo(PyContext& context, PyObjPtr& self);
+    
     std::string             name;
     std::vector<PyObjPtr>   parentClass;
     ExprASTPtr              suite;
@@ -203,13 +200,14 @@ public:
         this->handler = singleton_t<PyClassInstanceHandler>::instance_ptr();
         
         selfObjInfo = classDefPtr->getObjIdInfo();
-        //m_objStack.resize(classDefPtr->m_objStack.size(), PyObjTool::buildNULL());
     }
 
     virtual const ObjIdInfo& getObjIdInfo(){
         return classDefPtr.cast<PyObjClassDef>()->getObjIdInfo();
     }
-    
+    virtual int getFieldNum() const { 
+        return std::max(m_objStack.size(), classDefPtr->m_objStack.size()); 
+    }
     virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
     
     PyObjPtr& assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v); //!special process field assign

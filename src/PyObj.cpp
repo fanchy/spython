@@ -51,18 +51,6 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
         return ret;
     }
 
-    //!parent class
-    PyObjClassDef* po = classDefPtr.cast<PyObjClassDef>();
-    for (unsigned int i = 0; i <= po->parentClass.size(); ++i){
-        ret = po->parentClass[i]->getVar(context, po->parentClass[i], nFieldIndex);
-        if (false == IS_NULL(ret)){
-            if (ret->getType() == EXPR_FUNCDEF){
-                return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
-            }
-            return ret;
-        }
-    }
-
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
         m_objStack.push_back(PyObjTool::buildNULL());
     }
@@ -226,5 +214,47 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
     }
     
     return context.cacheResult(PyObjTool::buildNone());
+}
+
+
+PyObjClassDef::PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a, ExprASTPtr& b):name(s), parentClass(a), suite(b) {
+    selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
+    //!different function has different object id 
+    selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
+    this->handler = singleton_t<PyClassHandler>::instance_ptr();
+}
+
+std::map<std::string, PyObjPtr> PyObjClassDef::getAllFieldData(){
+    std::map<std::string, PyObjPtr> ret;
+
+    const ObjIdInfo& p = this->getObjIdInfo();
+    for (unsigned int i = 0; i < this->m_objStack.size(); ++i) {
+        string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFieldName(p.nModuleId, p.nObjectId, i);
+        ret[n]   = this->m_objStack[i];
+    }
+
+    return ret;
+}
+
+void PyObjClassDef::processInheritInfo(PyContext& context, PyObjPtr& self){
+    PyContextBackUp backup(context);
+    context.curstack = self;
+
+    for (unsigned int i = 0; i < parentClass.size(); ++i){
+        PyObjPtr& v = parentClass[i];
+        if (v->getType() != PY_CLASS_DEF)
+           continue;
+
+        std::map<std::string, PyObjPtr> fieldData = v.cast<PyObjClassDef>()->getAllFieldData();
+        std::map<std::string, PyObjPtr>::iterator it = fieldData.begin();
+        for (; it != fieldData.end(); ++it){
+            ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(it->first);
+            
+            DMSG(("PyObjClassDef::processInheritInfo %s", it->first.c_str()));
+            
+            PyObjPtr& ref = expr->eval(context);
+            ref = it->second;
+        }
+    }
 }
 
