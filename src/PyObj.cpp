@@ -250,7 +250,7 @@ void PyObjClassDef::processInheritInfo(PyContext& context, PyObjPtr& self){
         for (; it != fieldData.end(); ++it){
             ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(it->first);
             
-            DMSG(("PyObjClassDef::processInheritInfo %s", it->first.c_str()));
+            //DMSG(("PyObjClassDef::processInheritInfo %s", it->first.c_str()));
             
             PyObjPtr& ref = expr->eval(context);
             ref = it->second;

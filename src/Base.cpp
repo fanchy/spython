@@ -96,7 +96,7 @@ runtime_error PyException::buildException(ParseHelper& parseHelper, const string
 }
 runtime_error PyException::buildException(const string& err) {
     char msg[1024];
-    snprintf(msg, sizeof(msg) - 1, "line:%d,col:%d,err:%s", 0, 0, err.c_str());
+    snprintf(msg, sizeof(msg) - 1, "%s", err.c_str());
     return runtime_error(msg);
 }
 
@@ -220,7 +220,7 @@ unsigned int ExprAST::getFieldIndex(PyContext& pycontext){
         object2index.resize(p.nObjectId + 1, -1);
         object2index[p.nObjectId] = context->getFieldNum();
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
-        DMSG(("filedname2 %s %s %d\n", context->handler->handleStr(context).c_str(), this->name.c_str(), object2index[p.nObjectId]));
+        //DMSG(("filedname2 %s %s %d\n", context->handler->handleStr(context).c_str(), this->name.c_str(), object2index[p.nObjectId]));
     }
     
     int& nIndex = object2index[p.nObjectId];

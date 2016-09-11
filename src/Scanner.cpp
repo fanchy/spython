@@ -214,7 +214,7 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
     return retToken;
 }
 
-Scanner::Scanner():m_nSeekIndex(0), m_nCurLine(1), m_hasSearchMaxIndex(0){
+Scanner::Scanner():m_nSeekIndex(0), m_nCurLine(1), m_hasSearchMaxIndex(0), m_nCurFileId(0){
 }
 void Scanner::calLineIndentInfo(const std::string& content){
     int nLine = 1;
@@ -255,8 +255,24 @@ void Scanner::calLineIndentInfo(const std::string& content){
                 bLineCal = false;
             }
         }
-        printf("line:%d indent:%d\n", nLine, lineInfo.nIndent);
+        //printf("line:%d indent:%d\n", nLine, lineInfo.nIndent);
     }
+}
+bool Scanner::tokenizeFile(const std::string& path, int nFileId){
+    FILE* fp = ::fopen(path.c_str(), "r");
+    string strCode;
+    if(NULL == fp)
+    {
+        printf("∂¡»° ß∞‹£°\n");
+        return false;
+    }
+    
+    char buf[2048];
+    int n = fread(buf, 1, sizeof(buf), fp);
+    ::fclose(fp);
+    strCode.assign(buf, n);
+    m_nCurFileId = nFileId;
+    return tokenize(strCode);
 }
 bool Scanner::tokenize(const std::string& content){
 
@@ -271,7 +287,7 @@ bool Scanner::tokenize(const std::string& content){
         retToken.nLine = m_nCurLine;
         m_allTokens.push_back(retToken);
 
-        printf("token:%s\n", retToken.dump().c_str());
+        //printf("token:%s\n", retToken.dump().c_str());
 
     }while (retToken.nTokenType != TOK_EOF);
     
@@ -315,4 +331,8 @@ int Scanner::curIndentWidth(){
 int Scanner::calLineIndentWidth(int nLine){
     return m_allLines[nLine].nIndent;
 }
+std::string Scanner::getLineCode(int nLine){
+    return m_allLines[nLine].strLine; 
+}
+ 
 

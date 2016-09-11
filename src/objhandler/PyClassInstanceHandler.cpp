@@ -34,7 +34,7 @@ PyObjPtr& PyClassInstanceHandler::handleCall(PyContext& context, PyObjPtr& self,
     PyObjPtr ret = new PyObjClassInstance(self);
 
     if (__init__func && __init__func->getType() == PY_FUNC_DEF){
-        DMSG(("__init__func =%d", __init__func->getType()));
+        //DMSG(("__init__func =%d", __init__func->getType()));
         __init__func->handler->handleCall(context, __init__func, allArgsVal, argAssignVal);
     }
     

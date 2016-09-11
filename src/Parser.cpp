@@ -7,7 +7,17 @@ using namespace ff;
 
 #define THROW_ERROR(X) throwError(X, __LINE__)
 
-#define ALLOC_EXPR(X, Y) assignLineInfo(X, Y->nLine, m_curScanner->calLineIndentWidth(Y->nLine))
+int Parser::getCurLine(int nOffset){
+    return m_curScanner->getToken(nOffset)->nLine;
+}
+int Parser::getCurFileId(){
+    int nRet = m_curScanner->getCurFileId();
+    if (nRet == 0){
+        return 0;
+    }
+    return nRet;
+}
+//#define ALLOC_EXPR(X, Y) assignLineInfo(X, Y->nLine, m_curScanner->calLineIndentWidth(Y->nLine))
 
 Parser::Parser():m_curScanner(NULL){
 }
@@ -24,7 +34,7 @@ ExprASTPtr Parser::parse_single_input(){
 
 //! file_input: (NEWLINE | stmt)* ENDMARKER
 ExprASTPtr Parser::parse_file_input(){
-    StmtAST* allStmt = new StmtAST();
+    StmtAST* allStmt = ALLOC_EXPR<StmtAST>();
     ExprASTPtr ret = allStmt;
     
     while (m_curScanner->getToken()->nTokenType != TOK_EOF){
@@ -77,7 +87,7 @@ ExprASTPtr Parser::parse_funcdef(){
     }
     m_curScanner->seek(1);
     
-    FuncDefExprAST* f = new FuncDefExprAST();
+    FuncDefExprAST* f = ALLOC_EXPR<FuncDefExprAST>();
     ExprASTPtr ret = f;
     
     if (m_curScanner->getToken()->nTokenType != TOK_VAR){
@@ -124,7 +134,7 @@ ExprASTPtr Parser::parse_parameters(){
     m_curScanner->seek(1);
     
     if (!varargslist){
-        varargslist = new ParametersExprAST();
+        varargslist = ALLOC_EXPR<ParametersExprAST>();
     }
     return varargslist;
 }
@@ -133,7 +143,7 @@ ExprASTPtr Parser::parse_parameters(){
 //!               ('*' NAME [',' '**' NAME] | '**' NAME) |
 //!               fpdef ['=' test] (',' fpdef ['=' test])* [','])
 ExprASTPtr Parser::parse_varargslist(){
-    ParametersExprAST* p = new ParametersExprAST();
+    ParametersExprAST* p = ALLOC_EXPR<ParametersExprAST>();
     ExprASTPtr ret = p;
     do{
         ExprASTPtr fpdef = parse_fpdef();
@@ -204,7 +214,7 @@ ExprASTPtr Parser::parse_simple_stmt(){
     ExprASTPtr small_stmt = parse_small_stmt();
     
     if (small_stmt && m_curScanner->getToken()->strVal == ";"){
-        StmtAST* allStmt = new StmtAST();
+        StmtAST* allStmt = ALLOC_EXPR<StmtAST>();
         ExprASTPtr ret = allStmt;
         allStmt->exprs.push_back(small_stmt);
         
@@ -304,18 +314,18 @@ ExprASTPtr Parser::parse_expr_stmt(){
     else if (m_curScanner->getToken()->strVal == "="){
         m_curScanner->seek(1);
         
-        DMSG(("parse_expr_stmt 2 `=`"));
+        //DMSG(("parse_expr_stmt 2 `=`"));
         
         ExprASTPtr yield_expr = parse_yield_expr();
         if (yield_expr){
-            return new BinaryExprAST("=", testlist, yield_expr);
+            return ALLOC_EXPR_2<BinaryExprAST>("=", testlist, yield_expr);
         }
         ExprASTPtr testlist2  = parse_testlist();
         if (!testlist2){
             THROW_ERROR("parse_expr_stmt failed assign-2");
         }
         
-        return new BinaryExprAST("=", testlist, testlist2);
+        return ALLOC_EXPR_2<BinaryExprAST>("=", testlist, testlist2);
     }
     else{
         return testlist;
@@ -341,7 +351,8 @@ ExprASTPtr Parser::parse_augassign(){
         m_curScanner->getToken()->strVal == "//=")
     {
         m_curScanner->seek(1);
-        return new AugassignAST(m_curScanner->getToken()->strVal, NULL, NULL);
+        ExprASTPtr nullExpr;
+        return ALLOC_EXPR<AugassignAST>(m_curScanner->getToken()->strVal, nullExpr, nullExpr);
     }
     return NULL;
 }
@@ -357,7 +368,7 @@ ExprASTPtr Parser::parse_print_stmt(){
             if (!test){
                 THROW_ERROR("test needed when parse print");
             }
-            PrintAST* printAst = new PrintAST();
+            PrintAST* printAst = ALLOC_EXPR<PrintAST>();
             ExprASTPtr ret = printAst;
             printAst->exprs.push_back(test);
             
@@ -391,7 +402,7 @@ ExprASTPtr Parser::parse_del_stmt(){
         if (!exprlist){
             THROW_ERROR("exprlist needed when parse del");
         }
-        return new DelAST(exprlist);
+        return ALLOC_EXPR<DelAST>(exprlist);
     }
     return NULL;
 }
@@ -400,7 +411,7 @@ ExprASTPtr Parser::parse_del_stmt(){
 ExprASTPtr Parser::parse_pass_stmt(){
     if (m_curScanner->getToken()->strVal == "pass"){
         m_curScanner->seek(1);
-        return new PassAST();
+        return ALLOC_EXPR<PassAST>();
     }
     return NULL;
 }
@@ -435,7 +446,7 @@ ExprASTPtr Parser::parse_break_stmt(){
     const Token* token = m_curScanner->getToken();
     if (token->strVal == "break"){
         m_curScanner->seek(1);
-        return new BreakAST();
+        return ALLOC_EXPR<BreakAST>();
     }
     return NULL;
 }
@@ -444,7 +455,7 @@ ExprASTPtr Parser::parse_break_stmt(){
 ExprASTPtr Parser::parse_continue_stmt(){
     if (m_curScanner->getToken()->strVal == "continue"){
         m_curScanner->seek(1);
-        return new ContinueAST();
+        return ALLOC_EXPR<ContinueAST>();
     }
     return NULL;
 }
@@ -452,11 +463,11 @@ ExprASTPtr Parser::parse_continue_stmt(){
 //! return_stmt: 'return' [testlist]
 ExprASTPtr Parser::parse_return_stmt(){
     if (m_curScanner->getToken()->strVal == "return"){
-        DMSG(("curt:%s", m_curScanner->getToken()->strVal.c_str()));
+        //DMSG(("curt:%s", m_curScanner->getToken()->strVal.c_str()));
         m_curScanner->seek(1);
         
         ExprASTPtr testlist = parse_testlist();
-        return new ReturnAST(testlist);
+        return ALLOC_EXPR<ReturnAST>(testlist);
     }
     return NULL;
 }
@@ -472,7 +483,7 @@ ExprASTPtr Parser::parse_raise_stmt(){
     if (m_curScanner->getToken()->strVal == "raise"){
         m_curScanner->seek(1);
         
-        RaiseAST* raiseAST = new RaiseAST();
+        RaiseAST* raiseAST = ALLOC_EXPR<RaiseAST>();
         ExprASTPtr ret     = raiseAST;
         ExprASTPtr test    = parse_test();
         
@@ -518,7 +529,7 @@ ExprASTPtr Parser::parse_import_name(){
         m_curScanner->seek(1);
 
         ExprASTPtr dotted_as_names = parse_dotted_as_names();
-        return new ImportAST(dotted_as_names);
+        return ALLOC_EXPR<ImportAST>(dotted_as_names);
     }
     
     return NULL;
@@ -529,7 +540,7 @@ ExprASTPtr Parser::parse_import_name(){
 ExprASTPtr Parser::parse_import_from(){
     
     if (m_curScanner->getToken()->strVal == "from"){
-        StmtAST* stmt = new StmtAST();
+        StmtAST* stmt = ALLOC_EXPR<StmtAST>();
         ExprASTPtr ret = stmt;
         m_curScanner->seek(1);
         
@@ -545,7 +556,7 @@ ExprASTPtr Parser::parse_import_from(){
         m_curScanner->seek(1);
         
         if (m_curScanner->getToken()->strVal == "*"){
-            stmt->exprs.push_back(new StrExprAST("*"));
+            stmt->exprs.push_back(ALLOC_EXPR<StrExprAST>("*"));
             m_curScanner->seek(1);
         }
         else if (m_curScanner->getToken()->strVal == "("){
@@ -575,18 +586,18 @@ ExprASTPtr Parser::parse_import_from(){
 
 //! import_as_name: NAME ['as' NAME]
 ExprASTPtr Parser::parse_import_as_name(){
-    DMSG(("parse_import_as_name %s", m_curScanner->getToken()->strVal.c_str()));
-    StmtAST* stmt = new StmtAST();
+    //DMSG(("parse_import_as_name %s", m_curScanner->getToken()->strVal.c_str()));
+    StmtAST* stmt = ALLOC_EXPR<StmtAST>();
     ExprASTPtr ret = stmt;
 
     if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-        stmt->exprs.push_back(new StrExprAST(m_curScanner->getToken()->strVal));
+        stmt->exprs.push_back(ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal));
         m_curScanner->seek(1);
 
         if (m_curScanner->getToken()->strVal == "as"){
             m_curScanner->seek(1);
             if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-                stmt->exprs.push_back(new StrExprAST(m_curScanner->getToken()->strVal));
+                stmt->exprs.push_back(ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal));
                 m_curScanner->seek(1);
             }
             else{
@@ -603,7 +614,7 @@ ExprASTPtr Parser::parse_import_as_name(){
 
 //! dotted_as_name: dotted_name ['as' NAME]
 ExprASTPtr Parser::parse_dotted_as_name(){
-    StmtAST* stmt = new StmtAST();
+    StmtAST* stmt = ALLOC_EXPR<StmtAST>();
     ExprASTPtr ret = stmt;
     
     ExprASTPtr dotted_name = parse_dotted_name();
@@ -615,7 +626,7 @@ ExprASTPtr Parser::parse_dotted_as_name(){
         m_curScanner->seek(1);
         
         if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-            ExprASTPtr expr = new StrExprAST(m_curScanner->getToken()->strVal);
+            ExprASTPtr expr = ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal);
             stmt->exprs.push_back(expr);
             m_curScanner->seek(1);
         }
@@ -629,7 +640,7 @@ ExprASTPtr Parser::parse_dotted_as_name(){
 
 //! import_as_names: import_as_name (',' import_as_name)* [',']
 ExprASTPtr Parser::parse_import_as_names(){
-    StmtAST* stmt = new StmtAST();
+    StmtAST* stmt = ALLOC_EXPR<StmtAST>();
     ExprASTPtr ret = stmt;
     
     ExprASTPtr import_as_name = parse_import_as_name();
@@ -664,12 +675,12 @@ ExprASTPtr Parser::parse_dotted_as_names(){
 
 //! dotted_name: NAME ('.' NAME)*
 ExprASTPtr Parser::parse_dotted_name(){
-    StmtAST* stmt = new StmtAST();
+    StmtAST* stmt = ALLOC_EXPR<StmtAST>();
     ExprASTPtr ret = stmt;
-    DMSG(("parse_dotted_name %s", m_curScanner->getToken()->strVal.c_str()));
+    //DMSG(("parse_dotted_name %s", m_curScanner->getToken()->strVal.c_str()));
     
     if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-        ExprASTPtr expr = new StrExprAST(m_curScanner->getToken()->strVal);
+        ExprASTPtr expr = ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal);
         stmt->exprs.push_back(expr);
         m_curScanner->seek(1);
     }
@@ -682,7 +693,7 @@ ExprASTPtr Parser::parse_dotted_name(){
         m_curScanner->seek(1);
         
         if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-            ExprASTPtr expr = new StrExprAST(m_curScanner->getToken()->strVal);
+            ExprASTPtr expr = ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal);
             stmt->exprs.push_back(expr);
             m_curScanner->seek(1);
         }
@@ -700,7 +711,7 @@ ExprASTPtr Parser::parse_global_stmt(){
     }
     m_curScanner->seek(1);
     
-    GlobalAST* stmt = new GlobalAST();
+    GlobalAST* stmt = ALLOC_EXPR<GlobalAST>();
     ExprASTPtr ret = stmt;
     
     if (m_curScanner->getToken()->nTokenType != TOK_VAR){
@@ -727,7 +738,7 @@ ExprASTPtr Parser::parse_exec_stmt(){
         return NULL;
     }
     m_curScanner->seek(1);
-    ExecAST* stmt = new ExecAST();
+    ExecAST* stmt = ALLOC_EXPR<ExecAST>();
     ExprASTPtr ret = stmt;
     
     ExprASTPtr expr = parse_expr();
@@ -762,7 +773,7 @@ ExprASTPtr Parser::parse_assert_stmt(){
         return NULL;
     }
     m_curScanner->seek(1);
-    AssertAST* stmt = new AssertAST();
+    AssertAST* stmt = ALLOC_EXPR<AssertAST>();
     ExprASTPtr ret = stmt;
     
     ExprASTPtr test = parse_test();
@@ -819,7 +830,7 @@ ExprASTPtr Parser::parse_if_stmt(){
     }
     m_curScanner->seek(1);
     
-    IfExprAST* ifexpr = new IfExprAST();
+    IfExprAST* ifexpr = ALLOC_EXPR<IfExprAST>();
     ExprASTPtr ret    = ifexpr;
     
     ExprASTPtr test = parse_test();
@@ -839,7 +850,7 @@ ExprASTPtr Parser::parse_if_stmt(){
     ifexpr->ifSuite.push_back(suite);
     
     m_curScanner->skipEnterChar();
-    DMSG(("parse_if_stmt %s", m_curScanner->getToken()->strVal.c_str()));
+    //DMSG(("parse_if_stmt %s", m_curScanner->getToken()->strVal.c_str()));
     while (m_curScanner->getToken()->strVal == "elif"){
         m_curScanner->seek(1);
         test = parse_test();
@@ -883,7 +894,7 @@ ExprASTPtr Parser::parse_while_stmt(){
     }
     m_curScanner->seek(1);
     
-    WhileExprAST* whileexpr = new WhileExprAST();
+    WhileExprAST* whileexpr = ALLOC_EXPR<WhileExprAST>();
     ExprASTPtr ret          = whileexpr;
     
     ExprASTPtr test = parse_test();
@@ -926,7 +937,7 @@ ExprASTPtr Parser::parse_for_stmt(){
     }
     m_curScanner->seek(1);
     
-    ForExprAST* forexpr = new ForExprAST();
+    ForExprAST* forexpr = ALLOC_EXPR<ForExprAST>();
     ExprASTPtr ret      = forexpr;
     
     ExprASTPtr exprlist = parse_exprlist();
@@ -1004,14 +1015,14 @@ ExprASTPtr Parser::parse_suite(){
         return simple_stmt;
     }
     else{
-        StmtAST* allStmt = new StmtAST();
+        StmtAST* allStmt = ALLOC_EXPR<StmtAST>();
         ExprASTPtr ret = allStmt;
         
         m_curScanner->skipEnterChar();
         
         int nIndent = m_curScanner->curIndentWidth();
         
-        DMSG(("parse_suite %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
+        //DMSG(("parse_suite %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
         while (ExprASTPtr stmt = parse_stmt()){
             
             if (!stmt){
@@ -1023,7 +1034,7 @@ ExprASTPtr Parser::parse_suite(){
                 break;
             }
             
-            DMSG(("parse_suite %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
+            //DMSG(("parse_suite %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
         }
         
         return ret;
@@ -1063,7 +1074,7 @@ ExprASTPtr Parser::parse_or_test(){
         if (!and_test){
             THROW_ERROR("test expr needed after or");
         }
-        ret = new BinaryExprAST("or", ret, and_test);
+        ret = ALLOC_EXPR_2<BinaryExprAST>("or", ret, and_test);
     }
     return ret;
 }
@@ -1078,7 +1089,7 @@ ExprASTPtr Parser::parse_and_test(){
         if (!not_test){
             THROW_ERROR("test expr needed after or");
         }
-        ret = new BinaryExprAST("and", ret, not_test);
+        ret = ALLOC_EXPR_2<BinaryExprAST>("and", ret, not_test);
     }
     return ret;
 }
@@ -1091,7 +1102,7 @@ ExprASTPtr Parser::parse_not_test(){
         if (!not_test){
             THROW_ERROR("not test expr needed after not");
         }
-        return new NotAST(not_test);
+        return ALLOC_EXPR<NotAST>(not_test);
     }
     ExprASTPtr comparison = parse_comparison();
     return comparison;
@@ -1116,7 +1127,7 @@ ExprASTPtr Parser::parse_comp_op(ExprASTPtr& expr){
         if (!expr2){
             THROW_ERROR("expr needed after comp_op");
         }
-        return new BinaryExprAST(op, expr, expr2);
+        return ALLOC_EXPR_2<BinaryExprAST>(op, expr, expr2);
     }
     else if (op == "not"){
         if (m_curScanner->getToken(1)->strVal == "in"){
@@ -1125,7 +1136,7 @@ ExprASTPtr Parser::parse_comp_op(ExprASTPtr& expr){
             if (!expr2){
                 THROW_ERROR("expr needed after comp_op");
             }
-            return new BinaryExprAST("not in", expr, expr2);
+            return ALLOC_EXPR_2<BinaryExprAST>("not in", expr, expr2);
         }
     }
     else if (op == "is"){
@@ -1135,7 +1146,7 @@ ExprASTPtr Parser::parse_comp_op(ExprASTPtr& expr){
             if (!expr2){
                 THROW_ERROR("expr needed after comp_op");
             }
-            return new BinaryExprAST("is not", expr, expr2);
+            return ALLOC_EXPR_2<BinaryExprAST>("is not", expr, expr2);
         }
         else{
             m_curScanner->seek(1);
@@ -1143,7 +1154,7 @@ ExprASTPtr Parser::parse_comp_op(ExprASTPtr& expr){
             if (!expr2){
                 THROW_ERROR("expr needed after comp_op");
             }
-            return new BinaryExprAST(op, expr, expr2);
+            return ALLOC_EXPR_2<BinaryExprAST>(op, expr, expr2);
         }
     }
     return expr;
@@ -1184,7 +1195,7 @@ ExprASTPtr Parser::parse_arith_expr(){
         if (!term){
             THROW_ERROR("term need after +/-");
         }
-        ret = new BinaryExprAST(op, ret, term);
+        ret = ALLOC_EXPR_2<BinaryExprAST>(op, ret, term);
     }
     return ret;
 }
@@ -1203,7 +1214,7 @@ ExprASTPtr Parser::parse_term(){
         if (!term){
             THROW_ERROR("term need after * / %");
         }
-        ret = new BinaryExprAST(op, ret, term);
+        ret = ALLOC_EXPR_2<BinaryExprAST>(op, ret, term);
     }
     return ret;
 }
@@ -1221,7 +1232,7 @@ ExprASTPtr Parser::parse_power(){
         return NULL;
     }
     
-    PowerAST* p    = new PowerAST();
+    PowerAST* p    = ALLOC_EXPR<PowerAST>();
     ExprASTPtr ret = p;
     
     p->atom  = atom;
@@ -1243,25 +1254,25 @@ ExprASTPtr Parser::parse_atom(){
     
     ExprASTPtr retExpr;
     if (m_curScanner->getToken()->nTokenType == TOK_INT){
-        retExpr = new NumberExprAST(m_curScanner->getToken()->nVal);
+        retExpr = ALLOC_EXPR<NumberExprAST>(m_curScanner->getToken()->nVal);
     }
     else if (m_curScanner->getToken()->nTokenType == TOK_FLOAT){
-        retExpr = new FloatExprAST(m_curScanner->getToken()->fVal);
+        retExpr = ALLOC_EXPR<FloatExprAST>(m_curScanner->getToken()->fVal);
     }
     else if (m_curScanner->getToken()->nTokenType == TOK_STR){
-        retExpr = new StrExprAST(m_curScanner->getToken()->strVal);
+        retExpr = ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal);
     }
     else if (m_curScanner->getToken()->nTokenType == TOK_VAR){
         if (singleton_t<PyHelper>::instance_ptr()->isKeyword(m_curScanner->getToken()->strVal)){
             return NULL;
         }
-        retExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken()->strVal);//new VariableExprAST(m_curScanner->getToken()->strVal);
+        retExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken()->strVal);
     }
     else if (m_curScanner->getToken()->strVal == "["){
         m_curScanner->seek(1);
         if (m_curScanner->getToken()->strVal == "]"){
             m_curScanner->seek(1);
-            retExpr = new ListMakerExprAST();
+            retExpr = ALLOC_EXPR<ListMakerExprAST>();
         }
         else{
             retExpr = parse_listmaker();
@@ -1293,7 +1304,7 @@ ExprASTPtr Parser::parse_atom(){
             if (m_curScanner->getToken()->strVal != ","){
                 THROW_ERROR(", needed when define tuple value");
             }
-            TupleExprAST* p = new TupleExprAST();
+            TupleExprAST* p = ALLOC_EXPR<TupleExprAST>();
             retExpr = p;
             p->values.push_back(test);
             
@@ -1319,7 +1330,7 @@ ExprASTPtr Parser::parse_atom(){
         m_curScanner->seek(1);
         if (m_curScanner->getToken()->strVal == "}"){
             m_curScanner->seek(1);
-            retExpr = new DictorsetMakerExprAST();
+            retExpr = ALLOC_EXPR<DictorsetMakerExprAST>();
         }
         else{
             retExpr = parse_dictorsetmaker();
@@ -1337,7 +1348,7 @@ ExprASTPtr Parser::parse_atom(){
         return retExpr;
     }
     
-    DMSG(("parse_atom %s", m_curScanner->getToken()->dump().c_str()));
+    //DMSG(("parse_atom %s", m_curScanner->getToken()->dump().c_str()));
     m_curScanner->seek(1);
     return retExpr;
 }
@@ -1350,7 +1361,7 @@ ExprASTPtr Parser::parse_listmaker(){
         return NULL;
     }
     
-    ListMakerExprAST* listMaker = new ListMakerExprAST();
+    ListMakerExprAST* listMaker = ALLOC_EXPR<ListMakerExprAST>();
     ExprASTPtr ret = listMaker;
     
     listMaker->test.push_back(test);
@@ -1389,10 +1400,10 @@ ExprASTPtr Parser::parse_lambdef(){
 
 //! trailer: '(' [arglist] ')' | '[' subscriptlist ']' | '.' NAME
 ExprASTPtr Parser::parse_trailer(){
-    DMSG(("cur:%s", m_curScanner->getToken()->strVal.c_str()));
+    //DMSG(("cur:%s", m_curScanner->getToken()->strVal.c_str()));
     if (m_curScanner->getToken()->strVal == "("){ //!call func
         m_curScanner->seek(1);
-        ExprASTPtr ret = new CallExprAST();
+        ExprASTPtr ret = ALLOC_EXPR<CallExprAST>();
         if (m_curScanner->getToken()->strVal != ")"){
             ExprASTPtr arglist = parse_arglist();
             if (!arglist){
@@ -1418,10 +1429,10 @@ ExprASTPtr Parser::parse_trailer(){
         if (m_curScanner->getToken()->nTokenType != TOK_VAR){
             THROW_ERROR("name parse failed when parse trailer after .");
         }
-        DMSG(("cur2:%s", m_curScanner->getToken()->strVal.c_str()));
+        //DMSG(("cur2:%s", m_curScanner->getToken()->strVal.c_str()));
         ExprASTPtr name = parse_name();
-        DMSG(("cur3:%s", m_curScanner->getToken()->strVal.c_str()));
-        return new DotGetFieldExprAST(name);
+        //DMSG(("cur3:%s", m_curScanner->getToken()->strVal.c_str()));
+        return ALLOC_EXPR<DotGetFieldExprAST>(name);
     }
     return NULL;
 }
@@ -1448,7 +1459,7 @@ ExprASTPtr Parser::parse_exprlist(){
         return NULL;
     }
 
-    StmtAST* stmtAST = new StmtAST();
+    StmtAST* stmtAST = ALLOC_EXPR<StmtAST>();
     stmtAST->exprs.push_back(expr);
     ExprASTPtr ret   = stmtAST;
 
@@ -1468,7 +1479,7 @@ ExprASTPtr Parser::parse_testlist(){
     ExprASTPtr retExpr = parse_test();
 
     if (m_curScanner->getToken()->strVal == ","){
-        ExprASTPtr ret = new TupleExprAST();
+        ExprASTPtr ret = ALLOC_EXPR<TupleExprAST>();
         ret.cast<TupleExprAST>()->values.push_back(retExpr);
         
         while (m_curScanner->getToken()->strVal == ","){
@@ -1496,7 +1507,7 @@ ExprASTPtr Parser::parse_dictorsetmaker(){
         return NULL;
     }
     //DMSG(("cur:[%s]", m_curScanner->getToken()->strVal.c_str()));
-    DictorsetMakerExprAST* dict = new DictorsetMakerExprAST();
+    DictorsetMakerExprAST* dict = ALLOC_EXPR<DictorsetMakerExprAST>();
     ExprASTPtr ret = dict;
     
     if (m_curScanner->getToken()->strVal == ":"){
@@ -1553,7 +1564,7 @@ ExprASTPtr Parser::parse_classdef(){
     }
     m_curScanner->seek(1);
     
-    ClassDefExprAST* f = new ClassDefExprAST();
+    ClassDefExprAST* f = ALLOC_EXPR<ClassDefExprAST>();
     ExprASTPtr ret = f;
     
     if (m_curScanner->getToken()->nTokenType != TOK_VAR){
@@ -1594,7 +1605,7 @@ ExprASTPtr Parser::parse_classdef(){
 //!                          |'*' test (',' argument)* [',' '**' test] 
 //!                          |'**' test)
 ExprASTPtr Parser::parse_arglist(){
-    ExprASTPtr ret = new FuncArglist();
+    ExprASTPtr ret = ALLOC_EXPR<FuncArglist>();
     ExprASTPtr argument;
     if (m_curScanner->getToken()->strVal != "*"){
         argument = parse_argument(ret);
@@ -1690,7 +1701,7 @@ ExprASTPtr Parser::parse_testlist1(){
     }
     
     if (m_curScanner->getToken()->strVal == ","){
-        ExprASTPtr ret = new TupleExprAST();
+        ExprASTPtr ret = ALLOC_EXPR<TupleExprAST>();
         ret.cast<TupleExprAST>()->values.push_back(test);
         
         while (m_curScanner->getToken()->strVal == ","){
@@ -1730,7 +1741,7 @@ ExprASTPtr Parser::parse_name(bool throwFlag){
             }
             return NULL;
         }
-        ExprASTPtr retExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken()->strVal);;//new VariableExprAST(m_curScanner->getToken()->strVal);
+        ExprASTPtr retExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken()->strVal);
         m_curScanner->seek(1);
         return retExpr;
     }

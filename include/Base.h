@@ -182,12 +182,12 @@ struct PyObjTool{
 }; 
 
 struct ExprLine{
-    ExprLine():nLine(0), nIndent(0){
+    ExprLine():fileId(0), nLine(0){
     }
-    std::string file;
+    int         fileId;
     int         nLine;
-    int         nIndent;
 };
+
 class ExprAST {
 public:
     int    nFieldId;
@@ -203,8 +203,7 @@ public:
     virtual int getType() {
         return 0;
     }
-    virtual PyObjPtr handleAssign(PyObjPtr context, PyObjPtr val) { return NULL; }
-    
+
     virtual std::string dump(int nDepth){
         std::string ret;
         for (int i = 0; i < nDepth; ++i){
@@ -338,7 +337,46 @@ public:
     
     PyObjPtr evalResult;
     PyObjPtr curstack;//!cur using context
+    
+    void setTraceExpr(ExprAST* e){
+        if (e->lineInfo.fileId == 0){
+            return;
+        }
+        if (exprTrace.empty()){
+            exprTrace.push_back(e);
+        }
+        else{
+            exprTrace.back() = e;
+        }
+    }
+    void pushTraceExpr(ExprAST* e){
+        setTraceExpr(e);
+        exprTrace.push_back(e);
+    }
+    void popTraceExpr(){
+        exprTrace.pop_back();
+    }
+    std::string getFileId2Path(int n){
+        std::map<int, std::string>::iterator it = fileId2Path.find(n);
+        if (it != fileId2Path.end()){
+            return it->second;
+        }
+        
+        char msg[128] = {0};
+        snprintf(msg, sizeof(msg), "fileid:%d", n);
+        return std::string(msg);
+    }
+    int allocFileIdByPath(const std::string& f){
+        int n = fileId2Path.size() + 1;
+        fileId2Path[n] = f;
+        return n;
+    }
+    std::list<ExprAST*> exprTrace;//! for trace back
+    std::map<int, std::string> fileId2Path;
 };
+#define TRACE_EXPR() context.setTraceExpr(this)
+#define TRACE_EXPR_PUSH() context.pushTraceExpr(this)
+#define TRACE_EXPR_POP() context.popTraceExpr()
 
 struct PyContextBackUp{
     PyContextBackUp(PyContext& c):context(c), curstack(c.curstack){

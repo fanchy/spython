@@ -32,6 +32,7 @@ class F:
     def hi(self):
         self.d = 99
         print('hi')
+        a = b
         return 1023
 
 class Foo(F):
@@ -45,19 +46,19 @@ class Foo(F):
 
 foo = Foo()
 ee = foo.hi()
-foo.c = 201
-foo.a = 20
-Fa = Foo.a
-fa = foo.a
-print('fa', Fa, fa)
-foo.go()
+# foo.c = 201
+# foo.a = 20
+# Fa = Foo.a
+# fa = foo.a
+# print('fa', Fa, fa)
+# foo.go()
 
-foo.c = 202
-fc = foo.c
-print 1, 2, 3
-print('fc', fc)
+# foo.c = 202
+# fc = foo.c
+# print 1, 2, 3
+# print('fc', fc)
 
 
-fhi = foo.hi()
-fd  = foo.d
-# a, b, c = (1, 2, 3)
+# fhi = foo.hi()
+# fd  = foo.d
+# # a, b, c = (1, 2, 3)

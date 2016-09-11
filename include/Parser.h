@@ -211,6 +211,36 @@ private:
         p->lineInfo.nLine   = nLine;
         p->lineInfo.nIndent = nIndent;
     }
+    int getCurLine(int nOffset = 0);
+    int getCurFileId();
+    template<typename T>
+    T* ALLOC_EXPR(){
+        T* ret = new T();
+        ret->lineInfo.fileId = 0;
+        ret->lineInfo.nLine  = getCurLine();
+        return ret;
+    }
+    template<typename T, typename A1>
+    T* ALLOC_EXPR(A1& a1){
+        T* ret = new T(a1);
+        ret->lineInfo.fileId = 0;
+        ret->lineInfo.nLine  = getCurLine();
+        return ret;
+    }
+    template<typename T, typename A1, typename A2, typename A3>
+    T* ALLOC_EXPR(A1& a1, A2& a2, A3& a3){
+        T* ret = new T(a1, a2, a3);
+        ret->lineInfo.fileId = getCurFileId();
+        ret->lineInfo.nLine  = getCurLine();
+        return ret;
+    }
+    template<typename T, typename A1, typename A2, typename A3>
+    T* ALLOC_EXPR_2(A1& a1, A2& a2, A3& a3){
+        T* ret = new T(a1, a2, a3);
+        ret->lineInfo.fileId = getCurFileId();
+        ret->lineInfo.nLine  = getCurLine(-2);
+        return ret;
+    }
 protected:
     Scanner*            m_curScanner;
 };

@@ -31,6 +31,7 @@ public:
     Scanner();
     
     //!parse string to token vector
+    bool tokenizeFile(const std::string& path, int nFileId);
     bool tokenize(const std::string& content);
 
     //!get cur token obj
@@ -40,6 +41,10 @@ public:
     int skipEnterChar();
     int curIndentWidth();
     int calLineIndentWidth(int nLine);
+    int getCurFileId(){
+        return m_nCurFileId;
+    }
+    std::string getLineCode(int n);
 private:
     char getCharNext(const std::string& content, int& index);
     Token getOneToken(const std::string& content, int& index);
@@ -51,6 +56,7 @@ protected:
     int                     m_nCurLine;
     std::map<int, LineInfo> m_allLines;
     int                     m_hasSearchMaxIndex;
+    int                     m_nCurFileId;
 };
 
 }
