@@ -81,7 +81,7 @@ public:
     //! import_as_names: import_as_name (',' import_as_name)* [',']
     ExprASTPtr parse_import_as_names();
     //! dotted_as_names: dotted_as_name (',' dotted_as_name)*
-    ExprASTPtr parse_dotted_as_names();
+    ExprASTPtr parse_dotted_as_names(ExprASTPtr& importAst);
     //! dotted_name: NAME ('.' NAME)*
     ExprASTPtr parse_dotted_name();
     //! global_stmt: 'global' NAME (',' NAME)*

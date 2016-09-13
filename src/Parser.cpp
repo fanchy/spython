@@ -527,9 +527,9 @@ ExprASTPtr Parser::parse_import_stmt(){
 ExprASTPtr Parser::parse_import_name(){
     if (m_curScanner->getToken()->strVal == "import"){
         m_curScanner->seek(1);
-
-        ExprASTPtr dotted_as_names = parse_dotted_as_names();
-        return ALLOC_EXPR<ImportAST>(dotted_as_names);
+        ExprASTPtr ret = ALLOC_EXPR<ImportAST>();
+        ExprASTPtr dotted_as_names = parse_dotted_as_names(ret);
+        return ret;
     }
     
     return NULL;
@@ -661,14 +661,18 @@ ExprASTPtr Parser::parse_import_as_names(){
 }
 
 //! dotted_as_names: dotted_as_name (',' dotted_as_name)*
-ExprASTPtr Parser::parse_dotted_as_names(){
+ExprASTPtr Parser::parse_dotted_as_names(ExprASTPtr& importAst){
     ExprASTPtr dotted_as_name = parse_dotted_as_name();
     if (!dotted_as_name){
         return NULL;
     }
+    importAst.cast<ImportAST>()->dotted_as_names.push_back(dotted_as_name);
     while (m_curScanner->getToken()->strVal == ","){
         m_curScanner->seek(1);
         dotted_as_name = parse_dotted_as_name();
+        if (!dotted_as_name)
+            break;
+        importAst.cast<ImportAST>()->dotted_as_names.push_back(dotted_as_name);
     }
     return dotted_as_name;
 }

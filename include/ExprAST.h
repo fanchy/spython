@@ -209,7 +209,7 @@ public:
 };
 class ImportAST : public ExprAST {
 public:
-    ImportAST(ExprASTPtr& p):param(p){
+    ImportAST(){
         this->name = "import";
     }
     virtual int getType() {
@@ -220,6 +220,7 @@ public:
     }
     virtual std::string dump(int nDepth);
 public:
+    std::vector<ExprASTPtr>  dotted_as_names;
     ExprASTPtr param;
 };
 /// BinaryExprAST - Expression class for a binary operator.
