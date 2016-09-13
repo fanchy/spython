@@ -55,8 +55,11 @@ public:
     VariableExprAST(const std::string &n) {
         this->name = n;
     }
-    virtual PyObjPtr& eval(PyContext& context) {
-        return this->getFieldVal(context);
+    virtual PyObjPtr& eval(PyContext& context);
+    virtual PyObjPtr& assignVal(PyContext& context, PyObjPtr& v){
+        PyObjPtr& lval = this->getFieldVal(context);
+        lval = v;
+        return lval;
     }
     
     virtual int getType() {

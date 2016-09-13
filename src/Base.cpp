@@ -1,6 +1,7 @@
 #include "Base.h"
 #include "PyObj.h"
-
+#include <stdio.h>
+#include <stdarg.h>
 using namespace std;
 using namespace ff;
 
@@ -94,9 +95,13 @@ runtime_error PyException::buildException(ParseHelper& parseHelper, const string
     //snprintf(msg, sizeof(msg) - 1, "line:%d,col:%d,err:%s,curTok=%d", parseHelper.line, parseHelper.col, err.c_str(), parseHelper.at());
     return runtime_error(msg);
 }
-runtime_error PyException::buildException(const string& err) {
-    char msg[1024];
-    snprintf(msg, sizeof(msg) - 1, "%s", err.c_str());
+runtime_error PyException::buildException(const char * format, ...) {
+    char msg[512];
+      
+    va_list vl;  
+    va_start(vl, format);  
+  
+    vsprintf(msg, format, vl);  
     return runtime_error(msg);
 }
 

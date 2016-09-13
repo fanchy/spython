@@ -20,6 +20,14 @@ FloatExprAST::FloatExprAST(double v) : Val(v) {
     this->name = msg;
     obj = new PyObjFloat(Val);
 }
+PyObjPtr& VariableExprAST::eval(PyContext& context) {
+    PyObjPtr& ret = this->getFieldVal(context);
+    if (!ret){
+        throw PyException::buildException("NameError: global name '%s' is not defined", this->name.c_str());
+    }
+    return ret;
+}
+
 
 PyObjPtr& PowerAST::eval(PyContext& context){TRACE_EXPR();
     return merge->eval(context);
@@ -414,9 +422,9 @@ string FuncDefExprAST::dump(int nDepth){
 }
 
 PyObjPtr& FuncDefExprAST::eval(PyContext& context){TRACE_EXPR();
-    PyObjPtr& lval = funcname->eval(context);
+    
     PyObjPtr rval = new PyObjFuncDef(funcname.cast<VariableExprAST>()->name, parameters, suite);
-    lval = rval;
+    PyObjPtr& lval = funcname->assignVal(context, rval);
     return lval;
 }
 
@@ -449,8 +457,8 @@ PyObjPtr& ClassDefExprAST::eval(PyContext& context){TRACE_EXPR();
     PyObjPtr rval = new PyObjClassDef(classname.cast<VariableExprAST>()->name, parentClass, suite);
     rval.cast<PyObjClassDef>()->processInheritInfo(context, rval);
     
-    PyObjPtr& lval = classname->eval(context);
-    lval = rval;
+    PyObjPtr& lval = classname->assignVal(context, rval);
+
     if (suite){
         PyContextBackUp backup(context);
         context.curstack = rval;
@@ -542,6 +550,10 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
             }
             else if (left->getType() == EXPR_TUPLE){ //!special process assign for tuple
                 return left.cast<TupleExprAST>()->assignToField(context, rval);
+            }
+            else if (left->getType() == EXPR_VAR){ //!special process assign for var
+                PyObjPtr& lval = left->assignVal(context, rval);
+                return lval;
             }
             //DMSG(("assign %s\n%s,%s\n", left->dump(0).c_str(), right->dump(0).c_str(), rval->handler->handleStr(rval).c_str()));
 

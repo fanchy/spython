@@ -92,7 +92,7 @@ class ParseHelper;
 struct PyException {
     static std::runtime_error buildIndentException(ParseHelper& parseHelper, int nNeedIndent, std::string err = "") ;
     static std::runtime_error buildException(ParseHelper& parseHelper, const std::string& err);
-    static std::runtime_error buildException(const std::string& err);
+    static std::runtime_error buildException(const char * format, ...);
 };
 
 struct PyHelper{
@@ -200,6 +200,12 @@ public:
 
     unsigned int getFieldIndex(PyContext& context);
     virtual PyObjPtr& getFieldVal(PyContext& context);
+    virtual PyObjPtr& assignVal(PyContext& context, PyObjPtr& v){
+        PyObjPtr& lval = this->eval(context);
+        lval = v;
+        return lval;
+    }
+    
     virtual int getType() {
         return 0;
     }

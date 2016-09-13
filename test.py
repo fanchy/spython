@@ -1,38 +1,38 @@
-# a = 10
-# b = a + 1
-# c = b - 2
-# d = c * 2
-# e = c / 3
+a = 10
+b = a + 1
+c = b - 2
+d = c * 2
+e = c / 3
 
-# g = 3.5
+g = 3.5
 
-# if a*0:
-    # h = 10
-# elif b:
-    # h = 15
-# else:
-    # h = 20
-# i = 0
-# j = a
-# while j:
-    # j = j - 1
-    # i = i + 1
-    # pass
-    # if not j > 10:
-        # break
-# else:
-    # i = 1
+if a*0:
+    h = 10
+elif b:
+    h = 15
+else:
+    h = 20
+i = 0
+j = a
+while j:
+    j = j - 1
+    i = i + 1
+    pass
+    if not j > 10:
+        break
+else:
+    i = 1
     
 
-#def f1(a, b, c):
-    #return a + b
+def f1(a, b, c):
+    return a + b
 
-#s= f1(**{'a':1, 'b':2, 'c':5})
+s= f1(**{'a':1, 'b':2, 'c':5})
 class F:
     def hi(self):
         self.d = 99
         print('hi')
-        a = b
+        #a = b
         return 1023
 
 class Foo(F):
@@ -46,19 +46,19 @@ class Foo(F):
 
 foo = Foo()
 ee = foo.hi()
-# foo.c = 201
-# foo.a = 20
-# Fa = Foo.a
-# fa = foo.a
-# print('fa', Fa, fa)
-# foo.go()
+foo.c = 201
+foo.a = 20
+Fa = Foo.a
+fa = foo.a
+print('fa', Fa, fa)
+foo.go()
 
-# foo.c = 202
-# fc = foo.c
-# print 1, 2, 3
-# print('fc', fc)
+foo.c = 202
+fc = foo.c
+print 1, 2, 3
+print('fc', fc)
 
 
-# fhi = foo.hi()
-# fd  = foo.d
-# # a, b, c = (1, 2, 3)
+fhi = foo.hi()
+fd  = foo.d
+# a, b, c = (1, 2, 3)

@@ -78,8 +78,9 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
             }
             ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[0];
             
-            PyObjPtr& ref = paramInfo.paramKey->eval(context);
-            ref = classInstance;
+            //PyObjPtr& ref = paramInfo.paramKey->eval(context);
+            //ref = classInstance;
+            paramInfo.paramKey->assignVal(context, classInstance);
             ++hasAssignArgNum;
         }
         
@@ -143,8 +144,9 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
                     for (unsigned int n = fromIndex; n < allArgsVal.size(); ++n){
                         ArgTypeInfo& argInfo = allArgsVal[n];
                         if (argInfo.argKey == strArgName){//!hit
-                            PyObjPtr& ref = paramInfo.paramKey->eval(context);
-                            ref = argAssignVal[n];
+                            //PyObjPtr& ref = paramInfo.paramKey->eval(context);
+                            //ref = argAssignVal[n];
+                            paramInfo.paramKey->assignVal(context, argAssignVal[n]);
                             hitFlag = true;
                             ++hasAssignArgNum;
                             break;
@@ -252,8 +254,9 @@ void PyObjClassDef::processInheritInfo(PyContext& context, PyObjPtr& self){
             
             //DMSG(("PyObjClassDef::processInheritInfo %s", it->first.c_str()));
             
-            PyObjPtr& ref = expr->eval(context);
-            ref = it->second;
+            //PyObjPtr& ref = expr->eval(context);
+            //ref = it->second;
+            expr->assignVal(context, it->second);
         }
     }
 }
