@@ -532,7 +532,7 @@ string ImportAST::dump(int nDepth){
         ret += "-";
     }
     ret += "import";
-    ret += "\n" + param->dump(nDepth+1);
+    //ret += "\n" + param->dump(nDepth+1);
     return ret;
 }
 

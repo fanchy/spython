@@ -220,8 +220,8 @@ public:
     }
     virtual std::string dump(int nDepth);
 public:
-    std::vector<ExprASTPtr>  dotted_as_names;
-    ExprASTPtr param;
+    std::vector<std::string>                           fromArgs;    //! from a import b
+    std::vector<std::pair<std::string, std::string> >  importArgs;   //! from a import b as c, d as e
 };
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {

@@ -613,21 +613,19 @@ ExprASTPtr Parser::parse_import_as_name(){
 }
 
 //! dotted_as_name: dotted_name ['as' NAME]
-ExprASTPtr Parser::parse_dotted_as_name(){
-    StmtAST* stmt = ALLOC_EXPR<StmtAST>();
-    ExprASTPtr ret = stmt;
-    
+ExprASTPtr Parser::parse_dotted_as_name(ExprASTPtr& importAst){
     ExprASTPtr dotted_name = parse_dotted_name();
     if (!dotted_name){
         return NULL;
     }
-    stmt->exprs.push_back(dotted_name);
+    string str_dotted_name = dotted_name.cast<VariableExprAST>()->name;
+    string  strAs;
+    
     if (m_curScanner->getToken()->strVal == "as"){
         m_curScanner->seek(1);
         
         if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-            ExprASTPtr expr = ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal);
-            stmt->exprs.push_back(expr);
+            strAs = m_curScanner->getToken()->strVal;
             m_curScanner->seek(1);
         }
         else{
@@ -635,7 +633,9 @@ ExprASTPtr Parser::parse_dotted_as_name(){
             return NULL;
         }
     }
-    return ret;
+    
+    importAst.cast<ImportAST>()->importArgs.push_back(std::make_pair(str_dotted_name, strAs));
+    return importAst;
 }
 
 //! import_as_names: import_as_name (',' import_as_name)* [',']
@@ -662,17 +662,15 @@ ExprASTPtr Parser::parse_import_as_names(){
 
 //! dotted_as_names: dotted_as_name (',' dotted_as_name)*
 ExprASTPtr Parser::parse_dotted_as_names(ExprASTPtr& importAst){
-    ExprASTPtr dotted_as_name = parse_dotted_as_name();
+    ExprASTPtr dotted_as_name = parse_dotted_as_name(importAst);
     if (!dotted_as_name){
         return NULL;
     }
-    importAst.cast<ImportAST>()->dotted_as_names.push_back(dotted_as_name);
     while (m_curScanner->getToken()->strVal == ","){
         m_curScanner->seek(1);
-        dotted_as_name = parse_dotted_as_name();
+        dotted_as_name = parse_dotted_as_name(importAst);
         if (!dotted_as_name)
             break;
-        importAst.cast<ImportAST>()->dotted_as_names.push_back(dotted_as_name);
     }
     return dotted_as_name;
 }
@@ -682,10 +680,10 @@ ExprASTPtr Parser::parse_dotted_name(){
     StmtAST* stmt = ALLOC_EXPR<StmtAST>();
     ExprASTPtr ret = stmt;
     //DMSG(("parse_dotted_name %s", m_curScanner->getToken()->strVal.c_str()));
-    
+    string strVal;
     if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-        ExprASTPtr expr = ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal);
-        stmt->exprs.push_back(expr);
+        strVal = m_curScanner->getToken()->strVal;
+        
         m_curScanner->seek(1);
     }
     else{
@@ -698,7 +696,12 @@ ExprASTPtr Parser::parse_dotted_name(){
         
         if (m_curScanner->getToken()->nTokenType == TOK_VAR){
             ExprASTPtr expr = ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal);
-            stmt->exprs.push_back(expr);
+            if (strVal.empty()){
+                strVal = m_curScanner->getToken()->strVal;
+            }
+            else{
+                strVal += "." + m_curScanner->getToken()->strVal;
+            }
             m_curScanner->seek(1);
         }
         else{
