@@ -332,6 +332,11 @@ typedef PyObjNone PyCallTmpStack;
 
 class PyContext{
 public:
+    struct FileInfo{
+        std::string path;
+        std::map<int, std::string> line2Code;
+    };
+public:
     PyObjPtr& cacheResult(PyObjPtr v){
         evalResult = v;
         return evalResult;
@@ -363,9 +368,9 @@ public:
         exprTrace.pop_back();
     }
     std::string getFileId2Path(int n){
-        std::map<int, std::string>::iterator it = fileId2Path.find(n);
-        if (it != fileId2Path.end()){
-            return it->second;
+        std::map<int, FileInfo>::iterator it = fileId2Info.find(n);
+        if (it != fileId2Info.end()){
+            return it->second.path;
         }
         
         char msg[128] = {0};
@@ -373,12 +378,28 @@ public:
         return std::string(msg);
     }
     int allocFileIdByPath(const std::string& f){
-        int n = fileId2Path.size() + 1;
-        fileId2Path[n] = f;
+        std::map<int, FileInfo>::iterator it = fileId2Info.begin();
+        for (; it != fileId2Info.end(); ++it){
+            if (it->second.path == f){
+                return it->first;
+            }
+        }
+        int n = fileId2Info.size() + 1;
+        fileId2Info[n].path = f;
         return n;
     }
+    void setFileIdLineInfo(int nFiledId, std::map<int, std::string>& line2Code){
+        fileId2Info[nFiledId].line2Code = line2Code;
+    }
+    std::string getLine2Code(int nFiledId, int n){
+        std::map<int, FileInfo>::iterator it = fileId2Info.find(nFiledId);
+        if (it != fileId2Info.end()){
+            return it->second.line2Code[n];
+        }
+        return "";
+    }
     std::list<ExprAST*> exprTrace;//! for trace back
-    std::map<int, std::string> fileId2Path;
+    std::map<int, FileInfo> fileId2Info;
 };
 #define TRACE_EXPR() context.setTraceExpr(this)
 #define TRACE_EXPR_PUSH() context.pushTraceExpr(this)

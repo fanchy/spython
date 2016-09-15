@@ -1,3 +1,7 @@
+
+import ma as maM
+Mabcd = maM.abcd
+
 a = 10
 b = a + 1
 c = b - 2
@@ -63,6 +67,4 @@ fhi = foo.hi()
 fd  = foo.d
 # a, b, c = (1, 2, 3)
 
-import ma as maM
-Mabcd = maM.abcd
 

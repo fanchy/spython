@@ -207,6 +207,11 @@ public:
     }
 public:
 };
+
+struct PyOpsUtil{
+    static PyObjPtr importFile(PyContext& context, const std::string& modname, const std::string& realpath, std::string asName = "");
+    static std::string traceback(PyContext& context);
+};
 class ImportAST : public ExprAST {
 public:
     struct ImportInfo{

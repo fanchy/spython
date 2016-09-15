@@ -335,4 +335,12 @@ std::string Scanner::getLineCode(int nLine){
     return m_allLines[nLine].strLine; 
 }
  
+std::map<int, std::string> Scanner::getAllLineCode(){
+    std::map<int, std::string> ret;
+    std::map<int, LineInfo>::iterator it = m_allLines.begin();
+    for (; it != m_allLines.end(); ++it){
+        ret[it->first] = it->second.strLine;
+    }
+    return ret;
+}
 

@@ -7,6 +7,7 @@
 
 #include "Scanner.h"
 #include "Parser.h"
+#include "StrTool.h"
 
 using namespace std;
 using namespace ff;
@@ -854,31 +855,58 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
     return ret;
 }
 
+PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modname, const std::string& realpath, std::string asName){
+    Scanner scanner;
+    int nFileId = context.allocFileIdByPath(realpath);
+    scanner.tokenizeFile(realpath, nFileId);
+    
+    std::map<int, std::string> line2Code = scanner.getAllLineCode();
+    context.setFileIdLineInfo(nFileId, line2Code);
+
+    Parser parser;
+    ExprASTPtr rootExpr;
+    rootExpr = parser.parse(scanner);
+
+
+    PyObjPtr mod = new PyObjModule(modname, realpath);
+    PyContextBackUp backup(context);
+    context.curstack = mod;
+    rootExpr->eval(context);
+    backup.rollback();
+    
+    if (asName.empty()){
+        asName = modname;
+    }
+    
+    ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asName);
+    asExpr->assignVal(context, mod);
+    return mod;
+}
+std::string PyOpsUtil::traceback(PyContext& context){
+    string ret;
+    char msg[512] = {0};
+    for (list<ExprAST*>::iterator it = context.exprTrace.begin(); it != context.exprTrace.end(); ++it){
+        ExprAST* e = *it;
+        if (!e)
+            continue;
+        snprintf(msg, sizeof(msg), "  File \"%s\", line %d\n", context.getFileId2Path(e->lineInfo.fileId).c_str(), e->lineInfo.nLine);
+        ret += msg;
+        string lineCode = StrTool::trim(context.getLine2Code(e->lineInfo.fileId, e->lineInfo.nLine));
+        snprintf(msg, sizeof(msg), "    %s\n", lineCode.c_str());
+        ret += msg;
+    }
+    return ret;
+}
 PyObjPtr& ImportAST::eval(PyContext& context) {
     for (size_t i = 0; i < importArgs.size(); ++i){
         ImportAST::ImportInfo& info = importArgs[i];
-        
+
         string path;
         for (size_t j = 0; j < info.pathinfo.size(); ++j){
             path += info.pathinfo[j];
         }
         string realpath = path + ".py";
 
-        Scanner scanner;
-        int nFileId = context.allocFileIdByPath(realpath);
-        scanner.tokenizeFile(realpath, nFileId);
-
-        Parser parser;
-        ExprASTPtr rootExpr;
-        rootExpr = parser.parse(scanner);
-
-        PyObjPtr mod = new PyObjModule(path, realpath);
-        PyContextBackUp backup(context);
-        context.curstack = mod;
-        rootExpr->eval(context);
-
-        backup.rollback();
-        
         string asMod; 
         if (info.asinfo.empty()){
             asMod = info.pathinfo[info.pathinfo.size() - 1];
@@ -886,8 +914,9 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
         else{
             asMod = info.asinfo;
         }
-        ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asMod);
-        asExpr->assignVal(context, mod);
+        
+        PyObjPtr mod = PyOpsUtil::importFile(context, path, realpath, asMod);
+        return context.cacheResult(mod);
     }
     return context.cacheResult(PyObjTool::buildNone());
 }

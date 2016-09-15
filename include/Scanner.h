@@ -45,6 +45,8 @@ public:
         return m_nCurFileId;
     }
     std::string getLineCode(int n);
+    
+    std::map<int, std::string> getAllLineCode();
 private:
     char getCharNext(const std::string& content, int& index);
     Token getOneToken(const std::string& content, int& index);
