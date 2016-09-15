@@ -62,3 +62,7 @@ print('fc', fc)
 fhi = foo.hi()
 fd  = foo.d
 # a, b, c = (1, 2, 3)
+
+import ma as maM
+Mabcd = maM.abcd
+

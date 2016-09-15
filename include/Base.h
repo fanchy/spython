@@ -385,14 +385,18 @@ public:
 #define TRACE_EXPR_POP() context.popTraceExpr()
 
 struct PyContextBackUp{
-    PyContextBackUp(PyContext& c):context(c), curstack(c.curstack){
+    PyContextBackUp(PyContext& c):bRollback(false),context(c), curstack(c.curstack){
     }
     ~PyContextBackUp(){
         rollback();
     }
     void rollback(){
-        context.curstack = curstack;
+        if (!bRollback){
+            bRollback = true;
+            context.curstack = curstack;
+        }
     }
+    bool       bRollback;
     PyObjPtr   curstack;
     PyContext& context;
 };

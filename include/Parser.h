@@ -75,15 +75,15 @@ public:
     //!               'import' ('*' | '(' import_as_names ')' | import_as_names))
     ExprASTPtr parse_import_from();
     //! import_as_name: NAME ['as' NAME]
-    ExprASTPtr parse_import_as_name();
+    ExprASTPtr parse_import_as_name(ExprASTPtr& importAst);
     //! dotted_as_name: dotted_name ['as' NAME]
     ExprASTPtr parse_dotted_as_name(ExprASTPtr& importAst);
     //! import_as_names: import_as_name (',' import_as_name)* [',']
-    ExprASTPtr parse_import_as_names();
+    ExprASTPtr parse_import_as_names(ExprASTPtr& importAst);
     //! dotted_as_names: dotted_as_name (',' dotted_as_name)*
     ExprASTPtr parse_dotted_as_names(ExprASTPtr& importAst);
     //! dotted_name: NAME ('.' NAME)*
-    ExprASTPtr parse_dotted_name();
+    ExprASTPtr parse_dotted_name(ExprASTPtr& importAst);
     //! global_stmt: 'global' NAME (',' NAME)*
     ExprASTPtr parse_global_stmt();
     //! exec_stmt: 'exec' expr ['in' test [',' test]]

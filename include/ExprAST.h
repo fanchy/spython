@@ -209,19 +209,20 @@ public:
 };
 class ImportAST : public ExprAST {
 public:
+    struct ImportInfo{
+        std::vector<std::string>  pathinfo; //! import a.b.c.d
+        std::string               asinfo;   //! import a.b.c.d as abcd
+    };
     ImportAST(){
         this->name = "import";
     }
     virtual int getType() {
         return EXPR_IMPORT_STMT;
     }
-    virtual PyObjPtr& eval(PyContext& context) {
-        return context.cacheResult(PyObjTool::buildNone());
-    }
+    virtual PyObjPtr& eval(PyContext& context);
     virtual std::string dump(int nDepth);
 public:
-    std::vector<std::string>                           fromArgs;    //! from a import b
-    std::vector<std::pair<std::string, std::string> >  importArgs;   //! from a import b as c, d as e
+    std::vector<ImportInfo> importArgs;
 };
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {

@@ -27,6 +27,7 @@
 #include "objhandler/PyStrHandler.h"
 #include "objhandler/PyClassHandler.h"
 #include "objhandler/PyClassInstanceHandler.h"
+#include "objhandler/PyModHandler.h"
 
 namespace ff {
 
@@ -93,15 +94,14 @@ public:
 class PyObjModule:public PyObj {
 public:
     std::string moduleName;
-    PyObjModule(const std::string& v):moduleName(v) {
-        this->handler = new PyObjHandler();
+    std::string path;
+    PyObjModule(const std::string& v, std::string p = "built-in"):moduleName(v),path(p) {
+        this->handler = singleton_t<PyModHandler>::instance_ptr();
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjModule> >::instance_ptr()->objInfo;
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
     }
-    virtual int getType() const {
-        return PY_MOD;
-    }
+
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }

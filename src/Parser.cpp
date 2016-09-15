@@ -528,7 +528,9 @@ ExprASTPtr Parser::parse_import_name(){
     if (m_curScanner->getToken()->strVal == "import"){
         m_curScanner->seek(1);
         ExprASTPtr ret = ALLOC_EXPR<ImportAST>();
-        ExprASTPtr dotted_as_names = parse_dotted_as_names(ret);
+        if (!parse_dotted_as_names(ret)){
+            THROW_ERROR("dotted_as_names needed when parse import");
+        }
         return ret;
     }
     
@@ -540,64 +542,65 @@ ExprASTPtr Parser::parse_import_name(){
 ExprASTPtr Parser::parse_import_from(){
     
     if (m_curScanner->getToken()->strVal == "from"){
-        StmtAST* stmt = ALLOC_EXPR<StmtAST>();
-        ExprASTPtr ret = stmt;
+
+        ExprASTPtr importAst = ALLOC_EXPR<ImportAST>();
+        ImportAST::ImportInfo tmpinfo;
+        importAst.cast<ImportAST>()->importArgs.push_back(tmpinfo);
+        
         m_curScanner->seek(1);
         
-        ExprASTPtr dotted_name = parse_dotted_name();
+        ExprASTPtr dotted_name = parse_dotted_name(importAst);
         if (!dotted_name){
             THROW_ERROR("dotted_name need when parse import after from");
         }
-        stmt->exprs.push_back(dotted_name);
-        
+   
         if (m_curScanner->getToken()->strVal != "import"){
             THROW_ERROR("import need when parse import after from");
         }
         m_curScanner->seek(1);
         
         if (m_curScanner->getToken()->strVal == "*"){
-            stmt->exprs.push_back(ALLOC_EXPR<StrExprAST>("*"));
+            importAst.cast<ImportAST>()->importArgs.back().pathinfo.push_back("*");
             m_curScanner->seek(1);
         }
         else if (m_curScanner->getToken()->strVal == "("){
             m_curScanner->seek(1);
-            ExprASTPtr import_as_names = parse_import_as_names();
+            ExprASTPtr import_as_names = parse_import_as_names(importAst);
             if (!import_as_names){
                 THROW_ERROR("import_as_names need when parse import after import (");
             }
-            stmt->exprs.push_back(import_as_names);
-            
+ 
             if (m_curScanner->getToken()->strVal != ""){
                 THROW_ERROR(") need when parse import after import (");
             }
             m_curScanner->seek(1);
         }
         else{
-            ExprASTPtr import_as_names = parse_import_as_names();
+            ExprASTPtr import_as_names = parse_import_as_names(importAst);
             if (!import_as_names){
                 THROW_ERROR("import_as_names need when parse import after import");
             }
-            stmt->exprs.push_back(import_as_names);
         }
-        return ret;
+        return importAst;
     }
     return NULL;
 }
 
 //! import_as_name: NAME ['as' NAME]
-ExprASTPtr Parser::parse_import_as_name(){
-    //DMSG(("parse_import_as_name %s", m_curScanner->getToken()->strVal.c_str()));
-    StmtAST* stmt = ALLOC_EXPR<StmtAST>();
-    ExprASTPtr ret = stmt;
+ExprASTPtr Parser::parse_import_as_name(ExprASTPtr& importAst){
 
     if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-        stmt->exprs.push_back(ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal));
+        const string& strVal = m_curScanner->getToken()->strVal;
+        importAst.cast<ImportAST>()->importArgs.back().pathinfo.push_back(strVal);
+        
         m_curScanner->seek(1);
 
         if (m_curScanner->getToken()->strVal == "as"){
             m_curScanner->seek(1);
             if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-                stmt->exprs.push_back(ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal));
+                const string& strVal = m_curScanner->getToken()->strVal;
+                importAst.cast<ImportAST>()->importArgs.back().asinfo = strVal;
+                
                 m_curScanner->seek(1);
             }
             else{
@@ -609,24 +612,27 @@ ExprASTPtr Parser::parse_import_as_name(){
     else{
         THROW_ERROR("name needed when parse import");
     }
-    return ret;
+    return importAst;
 }
 
 //! dotted_as_name: dotted_name ['as' NAME]
 ExprASTPtr Parser::parse_dotted_as_name(ExprASTPtr& importAst){
-    ExprASTPtr dotted_name = parse_dotted_name();
+    ImportAST::ImportInfo tmpinfo;
+    importAst.cast<ImportAST>()->importArgs.push_back(tmpinfo);
+    
+    ExprASTPtr dotted_name = parse_dotted_name(importAst);
     if (!dotted_name){
         return NULL;
     }
-    string str_dotted_name = dotted_name.cast<VariableExprAST>()->name;
-    string  strAs;
-    
+
     if (m_curScanner->getToken()->strVal == "as"){
         m_curScanner->seek(1);
         
         if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-            strAs = m_curScanner->getToken()->strVal;
+            string strAs = m_curScanner->getToken()->strVal;
             m_curScanner->seek(1);
+            
+            importAst.cast<ImportAST>()->importArgs.back().asinfo = strAs;
         }
         else{
             THROW_ERROR("name needed when parse import after as");
@@ -634,30 +640,29 @@ ExprASTPtr Parser::parse_dotted_as_name(ExprASTPtr& importAst){
         }
     }
     
-    importAst.cast<ImportAST>()->importArgs.push_back(std::make_pair(str_dotted_name, strAs));
+    
     return importAst;
 }
 
 //! import_as_names: import_as_name (',' import_as_name)* [',']
-ExprASTPtr Parser::parse_import_as_names(){
-    StmtAST* stmt = ALLOC_EXPR<StmtAST>();
-    ExprASTPtr ret = stmt;
-    
-    ExprASTPtr import_as_name = parse_import_as_name();
+ExprASTPtr Parser::parse_import_as_names(ExprASTPtr& importAst){
+    ImportAST::ImportInfo tmpinfo = importAst.cast<ImportAST>()->importArgs.back();
+    ExprASTPtr import_as_name = parse_import_as_name(importAst);
     if (!import_as_name){
         return NULL;
     }
-    stmt->exprs.push_back(import_as_name);
-    
+
     while (m_curScanner->getToken()->strVal == ","){
         m_curScanner->seek(1);
-        import_as_name = parse_import_as_name();
+        
+        importAst.cast<ImportAST>()->importArgs.push_back(tmpinfo);
+        
+        import_as_name = parse_import_as_name(importAst);
         if (!import_as_name){
             THROW_ERROR("name needed when parse import after ,");;
         }
-        stmt->exprs.push_back(import_as_name);
     }
-    return ret;
+    return importAst;
 }
 
 //! dotted_as_names: dotted_as_name (',' dotted_as_name)*
@@ -676,9 +681,7 @@ ExprASTPtr Parser::parse_dotted_as_names(ExprASTPtr& importAst){
 }
 
 //! dotted_name: NAME ('.' NAME)*
-ExprASTPtr Parser::parse_dotted_name(){
-    StmtAST* stmt = ALLOC_EXPR<StmtAST>();
-    ExprASTPtr ret = stmt;
+ExprASTPtr Parser::parse_dotted_name(ExprASTPtr& importAst){
     //DMSG(("parse_dotted_name %s", m_curScanner->getToken()->strVal.c_str()));
     string strVal;
     if (m_curScanner->getToken()->nTokenType == TOK_VAR){
@@ -690,25 +693,23 @@ ExprASTPtr Parser::parse_dotted_name(){
         THROW_ERROR("name needed when parse import");
         return NULL;
     }
-    
+
+    importAst.cast<ImportAST>()->importArgs.back().pathinfo.push_back(strVal);
+
     while (m_curScanner->getToken()->strVal == "."){
         m_curScanner->seek(1);
         
         if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-            ExprASTPtr expr = ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal);
-            if (strVal.empty()){
-                strVal = m_curScanner->getToken()->strVal;
-            }
-            else{
-                strVal += "." + m_curScanner->getToken()->strVal;
-            }
+            strVal = m_curScanner->getToken()->strVal;
+            importAst.cast<ImportAST>()->importArgs.back().pathinfo.push_back(strVal);
+            
             m_curScanner->seek(1);
         }
         else{
             THROW_ERROR("name needed when parse import after .");
         }
     }
-    return ret;
+    return importAst;
 }
 
 //! global_stmt: 'global' NAME (',' NAME)*

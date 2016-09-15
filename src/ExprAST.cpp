@@ -5,6 +5,9 @@
 #include <map>
 #include <cstdlib>
 
+#include "Scanner.h"
+#include "Parser.h"
+
 using namespace std;
 using namespace ff;
 
@@ -850,3 +853,42 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
     TRACE_EXPR_POP();
     return ret;
 }
+
+PyObjPtr& ImportAST::eval(PyContext& context) {
+    for (size_t i = 0; i < importArgs.size(); ++i){
+        ImportAST::ImportInfo& info = importArgs[i];
+        
+        string path;
+        for (size_t j = 0; j < info.pathinfo.size(); ++j){
+            path += info.pathinfo[j];
+        }
+        string realpath = path + ".py";
+
+        Scanner scanner;
+        int nFileId = context.allocFileIdByPath(realpath);
+        scanner.tokenizeFile(realpath, nFileId);
+
+        Parser parser;
+        ExprASTPtr rootExpr;
+        rootExpr = parser.parse(scanner);
+
+        PyObjPtr mod = new PyObjModule(path, realpath);
+        PyContextBackUp backup(context);
+        context.curstack = mod;
+        rootExpr->eval(context);
+
+        backup.rollback();
+        
+        string asMod; 
+        if (info.asinfo.empty()){
+            asMod = info.pathinfo[info.pathinfo.size() - 1];
+        }
+        else{
+            asMod = info.asinfo;
+        }
+        ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asMod);
+        asExpr->assignVal(context, mod);
+    }
+    return context.cacheResult(PyObjTool::buildNone());
+}
+
