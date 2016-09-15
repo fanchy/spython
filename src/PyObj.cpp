@@ -225,8 +225,19 @@ PyObjClassDef::PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a, Exp
     selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
     this->handler = singleton_t<PyClassHandler>::instance_ptr();
 }
-
 std::map<std::string, PyObjPtr> PyObjClassDef::getAllFieldData(){
+    std::map<std::string, PyObjPtr> ret;
+
+    const ObjIdInfo& p = this->getObjIdInfo();
+    for (unsigned int i = 0; i < this->m_objStack.size(); ++i) {
+        string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFieldName(p.nModuleId, p.nObjectId, i);
+        ret[n]   = this->m_objStack[i];
+    }
+
+    return ret;
+}
+
+std::map<std::string, PyObjPtr> PyObjModule::getAllFieldData(){
     std::map<std::string, PyObjPtr> ret;
 
     const ObjIdInfo& p = this->getObjIdInfo();

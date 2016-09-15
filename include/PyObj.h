@@ -105,6 +105,7 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
+    std::map<std::string, PyObjPtr> getAllFieldData();
     ObjIdInfo  selfObjInfo;
 };
 

@@ -855,7 +855,8 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
     return ret;
 }
 
-PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modname, const std::string& realpath, std::string asName){
+PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, std::string asName){
+    string realpath = modpath + ".py";
     Scanner scanner;
     int nFileId = context.allocFileIdByPath(realpath);
     scanner.tokenizeFile(realpath, nFileId);
@@ -867,7 +868,7 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modname, c
     ExprASTPtr rootExpr;
     rootExpr = parser.parse(scanner);
 
-
+    string modname = asName;
     PyObjPtr mod = new PyObjModule(modname, realpath);
     PyContextBackUp backup(context);
     context.curstack = mod;
@@ -903,9 +904,11 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
 
         string path;
         for (size_t j = 0; j < info.pathinfo.size(); ++j){
+            if (info.pathinfo[j] == "*")
+               break;
             path += info.pathinfo[j];
         }
-        string realpath = path + ".py";
+        string realpath = path;
 
         string asMod; 
         if (info.asinfo.empty()){
@@ -915,7 +918,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
             asMod = info.asinfo;
         }
         
-        PyObjPtr mod = PyOpsUtil::importFile(context, path, realpath, asMod);
+        PyObjPtr mod = PyOpsUtil::importFile(context, realpath, asMod);
         return context.cacheResult(mod);
     }
     return context.cacheResult(PyObjTool::buildNone());

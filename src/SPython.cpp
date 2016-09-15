@@ -9,6 +9,6 @@ SPython::SPython(){
 }
 
 PyObjPtr SPython::importFile(const std::string& modname){
-    return PyOpsUtil::importFile(pycontext, modname, modname + ".py", modname);
+    return PyOpsUtil::importFile(pycontext, modname, modname);
 }
 
