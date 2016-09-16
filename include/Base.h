@@ -151,7 +151,7 @@ public:
 
     int getType() const;
     virtual int getFieldNum() const { return m_objStack.size(); }
-    static std::string dump(PyObjPtr& self);
+    static std::string dump(PyObjPtr& self, int preBlank = 0);
 
     virtual PyObjPtr& getVar(PyContext& c, PyObjPtr& self, unsigned int nFieldIndex);
     virtual const ObjIdInfo& getObjIdInfo() = 0;

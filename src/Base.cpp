@@ -5,14 +5,18 @@
 using namespace std;
 using namespace ff;
 
-string PyObj::dump(PyObjPtr& self) {
+string PyObj::dump(PyObjPtr& self, int preBlank) {
     string ret = self->handler->dump(self);
     if (ret.empty() == false)
         return ret;
-    
+    string blank;
+    for (size_t j = 0; j < preBlank; ++j){
+        blank += "  ";
+    }
     char msg[256] = {0};
     snprintf(msg, sizeof(msg), "type:%d\n", self->getType());
     ret += msg;
+
     const ObjIdInfo& p = self->getObjIdInfo();
     for (unsigned int i = 0; i < self->m_objStack.size(); ++i) {
         
@@ -21,13 +25,13 @@ string PyObj::dump(PyObjPtr& self) {
             snprintf(msg, sizeof(msg), "[%d-%d] %d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
         else 
             snprintf(msg, sizeof(msg), "[%d-%d] %02d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
-        ret += msg;
+        ret += blank + msg;
         if (!self->m_objStack[i]) {
             ret += "NULL\n";
             continue;
         }
-        if (self->m_objStack[i]->getType() == PY_MOD){
-            ret += "\n  "+ PyObj::dump(self->m_objStack[i]);
+        if (self->m_objStack[i]->getType() == PY_MOD && preBlank < 3){
+            ret += PyObj::dump(self->m_objStack[i], preBlank + 1);
             continue;
         }
         ret += self->m_objStack[i]->handler->handleStr(self->m_objStack[i]);
