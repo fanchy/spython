@@ -1,7 +1,4 @@
 
-import ma as maM
-Mabcd = maM.abcd
-
 a = 10
 b = a + 1
 c = b - 2
@@ -66,6 +63,8 @@ print('fc', fc)
 fhi = foo.hi()
 fd  = foo.d
 # a, b, c = (1, 2, 3)
-from mod import *
+#from mod import *
+#from mod import mb
 
 
+import ma

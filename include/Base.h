@@ -333,8 +333,16 @@ typedef PyObjNone PyCallTmpStack;
 class PyContext{
 public:
     struct FileInfo{
-        std::string path;
-        std::map<int, std::string> line2Code;
+        FileInfo(){
+        }
+        FileInfo(const FileInfo& src){
+            path = src.path;
+            line2Code = src.line2Code;
+            modCache = src.modCache;
+        }
+        std::string                 path;
+        std::map<int, std::string>  line2Code;
+        PyObjPtr                    modCache;
     };
 public:
     PyObjPtr& cacheResult(PyObjPtr v){
@@ -344,11 +352,7 @@ public:
     PyObjPtr& getCacheResult(){
         return evalResult;
     }
-    //std::vector<PyObjPtr>   tmpcache;
-    
-    PyObjPtr evalResult;
-    PyObjPtr curstack;//!cur using context
-    
+
     void setTraceExpr(ExprAST* e){
         if (e->lineInfo.fileId == 0){
             return;
@@ -362,7 +366,7 @@ public:
     }
     void pushTraceExpr(ExprAST* e){
         setTraceExpr(e);
-        exprTrace.push_back(e);
+        exprTrace.push_back(NULL);
     }
     void popTraceExpr(){
         exprTrace.pop_back();
@@ -391,6 +395,17 @@ public:
     void setFileIdLineInfo(int nFiledId, std::map<int, std::string>& line2Code){
         fileId2Info[nFiledId].line2Code = line2Code;
     }
+    void setFileIdModCache(int nFiledId, PyObjPtr v){
+        fileId2Info[nFiledId].modCache = v;
+    }
+    
+    PyObjPtr getFileIdModCache(int nFiledId){
+        std::map<int, FileInfo>::iterator it = fileId2Info.find(nFiledId);
+        if (it != fileId2Info.end()){
+            return it->second.modCache;
+        }
+        return NULL;
+    }
     std::string getLine2Code(int nFiledId, int n){
         std::map<int, FileInfo>::iterator it = fileId2Info.find(nFiledId);
         if (it != fileId2Info.end()){
@@ -398,9 +413,12 @@ public:
         }
         return "";
     }
+public:
     std::list<ExprAST*> exprTrace;//! for trace back
     std::map<int, FileInfo> fileId2Info;
     std::string             syspath;
+    PyObjPtr evalResult;
+    PyObjPtr curstack;//!cur using context
 };
 #define TRACE_EXPR() context.setTraceExpr(this)
 #define TRACE_EXPR_PUSH() context.pushTraceExpr(this)

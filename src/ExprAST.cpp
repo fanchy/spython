@@ -856,10 +856,62 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
     return ret;
 }
 
+struct TmpImportCacheGuard{
+    TmpImportCacheGuard(PyContext& c, int n):context(c),nFileId(n) {
+    }
+    ~TmpImportCacheGuard(){
+        PyObjPtr modCache = context.getFileIdModCache(nFileId);
+        if (modCache){
+            if (modCache.cast<PyObjModule>()->loadFlag == PyObjModule::MOD_LOADING){
+                context.setFileIdModCache(nFileId, NULL);
+            }
+        }
+    }
+    PyContext& context;
+    int nFileId;
+};
 PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, std::string asName, bool assignFlag){
-    string realpath = modpath + ".py";
+    string realpath;
+    if (modpath.find(".py") != string::npos){
+        realpath = modpath;
+    }
+    else{
+        vector<string> sysdir;
+        StrTool::split(context.syspath, sysdir, ";");
+        if (sysdir.empty()){
+            sysdir.push_back("./");
+        }
+        string path;
+        for (size_t n = 0; n < sysdir.size(); ++n){
+            path = sysdir[n];
+            if (path.empty() == false && path[path.size() - 1] != '/'){
+                path += '/';
+            }
+            path += modpath + ".py";
+            if (Util::isFile(path)){
+                realpath = path;
+                break;
+            }
+        }
+    }
+    if (realpath.empty()){
+        throw PyException::buildException("ImportError: No module named %s", modpath.c_str());
+    }
     Scanner scanner;
     int nFileId = context.allocFileIdByPath(realpath);
+    
+    PyObjPtr modCache = context.getFileIdModCache(nFileId);
+    if (modCache){
+        if (modCache.cast<PyObjModule>()->loadFlag == PyObjModule::MOD_LOADING){
+            throw PyException::buildException("ImportError: loop import %s", modpath.c_str());
+        }
+        if (assignFlag){
+            ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asName);
+            asExpr->assignVal(context, modCache);
+        }
+        return modCache;
+    }
+    
     scanner.tokenizeFile(realpath, nFileId);
     
     std::map<int, std::string> line2Code = scanner.getAllLineCode();
@@ -871,11 +923,15 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, s
 
     string modname = asName;
     PyObjPtr mod = new PyObjModule(modname, realpath);
+    context.setFileIdModCache(nFileId, mod);
+    TmpImportCacheGuard guardCache(context, nFileId);
+    
     PyContextBackUp backup(context);
     context.curstack = mod;
     rootExpr->eval(context);
+    mod.cast<PyObjModule>()->loadFlag = PyObjModule::MOD_LOADOK;
     backup.rollback();
-    
+
     if (asName.empty()){
         asName = modname;
     }
@@ -900,7 +956,8 @@ std::string PyOpsUtil::traceback(PyContext& context){
     }
     return ret;
 }
-PyObjPtr& ImportAST::eval(PyContext& context) {TRACE_EXPR();
+PyObjPtr& ImportAST::eval(PyContext& context) {
+    TRACE_EXPR_PUSH();
     vector<string> sysdir;
     StrTool::split(context.syspath, sysdir, ";");
     
@@ -938,7 +995,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {TRACE_EXPR();
                     continue;
                 }
                 else if (Util::isFile(path + ".py")){
-                    realpath = path;
+                    realpath = path + ".py";
                     hit = true;
                     
                     if (j < info.pathinfo.size() - 1){
@@ -961,9 +1018,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {TRACE_EXPR();
         
         if (allPyInDir.empty() == false){
             for (size_t t = 0; t < allPyInDir.size(); ++t){
-                vector<string> modargs;
-                StrTool::split(allPyInDir[t], modargs, ".py");
-                string modName = modargs[0];
+                string& modName = allPyInDir[t];
                 PyObjPtr mod = PyOpsUtil::importFile(context, realpath + "/" + modName, modName);
                 if (!mod){
                     throw PyException::buildException("ImportError: No module named %s", modName.c_str());
@@ -1005,6 +1060,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {TRACE_EXPR();
             
         }
     }
+    TRACE_EXPR_POP();
     return context.cacheResult(PyObjTool::buildNone());
 }
 

@@ -93,9 +93,11 @@ public:
 
 class PyObjModule:public PyObj {
 public:
-    std::string moduleName;
-    std::string path;
-    PyObjModule(const std::string& v, std::string p = "built-in"):moduleName(v),path(p) {
+    enum {
+        MOD_LOADING = 0,
+        MOD_LOADOK
+    };
+    PyObjModule(const std::string& v, std::string p = "built-in"):loadFlag(MOD_LOADING), moduleName(v),path(p) {
         this->handler = singleton_t<PyModHandler>::instance_ptr();
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjModule> >::instance_ptr()->objInfo;
         //!different function has different object id 
@@ -106,7 +108,11 @@ public:
         return selfObjInfo;
     }
     std::map<std::string, PyObjPtr> getAllFieldData();
-    ObjIdInfo  selfObjInfo;
+public:
+    int                             loadFlag; //!0 loading 1 load ok
+    std::string                     moduleName;
+    std::string                     path;
+    ObjIdInfo                       selfObjInfo;  
 };
 
 class PyObjTuple:public PyObj {
