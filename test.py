@@ -44,7 +44,7 @@ class Foo(F):
         return self
     def say(a):
         return a
-
+f = F()
 foo = Foo()
 ee = foo.hi()
 foo.c = 201
@@ -68,3 +68,17 @@ fd  = foo.d
 
 
 import ma
+
+try:
+    ta = 109
+    raise f
+except Foo, f:
+    teafoo = 199
+except F, f:
+    teaf = 299
+except:
+    tea = 99
+else:
+    tel = 89
+finally:
+    tef = 78

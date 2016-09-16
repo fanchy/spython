@@ -289,10 +289,12 @@ public:
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, 
                                  std::vector<PyObjPtr>& argAssignVal);
     virtual std::size_t    handleHash(const PyObjPtr& self) const;
+    virtual bool handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val);
 
     virtual std::string dump(PyObjPtr& self) {
         return "";
     }
+    
 };
 
 class PyNoneHandler: public PyObjHandler{
@@ -326,7 +328,7 @@ public:
     ObjIdInfo       selfObjInfo;
     bool            isNull;
 };
-#define IS_NULL(o) (o.get() == NULL || (o)->getType() == 0 || ((o)->getType() == PY_NONE && (o).cast<PyObjNone>()->isNull))
+#define IS_NULL(o) (o.get() == NULL)
 
 typedef PyObjNone PyCallTmpStack;
 
@@ -453,6 +455,9 @@ public:
 
 
 class ReturnSignal: public std::exception{
+public:
+};
+class PyExceptionSignal: public std::exception{
 public:
 };
 

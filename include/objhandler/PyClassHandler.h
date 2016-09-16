@@ -24,7 +24,7 @@ public:
     virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;
     virtual bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
-    
+    virtual bool handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     ExprASTPtr __init__;
 };
 

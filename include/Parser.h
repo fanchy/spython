@@ -109,7 +109,7 @@ public:
     //! with_item: test ['as' expr]
     ExprASTPtr parse_with_item();
     //! except_clause: 'except' [test [('as' | ',') test]]
-    ExprASTPtr parse_except_clause();
+    ExprASTPtr parse_except_clause(ExprASTPtr& ret);
     //! suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
     ExprASTPtr parse_suite();
     //! testlist_safe: old_test [(',' old_test)+ [',']]

@@ -40,4 +40,20 @@ PyObjPtr& PyClassHandler::handleCall(PyContext& context, PyObjPtr& self, std::ve
     
     return context.cacheResult(ret);
 }
+bool PyClassHandler::handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    if (val->getType() == PY_CLASS_INST){
+        PyObjPtr& classDef = val.cast<PyObjClassInstance>()->classDefPtr;
+        if (classDef.get() == self.get()){
+            return true;
+        }
+        vector<PyObjPtr>& allParentDef = classDef.cast<PyObjClassDef>()->parentClass;
+        for (size_t i = 0; i < allParentDef.size(); ++i){
+            if (allParentDef[i].get() == self.get()){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 

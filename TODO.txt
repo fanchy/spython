@@ -4,8 +4,9 @@
 4. print 的实现 	-- ok
 5 __doc__ 属性
 6 __dict__属性
-7. import 
-8. traceback
+7. import 		-- ok
+8. traceback		-- ok
 9. exception
 10.字典完善
 11.单元测试
+12.builtin-type int float str tuple dict exception

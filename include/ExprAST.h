@@ -710,6 +710,31 @@ public:
     ExprASTPtr arglist;
 };
 
+class TryAst : public ExprAST {
+public:
+    struct ExceptInfo{
+        ExceptInfo(){
+        }
+        ExceptInfo(const ExceptInfo& src){
+            exceptType = src.exceptType;
+            exceptAsVal= src.exceptAsVal;
+            exceptSuite= src.exceptSuite;
+        }
+        ExprASTPtr exceptType;
+        ExprASTPtr exceptAsVal;
+        ExprASTPtr exceptSuite;
+    };
+    virtual int getType() {
+        return EXPR_TRY_STMT;
+    }
+    virtual PyObjPtr& eval(PyContext& context);
+public:
+    ExprASTPtr                  trySuite;
+    std::vector<ExceptInfo>     exceptSuite;
+    ExprASTPtr                  elseSuite;
+    ExprASTPtr                  finallySuite;
+};
+
 
 }
 #endif

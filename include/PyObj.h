@@ -194,7 +194,7 @@ public:
     }
     std::map<std::string, PyObjPtr> getAllFieldData();
     void processInheritInfo(PyContext& context, PyObjPtr& self);
-    
+
     std::string             name;
     std::vector<PyObjPtr>   parentClass;
     ExprASTPtr              suite;

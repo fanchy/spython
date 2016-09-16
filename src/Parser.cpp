@@ -481,10 +481,11 @@ ExprASTPtr Parser::parse_yield_stmt(){
 //! raise_stmt: 'raise' [test [',' test [',' test]]]
 ExprASTPtr Parser::parse_raise_stmt(){
     if (m_curScanner->getToken()->strVal == "raise"){
-        m_curScanner->seek(1);
         
         RaiseAST* raiseAST = ALLOC_EXPR<RaiseAST>();
         ExprASTPtr ret     = raiseAST;
+        
+        m_curScanner->seek(1);
         ExprASTPtr test    = parse_test();
         
         if (test){
@@ -507,6 +508,9 @@ ExprASTPtr Parser::parse_raise_stmt(){
                     raiseAST->exprs.push_back(test);
                 }
             }
+        }
+        else{
+            THROW_ERROR("TypeError: exceptions must be old-style classes or derived from BaseException, not NoneType");
         }
         return ret;
     }
@@ -998,7 +1002,60 @@ ExprASTPtr Parser::parse_for_stmt(){
 //!             ['finally' ':' suite] |
 //!            'finally' ':' suite))
 ExprASTPtr Parser::parse_try_stmt(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "try"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    TryAst* tryexpr = ALLOC_EXPR<TryAst>();
+    ExprASTPtr ret  = tryexpr;
+    
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed when parse try after try");
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr suite = parse_suite();
+    if (!suite){
+        THROW_ERROR("suite needed when parse try after for:");
+    }
+    tryexpr->trySuite   = suite;
+    
+    while (m_curScanner->getToken()->strVal == "except"){
+        parse_except_clause(ret);
+    }
+    
+    if (m_curScanner->getToken()->strVal == "else"){
+        m_curScanner->seek(1);
+        
+        if (m_curScanner->getToken()->strVal != ":"){
+            THROW_ERROR(": needed when parse try after else");
+        }
+        m_curScanner->seek(1);
+        
+        suite = parse_suite();
+        if (!suite){
+            THROW_ERROR("suite needed when parse try after else:");
+        }
+        tryexpr->elseSuite   = suite;
+    }
+    
+    if (m_curScanner->getToken()->strVal == "finally"){
+        m_curScanner->seek(1);
+        
+        if (m_curScanner->getToken()->strVal != ":"){
+            THROW_ERROR(": needed when parse try after finally");
+        }
+        m_curScanner->seek(1);
+        
+        suite = parse_suite();
+        if (!suite){
+            THROW_ERROR("suite needed when parse try after finally:");
+        }
+        tryexpr->finallySuite   = suite;
+    }
+    
+    return ret;
 }
 
 //! with_stmt: 'with' with_item (',' with_item)*  ':' suite
@@ -1012,7 +1069,36 @@ ExprASTPtr Parser::parse_with_item(){
 }
 
 //! except_clause: 'except' [test [('as' | ',') test]]
-ExprASTPtr Parser::parse_except_clause(){
+ExprASTPtr Parser::parse_except_clause(ExprASTPtr& ret){
+    if (m_curScanner->getToken()->strVal != "except"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    TryAst::ExceptInfo info;
+    
+    if (m_curScanner->getToken()->strVal != ":"){
+        info.exceptType  = parse_test();
+
+        if (m_curScanner->getToken()->strVal == "as" || m_curScanner->getToken()->strVal == ","){
+            m_curScanner->seek(1);
+            const string& varName  = m_curScanner->getToken()->strVal;
+            info.exceptAsVal = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(varName);
+            m_curScanner->seek(1);
+        }
+    }
+    
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed when parse try after except");
+    }
+    
+    m_curScanner->seek(1);
+    info.exceptSuite = parse_suite();
+    if (!info.exceptSuite){
+        THROW_ERROR("suite needed when parse try after except");
+    }
+    
+    ret.cast<TryAst>()->exceptSuite.push_back(info);
     return NULL;
 }
 

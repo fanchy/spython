@@ -80,6 +80,9 @@ PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, std::vect
 size_t PyObjHandler::handleHash(const PyObjPtr& self) const{
     return size_t(self.get());
 }
+bool PyObjHandler::handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    return false;
+}
 
 PyObjPtr& PyObj::getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex) {
     //DMSG(("nFieldIndex %d\n", nFieldIndex));

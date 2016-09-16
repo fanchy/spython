@@ -136,14 +136,13 @@ string ReturnAST::dump(int nDepth){
 
 PyObjPtr& RaiseAST::eval(PyContext& context){TRACE_EXPR();
     if (exprs.empty()){
-        return context.cacheResult(PyObjTool::buildNone());
+        context.cacheResult(PyObjTool::buildNone());
+        throw PyExceptionSignal();
     }
-
-    unsigned int i = 0;
-    for (; i < exprs.size(); ++i){
-        exprs[i]->eval(context);
-    }
-    return exprs[i]->eval(context);
+    PyObjPtr v = exprs[0]->eval(context);
+    context.cacheResult(v);
+    throw PyExceptionSignal();
+    return context.cacheResult(PyObjTool::buildNone());
 }
 string RaiseAST::dump(int nDepth){
     string ret;
@@ -1061,6 +1060,50 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
         }
     }
     TRACE_EXPR_POP();
+    return context.cacheResult(PyObjTool::buildNone());
+}
+
+PyObjPtr& TryAst::eval(PyContext& context){TRACE_EXPR();
+    bool execptFlag = false;
+    try{
+        trySuite->eval(context);
+    }
+    catch(PyExceptionSignal& s){
+        execptFlag = true;
+        
+        bool hit = false;
+        PyObjPtr excepVal = context.getCacheResult();
+        vector<ExceptInfo>::iterator it = exceptSuite.begin();
+        for (; it != exceptSuite.end(); ++it){
+            ExceptInfo& info = *it;
+            if (!info.exceptType){ //!hit
+                hit = true;
+                info.exceptSuite->eval(context);
+                break;
+            }
+
+            PyObjPtr exceptType = info.exceptType->eval(context);
+            if (exceptType->handler->handleIsInstance(context, exceptType, excepVal)){
+                hit = true;
+                info.exceptSuite->eval(context);
+                break;
+            }
+        }
+        
+        if (!hit && !finallySuite){
+            context.cacheResult(excepVal);
+            throw PyExceptionSignal(); 
+        }
+    }
+    catch(...){
+        
+    }
+    if (!execptFlag && elseSuite){
+        elseSuite->eval(context);
+    }
+    if (finallySuite){
+        finallySuite->eval(context);
+    }
     return context.cacheResult(PyObjTool::buildNone());
 }
 
