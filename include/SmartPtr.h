@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 namespace ff {
-#define FF_ASSERT(X) if (!(X)) throw std::runtime_error("SmartPtr NULL DATA")
+//#define FF_ASSERT(X) if (!(X)) throw std::runtime_error("SmartPtr NULL DATA")
 
 #define ATOMIC_ADD(src_ptr, v)            (void)__sync_add_and_fetch(src_ptr, v)
 #define ATOMIC_SUB_AND_FETCH(src_ptr, v)  __sync_sub_and_fetch(src_ptr, v)
@@ -22,7 +22,6 @@ public:
     {}
     ~ref_count_t()
     {}
-
     inline void inc(int n = 1)
     {
         ATOMIC_ADD(&m_ref_num, n);
@@ -58,6 +57,11 @@ public:
     typedef T                         object_t;
     typedef SmartPtr<T>           self_type_t;
 public:
+    void FF_ASSERT(bool X) const{
+        if (!(X)) {
+            throw std::runtime_error("SmartPtr NULL DATA");
+        }
+    }
     SmartPtr();
     SmartPtr(object_t* p);
     SmartPtr(self_type_t& p);

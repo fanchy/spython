@@ -26,6 +26,10 @@ string PyObj::dump(PyObjPtr& self) {
             ret += "NULL\n";
             continue;
         }
+        if (self->m_objStack[i]->getType() == PY_MOD){
+            ret += "\n  "+ PyObj::dump(self->m_objStack[i]);
+            continue;
+        }
         ret += self->m_objStack[i]->handler->handleStr(self->m_objStack[i]);
         ret += "\n";
     }
