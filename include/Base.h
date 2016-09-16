@@ -400,6 +400,7 @@ public:
     }
     std::list<ExprAST*> exprTrace;//! for trace back
     std::map<int, FileInfo> fileId2Info;
+    std::string             syspath;
 };
 #define TRACE_EXPR() context.setTraceExpr(this)
 #define TRACE_EXPR_PUSH() context.pushTraceExpr(this)

@@ -526,8 +526,8 @@ ExprASTPtr Parser::parse_import_stmt(){
 //! import_name: 'import' dotted_as_names
 ExprASTPtr Parser::parse_import_name(){
     if (m_curScanner->getToken()->strVal == "import"){
-        m_curScanner->seek(1);
         ExprASTPtr ret = ALLOC_EXPR<ImportAST>();
+        m_curScanner->seek(1);
         if (!parse_dotted_as_names(ret)){
             THROW_ERROR("dotted_as_names needed when parse import");
         }

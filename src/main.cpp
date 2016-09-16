@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     catch(exception& e){
         printf("Traceback (most recent call last):\n");
         string traceback = PyOpsUtil::traceback(spython.getPyContext());
-        printf("%s\n", traceback.c_str());
+        printf("%s", traceback.c_str());
         printf("%s\n", e.what());
     }
     

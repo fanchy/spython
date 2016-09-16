@@ -216,14 +216,14 @@ private:
     template<typename T>
     T* ALLOC_EXPR(){
         T* ret = new T();
-        ret->lineInfo.fileId = 0;
+        ret->lineInfo.fileId = getCurFileId();
         ret->lineInfo.nLine  = getCurLine();
         return ret;
     }
     template<typename T, typename A1>
     T* ALLOC_EXPR(A1& a1){
         T* ret = new T(a1);
-        ret->lineInfo.fileId = 0;
+        ret->lineInfo.fileId = getCurFileId();
         ret->lineInfo.nLine  = getCurLine();
         return ret;
     }

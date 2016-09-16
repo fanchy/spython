@@ -5,6 +5,7 @@
 #include <string.h>
 #include <iostream>
 #include <vector>
+namespace ff {
 
 struct StrTool
 {
@@ -105,5 +106,7 @@ size_t utf8_words_num(const char* s_)
     return ret;
 }
 };
+
+}
 #endif
 

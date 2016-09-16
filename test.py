@@ -66,5 +66,6 @@ print('fc', fc)
 fhi = foo.hi()
 fd  = foo.d
 # a, b, c = (1, 2, 3)
+from mod import *
 
 

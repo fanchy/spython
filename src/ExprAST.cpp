@@ -8,6 +8,7 @@
 #include "Scanner.h"
 #include "Parser.h"
 #include "StrTool.h"
+#include "Util.h"
 
 using namespace std;
 using namespace ff;
@@ -855,7 +856,7 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
     return ret;
 }
 
-PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, std::string asName){
+PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, std::string asName, bool assignFlag){
     string realpath = modpath + ".py";
     Scanner scanner;
     int nFileId = context.allocFileIdByPath(realpath);
@@ -878,9 +879,10 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, s
     if (asName.empty()){
         asName = modname;
     }
-    
-    ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asName);
-    asExpr->assignVal(context, mod);
+    if (assignFlag){
+        ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asName);
+        asExpr->assignVal(context, mod);
+    }
     return mod;
 }
 std::string PyOpsUtil::traceback(PyContext& context){
@@ -898,28 +900,110 @@ std::string PyOpsUtil::traceback(PyContext& context){
     }
     return ret;
 }
-PyObjPtr& ImportAST::eval(PyContext& context) {
+PyObjPtr& ImportAST::eval(PyContext& context) {TRACE_EXPR();
+    vector<string> sysdir;
+    StrTool::split(context.syspath, sysdir, ";");
+    
     for (size_t i = 0; i < importArgs.size(); ++i){
         ImportAST::ImportInfo& info = importArgs[i];
 
+        string realpath;
         string path;
-        for (size_t j = 0; j < info.pathinfo.size(); ++j){
-            if (info.pathinfo[j] == "*")
-               break;
-            path += info.pathinfo[j];
+        if (sysdir.empty()){
+            sysdir.push_back("./");
         }
-        string realpath = path;
-
+        string importChildProp; //! from a import b
+        vector<string> allPyInDir; //!each file in dir
+        
+        for (size_t n = 0; n < sysdir.size(); ++n){
+            path = sysdir[n];
+            if (path.empty() == false && path[path.size() - 1] != '/'){
+                path += '/';
+            }
+            bool hit = false;
+            for (size_t j = 0; j < info.pathinfo.size(); ++j){
+                if (info.pathinfo[j] == "*" && Util::isDir(path)){
+                    Util::getAllFileInDir(path, allPyInDir, ".py");
+                    realpath = path;
+                    hit = true;
+                    break;
+                }
+                if (j == 0){
+                    path += info.pathinfo[j];
+                }
+                else{
+                    path += "/" + info.pathinfo[j];
+                }
+                if (Util::isDir(path)){
+                    continue;
+                }
+                else if (Util::isFile(path + ".py")){
+                    realpath = path;
+                    hit = true;
+                    
+                    if (j < info.pathinfo.size() - 1){
+                        importChildProp = info.pathinfo[info.pathinfo.size() - 1];
+                    }
+                    break;
+                }
+                else{
+                    break;
+                }
+            }
+            if (hit){
+                break;
+            }
+        }
+        
+        if (realpath.empty()){
+            throw PyException::buildException("ImportError: No module named %s", info.pathinfo[info.pathinfo.size() - 1].c_str());
+        }
+        
+        if (allPyInDir.empty() == false){
+            for (size_t t = 0; t < allPyInDir.size(); ++t){
+                vector<string> modargs;
+                StrTool::split(allPyInDir[t], modargs, ".py");
+                string modName = modargs[0];
+                PyObjPtr mod = PyOpsUtil::importFile(context, realpath + "/" + modName, modName);
+                if (!mod){
+                    throw PyException::buildException("ImportError: No module named %s", modName.c_str());
+                }
+            }
+            continue;
+        }
+        
         string asMod; 
-        if (info.asinfo.empty()){
+        if (info.asinfo.empty() || info.asinfo == "*"){
             asMod = info.pathinfo[info.pathinfo.size() - 1];
         }
         else{
             asMod = info.asinfo;
         }
         
-        PyObjPtr mod = PyOpsUtil::importFile(context, realpath, asMod);
-        return context.cacheResult(mod);
+        PyObjPtr mod = PyOpsUtil::importFile(context, realpath, asMod, importChildProp.empty());
+        if (!mod){
+            throw PyException::buildException("ImportError: No module named %s", info.pathinfo[info.pathinfo.size() - 1].c_str());
+        }
+        
+        if (!importChildProp.empty() && mod){
+            map<string, PyObjPtr> ret = mod.cast<PyObjModule>()->getAllFieldData();
+            if (importChildProp == "*"){
+                map<string, PyObjPtr>::iterator it = ret.begin();
+                for (; it != ret.end(); ++it){
+                    ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(it->first);
+                    asExpr->assignVal(context, it->second);
+                }
+            }
+            else{
+                map<string, PyObjPtr>::iterator it = ret.find(importChildProp);
+                if (it == ret.end()){
+                    throw PyException::buildException("ImportError: No module named %s", importChildProp.c_str());
+                }
+                ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(it->first);
+                asExpr->assignVal(context, it->second);
+            }
+            
+        }
     }
     return context.cacheResult(PyObjTool::buildNone());
 }
