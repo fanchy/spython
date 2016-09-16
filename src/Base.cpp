@@ -25,10 +25,12 @@ string PyObj::dump(PyObjPtr& self, int preBlank) {
             snprintf(msg, sizeof(msg), "[%d-%d] %d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
         else 
             snprintf(msg, sizeof(msg), "[%d-%d] %02d %s = ", p.nModuleId, p.nObjectId, i, n.c_str());
-        ret += blank + msg;
+        
         if (!self->m_objStack[i]) {
-            ret += "NULL\n";
+            //ret += "NULL\n";
             continue;
+        }else{
+            ret += blank + msg;
         }
         if (self->m_objStack[i]->getType() == PY_MOD && preBlank < 3){
             ret += PyObj::dump(self->m_objStack[i], preBlank + 1);

@@ -48,7 +48,9 @@ enum PyObjType{
     PY_MOD,
     PY_BOOL,
     PY_TUPLE,
+    PY_LIST,
     PY_DICT,
+    PY_BUILTIN_TYPE
 };
 
 typedef  int TokenType;
@@ -415,12 +417,22 @@ public:
         }
         return "";
     }
+    
+    PyObjPtr getBuiltin(const std::string& s){
+        std::map<std::string, PyObjPtr>::iterator it = allBuiltin.find(s);
+        if (it != allBuiltin.end()){
+            return it->second;
+        }
+        return NULL;
+    }
 public:
     std::list<ExprAST*> exprTrace;//! for trace back
     std::map<int, FileInfo> fileId2Info;
     std::string             syspath;
     PyObjPtr evalResult;
     PyObjPtr curstack;//!cur using context
+    
+    std::map<std::string, PyObjPtr>  allBuiltin;
 };
 #define TRACE_EXPR() context.setTraceExpr(this)
 #define TRACE_EXPR_PUSH() context.pushTraceExpr(this)

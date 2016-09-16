@@ -27,7 +27,12 @@ FloatExprAST::FloatExprAST(double v) : Val(v) {
 }
 PyObjPtr& VariableExprAST::eval(PyContext& context) {
     PyObjPtr& ret = this->getFieldVal(context);
+    
     if (!ret){
+        PyObjPtr ret2 = context.getBuiltin(this->name);
+        if (ret2){
+            return context.cacheResult(ret2);
+        }
         throw PyException::buildException("NameError: global name '%s' is not defined", this->name.c_str());
     }
     return ret;

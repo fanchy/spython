@@ -71,7 +71,9 @@ import ma
 
 try:
     ta = 109
-    raise f
+    raise 1002
+except int, i:
+    teai = 2399
 except Foo, f:
     teafoo = 199
 except F, f:

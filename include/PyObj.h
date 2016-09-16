@@ -28,6 +28,7 @@
 #include "objhandler/PyClassHandler.h"
 #include "objhandler/PyClassInstanceHandler.h"
 #include "objhandler/PyModHandler.h"
+#include "objhandler/PyBuiltinTypeHandler.h"
 
 namespace ff {
 
@@ -222,6 +223,19 @@ public:
     
     PyObjPtr            classDefPtr;
     ObjIdInfo           selfObjInfo;
+};
+
+class PyBuiltinTypeInfo:public PyObj {
+public:
+    PyBuiltinTypeInfo(int n):nType(n){
+        this->handler = singleton_t<PyBuiltinTypeHandler>::instance_ptr();
+    }
+
+    virtual const ObjIdInfo& getObjIdInfo(){
+        return singleton_t<ObjIdTypeTraits<PyBuiltinTypeInfo> >::instance_ptr()->objInfo;
+    }
+
+    int nType;
 };
 
 }
