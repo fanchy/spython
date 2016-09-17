@@ -33,7 +33,16 @@ PyObjPtr& VariableExprAST::eval(PyContext& context) {
         if (ret2){
             return context.cacheResult(ret2);
         }
-        throw PyException::buildException("NameError: global name '%s' is not defined", this->name.c_str());
+        context.curstack->getType();
+        if (IsFuncCallStack(context.curstack)){
+            PyContextBackUp backup(context);
+            context.curstack = context.curstack.cast<PyCallTmpStack>()->modBelong;
+            PyObjPtr& ret3 = this->getFieldVal(context);
+            if (ret3){
+                return ret3;
+            }
+        }
+        throw PyException::buildException("NameError: global name '%s' is not defined %d", this->name.c_str(), context.curstack->getType());
     }
     return ret;
 }
@@ -1106,6 +1115,30 @@ PyObjPtr& TryAst::eval(PyContext& context){TRACE_EXPR();
     }
     if (finallySuite){
         finallySuite->eval(context);
+    }
+    return context.cacheResult(PyObjTool::buildNone());
+}
+
+PyObjPtr& DecoratorAST::eval(PyContext& context){TRACE_EXPR();
+    PyObjPtr objFunc = funcDef->eval(context);
+
+    for (size_t i = 0; i < allDecorators.size(); ++i){
+        PyObjPtr funcObj = allDecorators[i]->eval(context);
+        if (!funcObj || funcObj->getType() != PY_FUNC_DEF){
+            throw PyException::buildException("Decorator must be a func given:%d", funcObj->getType());
+        }
+        
+        vector<ArgTypeInfo> allArgsTypeInfo;
+        ArgTypeInfo info2;
+        allArgsTypeInfo.push_back(info2);
+        
+        vector<PyObjPtr> allValue;
+        allValue.push_back(objFunc);
+        
+        objFunc = funcObj->handler->handleCall(context, funcObj, allArgsTypeInfo, allValue);
+        if (funcDef->getType() == EXPR_FUNCDEF){
+            funcDef.cast<FuncDefExprAST>()->funcname->assignVal(context, objFunc);
+        }
     }
     return context.cacheResult(PyObjTool::buildNone());
 }

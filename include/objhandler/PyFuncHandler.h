@@ -16,7 +16,7 @@ namespace ff {
 class PyFuncHandler: public PyObjHandler{
 public:
     virtual int getType() const {
-        return EXPR_FUNCDEF;
+        return PY_FUNC_DEF;
     }
     virtual std::string handleStr(const PyObjPtr& self) const;
     virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;

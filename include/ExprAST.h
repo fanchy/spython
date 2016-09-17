@@ -542,7 +542,9 @@ public:
 
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
-    
+    virtual int getType() {
+        return EXPR_FUNCDEF;
+    }
 };
 
 
@@ -735,6 +737,16 @@ public:
     ExprASTPtr                  finallySuite;
 };
 
+class DecoratorAST : public ExprAST {
+public:
+    virtual PyObjPtr& eval(PyContext& context);
+    virtual int getType() {
+        return EXPR_DECORATOR;
+    }
+public:
+    std::vector<ExprASTPtr>     allDecorators;
+    ExprASTPtr                  funcDef;
+};
 
 }
 #endif

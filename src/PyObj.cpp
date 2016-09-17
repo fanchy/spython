@@ -35,7 +35,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
         PyObjPtr& ret = m_objStack[nFieldIndex];
         //DMSG(("PyObjClassInstance::getVar...%u %d, %ds", nFieldIndex, ret->getType(), ret->handler->handleStr(ret).c_str()));
         if (false == IS_NULL(ret)){
-            if (ret->getType() == EXPR_FUNCDEF){
+            if (ret->getType() == PY_FUNC_DEF){
                 return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
             }
             return ret;
@@ -45,7 +45,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
     PyObjPtr& ret = classDefPtr->getVar(context, classDefPtr, nFieldIndex);
 
     if (false == IS_NULL(ret)){
-        if (ret->getType() == EXPR_FUNCDEF){
+        if (ret->getType() == PY_FUNC_DEF){
             return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
         }
         return ret;
@@ -66,7 +66,8 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
     {
         //DMSG(("PyObjFuncDef::exeFunc...%u\n", allArgsVal.size()));
         PyContextBackUp backup(context);
-        context.curstack = new PyCallTmpStack(this->getObjIdInfo());
+
+        context.curstack = new PyCallTmpStack(this->getObjIdInfo(), context.getFileIdModCache(this->suite->lineInfo.fileId));
 
         ParametersExprAST* pParametersExprAST = parameters.cast<ParametersExprAST>();
         unsigned int hasConsumeArg = 0;
@@ -95,8 +96,8 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
             else if (allArgsVal.size() <= hasConsumeArg){
                 if (paramInfo.paramDefault){
                     PyObjPtr v = paramInfo.paramDefault->eval(context);
-                    PyObjPtr& ref = paramInfo.paramKey->eval(context);
-                    ref = v;
+                    paramInfo.paramKey->assignVal(context, v);
+
                     ++hasAssignArgNum;
                 }
                 else{
@@ -105,8 +106,8 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
                 continue;
             }
             else if (allArgsVal[hasConsumeArg].argType.empty()){//!普通赋值过来的参数 f(1, 2, 3)
-                PyObjPtr& ref = paramInfo.paramKey->eval(context);
-                ref = argAssignVal[hasConsumeArg];
+                paramInfo.paramKey->assignVal(context, argAssignVal[hasConsumeArg]);
+  
                 ++hasConsumeArg;
                 ++hasAssignArgNum;
             }
@@ -157,8 +158,8 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
                     }
                     else if(paramInfo.paramDefault){//!如果有默认值 
                         PyObjPtr v = paramInfo.paramDefault->eval(context);
-                        PyObjPtr& ref = paramInfo.paramKey->eval(context);
-                        ref = v;
+                        paramInfo.paramKey->assignVal(context, v);
+
                         ++hasAssignArgNum;
                     }
                     else{
@@ -180,8 +181,8 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
             const string& strVarName = paramInfo.paramKey.cast<VariableExprAST>()->name;
             if (paramInfo.paramType == "*"){
                 PyObjPtr pVal = new PyObjTuple();
-                PyObjPtr& ref = paramInfo.paramKey->eval(context);
-                ref = pVal;
+                paramInfo.paramKey->assignVal(context, pVal);
+
                 
                 for (unsigned int m = hasConsumeArg; m < allArgsVal.size(); ++m){
                     ArgTypeInfo& argInfo = allArgsVal[m];
@@ -194,8 +195,8 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
             }
             else if (paramInfo.paramType == "**"){
                 PyObjPtr pVal = new PyObjDict();
-                PyObjPtr& ref = paramInfo.paramKey->eval(context);
-                ref = pVal;
+                paramInfo.paramKey->assignVal(context, pVal);
+
                 
                 for (unsigned int m = hasConsumeArg; m < allArgsVal.size(); ++m){
                     ArgTypeInfo& argInfo = allArgsVal[m];
@@ -217,7 +218,6 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
     
     return context.cacheResult(PyObjTool::buildNone());
 }
-
 
 PyObjClassDef::PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a):name(s), parentClass(a) {
     selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;

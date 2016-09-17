@@ -20,7 +20,7 @@ class PyCppClassHandler: public PyClassHandler{
 public:
     PyCppClassHandler(){
     }
-    
+
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
 };
 
@@ -35,9 +35,12 @@ public:
 };
 
 template<typename T>
-class PyCppInstanceHandler: public PyObjHandler{
+class PyCppInstanceHandler: public PyClassInstanceHandler{
 public:
     PyCppInstanceHandler(){
+    }
+    virtual int getType() const {
+        return PY_CLASS_INST;
     }
     //!TODO virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
 };

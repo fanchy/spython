@@ -67,17 +67,71 @@ ExprASTPtr Parser::parse_eval_input(){
 
 //! decorator: '@' dotted_name [ '(' [arglist] ')' ] NEWLINE
 ExprASTPtr Parser::parse_decorator(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "@"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    ExprASTPtr ret = parse_test();
+    if (m_curScanner->getToken()->strVal == "\n"){
+        m_curScanner->seek(1);
+    }
+    /*
+    vector<ExprASTPtr> expr_dotted_name;
+    
+    do{
+        ExprASTPtr name = parse_name();
+        expr_dotted_name.push_back(name);
+        if (m_curScanner->getToken()->strVal != "."){
+            break;
+        }
+        m_curScanner->seek(1);
+    } while (m_curScanner->getToken()->strVal != "(" && m_curScanner->getToken()->strVal != "\n");
+    
+    
+
+    if (m_curScanner->getToken()->strVal == "("){
+        m_curScanner->seek(1);
+        
+        ExprASTPtr arglist = parse_arglist();
+        if (!arglist){
+            THROW_ERROR("arglist parse failed after @dotted_name");
+        }
+        if (m_curScanner->getToken()->strVal != ")"){
+            THROW_ERROR(") needed after @dotted_name");
+        }
+        m_curScanner->seek(1);
+    }*/
+    return ret;
 }
 
 //! decorators: decorator+
 ExprASTPtr Parser::parse_decorators(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "@"){
+        return NULL;
+    }
+    ExprASTPtr ret = ALLOC_EXPR<DecoratorAST>();
+    while (m_curScanner->getToken()->strVal == "@"){
+        ExprASTPtr e = parse_decorator();
+        if (!e){
+            THROW_ERROR("decorator parse failed after @");
+        }
+        ret.cast<DecoratorAST>()->allDecorators.push_back(e);
+    }
+    return ret;
 }
 
 //! decorated: decorators (classdef | funcdef)
 ExprASTPtr Parser::parse_decorated(){
-    return NULL;
+    ExprASTPtr ret = parse_decorators();
+    if (!ret){
+        return ret;
+    }
+    
+    ret.cast<DecoratorAST>()->funcDef = parse_funcdef();
+    if (!ret.cast<DecoratorAST>()->funcDef){
+        THROW_ERROR("funcdef parse failed after decorator");
+    }
+    return ret;
 }
 
 //! funcdef: 'def' NAME parameters ':' suite

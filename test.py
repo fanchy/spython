@@ -86,3 +86,15 @@ finally:
     tef = 78
 
 ecpp = exception
+
+def wf2():
+    return 6633
+def wrap(f):
+    print('wrap....')
+    return wf2
+
+@wrap
+def wf():
+    return 1122334
+
+testD = wf()

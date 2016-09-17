@@ -192,10 +192,10 @@ struct ExprLine{
 
 class ExprAST {
 public:
-    int    nFieldId;
+    //int    nFieldId;
     std::string name;
     ExprLine    lineInfo;
-    ExprAST():nFieldId(-1){
+    ExprAST(){
     }
     virtual ~ExprAST() {}
     virtual PyObjPtr& eval(PyContext& context) = 0;
@@ -242,9 +242,7 @@ class PyObjHandler{
 public:
     virtual ~PyObjHandler(){}
     
-    virtual int getType() const {
-        return 0;
-    }
+    virtual int getType() const = 0;
 
     //!比较是否相等 
     virtual bool handleEQ(PyObjPtr& self, PyObjPtr& args){
@@ -301,7 +299,7 @@ public:
 
 class PyNoneHandler: public PyObjHandler{
 public:
-    virtual int getType() {
+    virtual int getType() const{
         return PY_NONE;
     }
     virtual std::string handleStr(const PyObjPtr& self) const{
@@ -320,7 +318,7 @@ public:
         this->handler = singleton_t<PyNoneHandler>::instance_ptr();
         selfObjInfo   = singleton_t<ObjIdTypeTraits<PyObjNone> >::instance_ptr()->objInfo;
     }
-    PyObjNone(const ObjIdInfo& m){
+    PyObjNone(const ObjIdInfo& m, PyObjPtr v):modBelong(v){
         this->handler = singleton_t<PyNoneHandler>::instance_ptr();
         selfObjInfo   = m;
     }
@@ -329,10 +327,13 @@ public:
     }
     ObjIdInfo       selfObjInfo;
     bool            isNull;
+    PyObjPtr        modBelong;
 };
-#define IS_NULL(o) (o.get() == NULL)
-
 typedef PyObjNone PyCallTmpStack;
+
+#define IS_NULL(o) (o.get() == NULL)
+#define IsFuncCallStack(o) (o->getType() == PY_NONE && o.cast<PyObjNone>()->modBelong)
+
 
 class PyContext{
 public:
