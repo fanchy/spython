@@ -1123,7 +1123,7 @@ PyObjPtr& DecoratorAST::eval(PyContext& context){TRACE_EXPR();
     PyObjPtr objFunc = funcDef->eval(context);
 
     for (size_t i = 0; i < allDecorators.size(); ++i){
-        PyObjPtr funcObj = allDecorators[i]->eval(context);
+        PyObjPtr funcObj = allDecorators[allDecorators.size() - 1 - i]->eval(context);
         if (!funcObj || funcObj->getType() != PY_FUNC_DEF){
             throw PyException::buildException("Decorator must be a func given:%d", funcObj->getType());
         }

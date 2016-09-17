@@ -1,6 +1,6 @@
 [Editors]
 Order=0,1,9,8,2,5,7,6,27,28,31,30,38,34,39,3,4,19,10,11
-Focused=1
+Focused=8
 [Editor_0]
 CursorCol=1
 CursorRow=222
@@ -62,9 +62,9 @@ CursorRow=166
 TopLine=146
 LeftChar=1
 [Editor_8]
-CursorCol=10
-CursorRow=1141
-TopLine=1119
+CursorCol=65
+CursorRow=1126
+TopLine=1107
 LeftChar=1
 [Editor_9]
 CursorCol=14

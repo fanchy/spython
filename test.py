@@ -91,8 +91,11 @@ def wf2():
     return 6633
 def wrap(f):
     print('wrap....')
+    return f
+def wrap2(f):
+    print('wrap2....')
     return wf2
-
+@wrap2
 @wrap
 def wf():
     return 1122334
