@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=3
 CompilerSettings=0000000100000000001000000
-UnitCount=40
+UnitCount=41
 
 [VersionInfo]
 Major=1
@@ -430,8 +430,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit39]
-FileName=include\objhandler\PyBuiltinTypeHandler.h
+[Unit40]
+FileName=include\PyCpp.h
 CompileCpp=1
 Folder=include
 Compile=1
@@ -440,7 +440,27 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit40]
+[Unit42]
+FileName=include\CppPy.h
+CompileCpp=1
+Folder=include
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit41]
+FileName=include\objhandler\PyBuiltinTypeHandler.h
+CompileCpp=1
+Folder=include/objhandler
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit39]
 FileName=src\objhandler\PyBuiltinTypeHandler.cpp
 CompileCpp=1
 Folder=src/objhandler

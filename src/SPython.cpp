@@ -2,9 +2,14 @@
 #include "SPython.h"
 #include "ExprAST.h"
 #include "PyObj.h"
+#include "PyCpp.h"
 
 using namespace std;
 using namespace ff;
+
+struct PyExtException{
+    
+};
 
 SPython::SPython(){
     pycontext.curstack = new PyObjModule("__main__", "built-in");
@@ -14,6 +19,8 @@ SPython::SPython(){
     pycontext.allBuiltin["tuple"] = new PyBuiltinTypeInfo(PY_TUPLE);
     pycontext.allBuiltin["list"] = new PyBuiltinTypeInfo(PY_LIST);
     pycontext.allBuiltin["dict"] = new PyBuiltinTypeInfo(PY_DICT);
+    vector<PyObjPtr> tmpParent;
+    pycontext.allBuiltin["exception"] = new PyCppClassDef<PyExtException>("exception", tmpParent);
 }
 
 PyObjPtr SPython::importFile(const std::string& modname){

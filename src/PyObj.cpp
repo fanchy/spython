@@ -219,7 +219,7 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
 }
 
 
-PyObjClassDef::PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a, ExprASTPtr& b):name(s), parentClass(a), suite(b) {
+PyObjClassDef::PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a):name(s), parentClass(a) {
     selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
     //!different function has different object id 
     selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();

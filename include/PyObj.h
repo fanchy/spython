@@ -189,17 +189,18 @@ public:
 
 class PyObjClassDef:public PyObj {
 public:
-    PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a, ExprASTPtr& b);
+    PyObjClassDef(){
+    }
+    PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a);
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
-    std::map<std::string, PyObjPtr> getAllFieldData();
+    virtual std::map<std::string, PyObjPtr> getAllFieldData();
     void processInheritInfo(PyContext& context, PyObjPtr& self);
 
     std::string             name;
     std::vector<PyObjPtr>   parentClass;
-    ExprASTPtr              suite;
-    ObjIdInfo  selfObjInfo;
+    ObjIdInfo               selfObjInfo;
 };
 
 class PyObjClassInstance:public PyObj {
@@ -218,7 +219,7 @@ public:
     }
     virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
     
-    PyObjPtr& assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v); //!special process field assign
+    virtual PyObjPtr& assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v); //!special process field assign
     
     
     PyObjPtr            classDefPtr;
@@ -237,6 +238,7 @@ public:
 
     int nType;
 };
+
 
 }
 #endif

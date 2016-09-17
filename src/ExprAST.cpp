@@ -463,7 +463,7 @@ PyObjPtr& ClassDefExprAST::eval(PyContext& context){TRACE_EXPR();
             parentClass.push_back(inheritClass);
         }
     }
-    PyObjPtr rval = new PyObjClassDef(classname.cast<VariableExprAST>()->name, parentClass, suite);
+    PyObjPtr rval = new PyObjClassDef(classname.cast<VariableExprAST>()->name, parentClass);
     rval.cast<PyObjClassDef>()->processInheritInfo(context, rval);
     
     PyObjPtr& lval = classname->assignVal(context, rval);
@@ -1100,9 +1100,7 @@ PyObjPtr& TryAst::eval(PyContext& context){TRACE_EXPR();
             throw PyExceptionSignal(); 
         }
     }
-    catch(...){
-        
-    }
+
     if (!execptFlag && elseSuite){
         elseSuite->eval(context);
     }

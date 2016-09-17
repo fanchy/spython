@@ -9,4 +9,5 @@
 9. exception
 10.字典完善
 11.单元测试
-12.builtin-type int float str tuple dict exception
+12.builtin-type int float str tuple dict exception -- ok
+13.自定义类如何方便实现
