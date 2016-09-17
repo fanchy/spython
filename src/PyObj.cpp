@@ -61,13 +61,16 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
 }
 
 PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
-    //DMSG(("PyObjFuncDef::exeFunc...\n"));
     try
     {
-        //DMSG(("PyObjFuncDef::exeFunc...%u\n", allArgsVal.size()));
         PyContextBackUp backup(context);
 
-        context.curstack = new PyCallTmpStack(this->getObjIdInfo(), context.getFileIdModCache(this->suite->lineInfo.fileId));
+        if (pyCppfunc){//!this is cpp func wrap
+            context.curstack = new PyCallTmpStack(this->getObjIdInfo(), context.getFileIdModCache(context.getCurExprFileId()));
+        }
+        else{
+            context.curstack = new PyCallTmpStack(this->getObjIdInfo(), context.getFileIdModCache(this->suite->lineInfo.fileId));
+        }
 
         ParametersExprAST* pParametersExprAST = parameters.cast<ParametersExprAST>();
         unsigned int hasConsumeArg = 0;
@@ -210,7 +213,13 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
                 continue;
             }
         }
-        suite->eval(context);
+        
+        if (suite){
+            suite->eval(context);
+        }
+        else if (pyCppfunc){
+            //return pyCppfunc->exeFunc(context, self, allArgsVal, argAssignVal);
+        }
     }
     catch(ReturnSignal& s){
         return context.getCacheResult();

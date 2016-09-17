@@ -13,6 +13,7 @@ struct PyExtException{
 
 SPython::SPython(){
     pycontext.curstack = new PyObjModule("__main__", "built-in");
+    pycontext.allBuiltin["None"] = PyObjTool::buildNone();
     pycontext.allBuiltin["int"] = new PyBuiltinTypeInfo(PY_INT);
     pycontext.allBuiltin["float"] = new PyBuiltinTypeInfo(PY_FLOAT);
     pycontext.allBuiltin["str"] = new PyBuiltinTypeInfo(PY_STR);

@@ -157,6 +157,15 @@ public:
     DictMap value;
 };
 
+class PyCppFunc{
+public:
+    virtual ~PyCppFunc(){
+    }
+    
+    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal) = 0;
+};
+typedef SmartPtr<PyCppFunc> PyCppFuncPtr;
+
 class PyObjFuncDef:public PyObj {
 public:
     PyObjFuncDef(const std::string& n, ExprASTPtr& p, ExprASTPtr& s):name(n), parameters(p), suite(s){
@@ -185,6 +194,8 @@ public:
     ExprASTPtr      suite;
     ObjIdInfo       selfObjInfo;
     PyObjPtr        classInstance;
+    
+    PyCppFuncPtr    pyCppfunc;
 };
 
 class PyObjClassDef:public PyObj {

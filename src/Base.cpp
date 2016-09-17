@@ -124,7 +124,7 @@ PyHelper::PyHelper(){
     m_allKeyword.insert("finally");
     m_allKeyword.insert("is");
     m_allKeyword.insert("return");
-    m_allKeyword.insert("None");
+    //m_allKeyword.insert("None");
     m_allKeyword.insert("continuefor");
     m_allKeyword.insert("lambda");
     m_allKeyword.insert("try");

@@ -376,6 +376,12 @@ public:
     void popTraceExpr(){
         exprTrace.pop_back();
     }
+    int getCurExprFileId() {
+        if (!exprTrace.empty()){
+            exprTrace.back()->lineInfo.fileId;
+        }
+        return 0;
+    }
     std::string getFileId2Path(int n){
         std::map<int, FileInfo>::iterator it = fileId2Info.find(n);
         if (it != fileId2Info.end()){
