@@ -16,9 +16,9 @@ namespace ff {
     
 class PyCppFuncWrap: public PyCppFunc{
 public:
-    typedef PyObjPtr  (*PyCppStaticFunc)(PyContext& context, std::vector<PyObjPtr>& argAssignVal);
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, std::vector<PyObjPtr>& argAssignVal);
     
-    PyCppFuncWrap(PyCppStaticFunc f):cppFunc(f){
+    PyCppFuncWrap(PyCppFunc f):cppFunc(f){
     }
     virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
         if (cppFunc){
@@ -28,8 +28,29 @@ public:
         return context.cacheResult(PyObjTool::buildNone());
     }
 public:
-    PyCppStaticFunc     cppFunc;
+    PyCppFunc     cppFunc;
 };
+class PyCppClassFuncWrap: public PyCppFunc{
+public:
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal);
+    
+    PyCppClassFuncWrap(PyCppFunc f):cppFunc(f){
+    }
+    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
+        if (cppFunc){
+            PyObjPtr& self = self.cast<PyObjFuncDef>()->classInstance;
+            if (!self){
+                throw PyException::buildException("arg self not assigned");
+            }
+            PyObjPtr v = (*cppFunc)(context, self, argAssignVal);
+            return context.cacheResult(v);
+        }
+        return context.cacheResult(PyObjTool::buildNone());
+    }
+public:
+    PyCppFunc     cppFunc;
+};
+
 struct PyCppUtil{
     static PyObjPtr genInt(long n){
         return new PyObjInt(n);
@@ -37,8 +58,11 @@ struct PyCppUtil{
     static PyObjPtr genStr(const std::string& s){
         return new PyObjStr(s);
     }
-    static PyObjPtr genFunc(PyCppFuncWrap::PyCppStaticFunc f, std::string n = ""){
+    static PyObjPtr genFunc(PyCppFuncWrap::PyCppFunc f, std::string n = ""){
         return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrap(f));
+    }
+    static PyObjPtr genFunc(PyCppClassFuncWrap::PyCppFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrap(f));
     }
 };
 template <typename T>
