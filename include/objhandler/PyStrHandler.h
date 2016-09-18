@@ -29,6 +29,7 @@ public:
     virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual long handleLen(PyContext& context, PyObjPtr& self);
     
 };
 

@@ -120,4 +120,7 @@ PyObjPtr& PyDictHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr&
     return self;
 }
 
+long PyDictHandler::handleLen(PyContext& context, PyObjPtr& self){
+    return self.cast<PyObjDict>()->value.size();
+}
 

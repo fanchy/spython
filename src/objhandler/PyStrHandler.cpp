@@ -77,5 +77,7 @@ PyObjPtr& PyStrHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& 
     THROW_EVAL_ERROR("can't mod to str");
     return self;
 }
-
+long PyStrHandler::handleLen(PyContext& context, PyObjPtr& self){
+    return self.cast<PyObjStr>()->value.size();
+}
 
