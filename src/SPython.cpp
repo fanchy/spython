@@ -34,7 +34,7 @@ SPython::SPython(){
     vector<PyObjPtr> tmpParent;
     pycontext.allBuiltin["exception"] = new PyCppClassDef<PyExtException>("exception", tmpParent);
     
-    pycontext.allBuiltin["len"] = PyCppUtil::genFunc(pyLen);
+    pycontext.allBuiltin["len"] = PyCppUtil::genFunc(pyLen, "len");
 }
 
 PyObjPtr SPython::importFile(const std::string& modname){
