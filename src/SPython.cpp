@@ -7,6 +7,17 @@
 using namespace std;
 using namespace ff;
 
+static PyObjPtr pyLen(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+    if (argAssignVal.size() != 1){
+        throw PyException::buildException("TypeError: len() takes exactly one argument (%d given)", argAssignVal.size());
+    }
+    PyObjPtr& param = argAssignVal[0];
+    long ret = param->handler->handleLen(context, param);
+    if (ret < 0){
+        throw PyException::buildException("TypeError: object of type '%d' has no len()", param->getType());
+    }
+    return PyCppUtil::genInt(ret);
+}
 struct PyExtException{
     
 };
@@ -22,6 +33,8 @@ SPython::SPython(){
     pycontext.allBuiltin["dict"] = new PyBuiltinTypeInfo(PY_DICT);
     vector<PyObjPtr> tmpParent;
     pycontext.allBuiltin["exception"] = new PyCppClassDef<PyExtException>("exception", tmpParent);
+    
+    pycontext.allBuiltin["len"] = PyCppUtil::genFunc(pyLen);
 }
 
 PyObjPtr SPython::importFile(const std::string& modname){

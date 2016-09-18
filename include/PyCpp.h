@@ -13,8 +13,34 @@
 #include "PyObj.h"
 
 namespace ff {
-
-
+    
+class PyCppFuncWrap: public PyCppFunc{
+public:
+    typedef PyObjPtr  (*PyCppStaticFunc)(PyContext& context, std::vector<PyObjPtr>& argAssignVal);
+    
+    PyCppFuncWrap(PyCppStaticFunc f):cppFunc(f){
+    }
+    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
+        if (cppFunc){
+            PyObjPtr v = (*cppFunc)(context, argAssignVal);
+            return context.cacheResult(v);
+        }
+        return context.cacheResult(PyObjTool::buildNone());
+    }
+public:
+    PyCppStaticFunc     cppFunc;
+};
+struct PyCppUtil{
+    static PyObjPtr genInt(long n){
+        return new PyObjInt(n);
+    }
+    static PyObjPtr genStr(const std::string& s){
+        return new PyObjStr(s);
+    }
+    static PyObjPtr genFunc(PyCppFuncWrap::PyCppStaticFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrap(f));
+    }
+};
 template <typename T>
 class PyCppClassHandler: public PyClassHandler{
 public:

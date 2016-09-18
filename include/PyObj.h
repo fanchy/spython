@@ -168,14 +168,17 @@ typedef SmartPtr<PyCppFunc> PyCppFuncPtr;
 
 class PyObjFuncDef:public PyObj {
 public:
-    PyObjFuncDef(const std::string& n, ExprASTPtr& p, ExprASTPtr& s):name(n), parameters(p), suite(s){
+    PyObjFuncDef(const std::string& n, ExprASTPtr p, ExprASTPtr s, PyCppFuncPtr f = NULL):name(n), parameters(p), suite(s), pyCppfunc(f){
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
         this->handler = singleton_t<PyFuncHandler>::instance_ptr();
     }
-
+    PyObjFuncDef(const std::string& n):name(n){
+        this->handler = singleton_t<PyFuncHandler>::instance_ptr();
+    }
     //PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist);
+    void processParam(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
     PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
     
     virtual const ObjIdInfo& getObjIdInfo(){
@@ -183,8 +186,12 @@ public:
     }
     
     PyObjPtr forkClassFunc(PyObjPtr& obj){
-        PyObjFuncDef* ret  = new PyObjFuncDef(name, parameters, suite);
+        PyObjFuncDef* ret  = new PyObjFuncDef(name);
+        ret->selfObjInfo   = selfObjInfo;
+        ret->parameters    = parameters;
+        ret->suite         = suite;
         ret->classInstance = obj;
+        ret->pyCppfunc     = pyCppfunc;
         return ret;
     }
     bool hasSelfParam();

@@ -114,5 +114,7 @@ PyObjPtr& PyTupleHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr
     THROW_EVAL_ERROR("unsupported operand type(s) for %: 'tuple' and other value");
     return self;
 }
-
+long PyTupleHandler::handleLen(PyContext& context, PyObjPtr& self){
+    return self.cast<PyObjTuple>()->value.size();
+}
 

@@ -290,7 +290,7 @@ public:
                                  std::vector<PyObjPtr>& argAssignVal);
     virtual std::size_t    handleHash(const PyObjPtr& self) const;
     virtual bool handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val);
-
+    virtual long handleLen(PyContext& context, PyObjPtr& self);
     virtual std::string dump(PyObjPtr& self) {
         return "";
     }

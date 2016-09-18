@@ -102,3 +102,5 @@ def wf():
 
 testD = wf()
 testN = None
+testtuple = (1, 2)
+testlen = len(testtuple)

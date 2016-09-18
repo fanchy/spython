@@ -79,6 +79,9 @@ PyObjPtr& PyObjHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& 
 PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
     throw PyException::buildException("handleCall invalid");return self;
 }
+long PyObjHandler::handleLen(PyContext& context, PyObjPtr& self){
+    return -1;
+}
 size_t PyObjHandler::handleHash(const PyObjPtr& self) const{
     return size_t(self.get());
 }
