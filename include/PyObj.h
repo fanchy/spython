@@ -207,6 +207,7 @@ public:
 
 class PyObjClassDef:public PyObj {
 public:
+    PyObjClassDef(const std::string& s);
     PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a);
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;

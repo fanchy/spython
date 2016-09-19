@@ -18,6 +18,18 @@ static PyObjPtr pyLen(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
     }
     return PyCppUtil::genInt(ret);
 }
+
+static PyObjPtr strUpper(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+    if (self->getType() != PY_STR){
+        throw PyException::buildException("str instance needed");
+    }
+    if (argAssignVal.size() != 0){
+        throw PyException::buildException("TypeError: len() takes exactly zero argument (%d given)", argAssignVal.size());
+    }
+    
+    return PyCppUtil::genStr(self.cast<PyObjStr>()->value);
+}
+
 struct PyExtException{
     
 };
@@ -35,6 +47,9 @@ SPython::SPython(){
     pycontext.allBuiltin["exception"] = new PyCppClassDef<PyExtException>("exception", tmpParent);
     
     pycontext.allBuiltin["len"] = PyCppUtil::genFunc(pyLen, "len");
+    
+    pycontext.strClass = new PyObjClassDef("str");
+    PyCppUtil::setAttr(pycontext, pycontext.strClass, "upper", PyCppUtil::genFunc(strUpper, "upper"))
 }
 
 PyObjPtr SPython::importFile(const std::string& modname){

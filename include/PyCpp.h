@@ -13,7 +13,7 @@
 #include "PyObj.h"
 
 namespace ff {
-    
+
 class PyCppFuncWrap: public PyCppFunc{
 public:
     typedef PyObjPtr  (*PyCppFunc)(PyContext& context, std::vector<PyObjPtr>& argAssignVal);
@@ -63,6 +63,27 @@ struct PyCppUtil{
     }
     static PyObjPtr genFunc(PyCppClassFuncWrap::PyCppFunc f, std::string n = ""){
         return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrap(f));
+    }
+    static PyObjPtr getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname){
+        PyContextBackUp backup(context);
+        context.curstack = obj;
+        
+        ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(filedname);
+        return expr->eval(context);
+    }
+    static void setAttr(PyContext& context, PyObjPtr& obj, const char* filedName, PyObjPtr& v){
+        PyContextBackUp backup(context);
+        context.curstack = obj;
+        
+        ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(str(filedname));
+        expr->assignVal(context, v);
+    }
+    static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname, PyObjPtr& v){
+        PyContextBackUp backup(context);
+        context.curstack = obj;
+        
+        ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(filedname);
+        expr->assignVal(context, v);
     }
 };
 template <typename T>

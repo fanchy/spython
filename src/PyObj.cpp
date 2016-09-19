@@ -227,7 +227,12 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
     
     return context.cacheResult(PyObjTool::buildNone());
 }
-
+PyObjClassDef::PyObjClassDef(const std::string& s):name(s){
+    selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
+    //!different function has different object id 
+    selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
+    this->handler = singleton_t<PyClassHandler>::instance_ptr();
+}
 PyObjClassDef::PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a):name(s), parentClass(a) {
     selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
     //!different function has different object id 

@@ -440,6 +440,7 @@ public:
     PyObjPtr curstack;//!cur using context
     
     std::map<std::string, PyObjPtr>  allBuiltin;
+    PyObjPtr                         strClass;//!str interface like upper lower...
 };
 #define TRACE_EXPR() context.setTraceExpr(this)
 #define TRACE_EXPR_PUSH() context.pushTraceExpr(this)
