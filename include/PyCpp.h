@@ -71,18 +71,11 @@ struct PyCppUtil{
         ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(filedname);
         return expr->eval(context);
     }
-    static void setAttr(PyContext& context, PyObjPtr& obj, const char* filedName, PyObjPtr& v){
+    static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v){
         PyContextBackUp backup(context);
         context.curstack = obj;
         
-        ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(str(filedname));
-        expr->assignVal(context, v);
-    }
-    static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname, PyObjPtr& v){
-        PyContextBackUp backup(context);
-        context.curstack = obj;
-        
-        ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(filedname);
+        ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(fieldName);
         expr->assignVal(context, v);
     }
 };

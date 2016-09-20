@@ -9,102 +9,112 @@ namespace ff {
 
 struct StrTool
 {
-static std::string trim(const std::string& str)
-{
-    std::string::size_type pos = str.find_first_not_of(' ');
-    if (pos == std::string::npos)
+    static std::string trim(const std::string& str)
     {
-        return str;
+        std::string::size_type pos = str.find_first_not_of(' ');
+        if (pos == std::string::npos)
+        {
+            return str;
+        }
+        std::string::size_type pos2 = str.find_last_not_of(' ');
+        if (pos2 != std::string::npos)
+        {
+            return str.substr(pos, pos2 - pos + 1);
+        }
+        return str.substr(pos);
     }
-    std::string::size_type pos2 = str.find_last_not_of(' ');
-    if (pos2 != std::string::npos)
+    
+    static int split(const std::string& str, std::vector<std::string>& ret_, std::string sep = ",")
     {
-        return str.substr(pos, pos2 - pos + 1);
-    }
-    return str.substr(pos);
-}
-
-static int split(const std::string& str, std::vector<std::string>& ret_, std::string sep = ",")
-{
-    if (str.empty())
-    {
+        if (str.empty())
+        {
+            return 0;
+        }
+    
+        std::string tmp;
+        std::string::size_type pos_begin = str.find_first_not_of(sep);
+        std::string::size_type comma_pos = 0;
+    
+        while (pos_begin != std::string::npos)
+        {
+            comma_pos = str.find(sep, pos_begin);
+            if (comma_pos != std::string::npos)
+            {
+                tmp = str.substr(pos_begin, comma_pos - pos_begin);
+                pos_begin = comma_pos + sep.length();
+            }
+            else
+            {
+                tmp = str.substr(pos_begin);
+                pos_begin = comma_pos;
+            }
+    
+            if (!tmp.empty())
+            {
+                ret_.push_back(tmp);
+                tmp.clear();
+            }
+        }
         return 0;
     }
-
-    std::string tmp;
-    std::string::size_type pos_begin = str.find_first_not_of(sep);
-    std::string::size_type comma_pos = 0;
-
-    while (pos_begin != std::string::npos)
+    
+    static std::string replace(const std::string& str, const std::string& src, const std::string& dest)
     {
-        comma_pos = str.find(sep, pos_begin);
-        if (comma_pos != std::string::npos)
+        std::string ret;
+    
+        std::string::size_type pos_begin = 0;
+        std::string::size_type pos       = str.find(src);
+        while (pos != std::string::npos)
         {
-            tmp = str.substr(pos_begin, comma_pos - pos_begin);
-            pos_begin = comma_pos + sep.length();
+            //cout <<"replacexxx:" << pos_begin <<" " << pos <<"\n";
+            ret.append(str.c_str() + pos_begin, pos - pos_begin);
+            ret += dest;
+            pos_begin = pos + src.length();
+            pos       = str.find(src, pos_begin);
         }
-        else
+        if (pos_begin < str.length())
         {
-            tmp = str.substr(pos_begin);
-            pos_begin = comma_pos;
+            ret.append(str.begin() + pos_begin, str.end());
         }
-
-        if (!tmp.empty())
-        {
-            ret_.push_back(tmp);
-            tmp.clear();
-        }
+        return ret;
     }
-    return 0;
-}
-
-static std::string replace(const std::string& str, const std::string& src, const std::string& dest)
-{
-    std::string ret;
-
-    std::string::size_type pos_begin = 0;
-    std::string::size_type pos       = str.find(src);
-    while (pos != std::string::npos)
+    
+    static size_t utf8_words_num(const char* s_)
     {
-        //cout <<"replacexxx:" << pos_begin <<" " << pos <<"\n";
-        ret.append(str.c_str() + pos_begin, pos - pos_begin);
-        ret += dest;
-        pos_begin = pos + src.length();
-        pos       = str.find(src, pos_begin);
+        size_t ret = 0;
+        const char* p = s_;
+        for (unsigned char c = (unsigned char)(*p); c != 0; c = (unsigned char)(*p))
+        {
+            ++ret;
+            if (c <= 127)
+            {
+                p += 1;
+            }
+            else if (c < 192)
+            {
+                p   += 2;
+            }
+            else if (c < 223)
+            {
+                p   += 3;
+            }
+            else
+            {
+                p   += 4;
+            }
+        }
+        return ret;
     }
-    if (pos_begin < str.length())
+    static std::string upper(const std::string& str)
     {
-        ret.append(str.begin() + pos_begin, str.end());
+        std::string ret = str;
+        for (unsigned int i = 0; i < ret.size(); ++i){
+            if (ret[i] >= 'a' && ret[i] <= 'z'){
+                ret[i] -= 32;
+            }
+        }
+        return ret;
     }
-    return ret;
-}
-
-size_t utf8_words_num(const char* s_)
-{
-    size_t ret = 0;
-    const char* p = s_;
-    for (unsigned char c = (unsigned char)(*p); c != 0; c = (unsigned char)(*p))
-    {
-        ++ret;
-        if (c <= 127)
-        {
-            p += 1;
-        }
-        else if (c < 192)
-        {
-            p   += 2;
-        }
-        else if (c < 223)
-        {
-            p   += 3;
-        }
-        else
-        {
-            p   += 4;
-        }
-    }
-    return ret;
-}
 };
 
 }

@@ -5,6 +5,26 @@
 using namespace std;
 using namespace ff;
 
+PyObjPtr& PyObjStr::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex)
+{
+    PyObjPtr& ret = context.strClass->getVar(context, context.strClass, nFieldIndex);
+
+    if (false == IS_NULL(ret)){
+        if (ret->getType() == PY_FUNC_DEF){
+            return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
+        }
+        return ret;
+    }
+
+    for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
+        m_objStack.push_back(PyObjTool::buildNULL());
+    }
+    
+    ret = m_objStack[nFieldIndex];
+
+    return ret;
+}
+
 bool PyObjFuncDef::hasSelfParam(){
     ParametersExprAST* pParametersExprAST = parameters.cast<ParametersExprAST>();
     if (pParametersExprAST->allParam.empty() == false){

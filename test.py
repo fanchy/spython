@@ -104,3 +104,5 @@ testD = wf()
 testN = None
 testtuple = (1, 2)
 testlen = len('1222')
+tests1 = 'abc'
+tests2 = tests1.upper()

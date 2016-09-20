@@ -89,6 +89,7 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo;
     }
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
 };
 
 

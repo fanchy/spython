@@ -3,6 +3,7 @@
 #include "ExprAST.h"
 #include "PyObj.h"
 #include "PyCpp.h"
+#include "StrTool.h"
 
 using namespace std;
 using namespace ff;
@@ -27,7 +28,7 @@ static PyObjPtr strUpper(PyContext& context, PyObjPtr& self, std::vector<PyObjPt
         throw PyException::buildException("TypeError: len() takes exactly zero argument (%d given)", argAssignVal.size());
     }
     
-    return PyCppUtil::genStr(self.cast<PyObjStr>()->value);
+    return PyCppUtil::genStr(StrTool::upper(self.cast<PyObjStr>()->value));
 }
 
 struct PyExtException{
@@ -49,7 +50,8 @@ SPython::SPython(){
     pycontext.allBuiltin["len"] = PyCppUtil::genFunc(pyLen, "len");
     
     pycontext.strClass = new PyObjClassDef("str");
-    PyCppUtil::setAttr(pycontext, pycontext.strClass, "upper", PyCppUtil::genFunc(strUpper, "upper"))
+    pycontext.strClass.cast<PyObjClassDef>()->selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo;
+    PyCppUtil::setAttr(pycontext, pycontext.strClass, "upper", PyCppUtil::genFunc(strUpper, "upper"));
 }
 
 PyObjPtr SPython::importFile(const std::string& modname){
