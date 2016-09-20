@@ -38,11 +38,11 @@ public:
     }
     virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
         if (cppFunc){
-            PyObjPtr& self = self.cast<PyObjFuncDef>()->classInstance;
-            if (!self){
+            PyObjPtr& selfobj = self.cast<PyObjFuncDef>()->classInstance;
+            if (!selfobj){
                 throw PyException::buildException("arg self not assigned");
             }
-            PyObjPtr v = (*cppFunc)(context, self, argAssignVal);
+            PyObjPtr v = (*cppFunc)(context, selfobj, argAssignVal);
             return context.cacheResult(v);
         }
         return context.cacheResult(PyObjTool::buildNone());

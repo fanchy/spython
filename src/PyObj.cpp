@@ -7,7 +7,8 @@ using namespace ff;
 
 PyObjPtr& PyObjStr::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex)
 {
-    PyObjPtr& ret = context.strClass->getVar(context, context.strClass, nFieldIndex);
+    PyObjPtr& strClass = context.allBuiltin["str"];
+    PyObjPtr& ret = strClass->getVar(context, strClass, nFieldIndex);
 
     if (false == IS_NULL(ret)){
         if (ret->getType() == PY_FUNC_DEF){

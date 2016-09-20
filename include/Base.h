@@ -158,6 +158,9 @@ public:
     virtual PyObjPtr& getVar(PyContext& c, PyObjPtr& self, unsigned int nFieldIndex);
     virtual const ObjIdInfo& getObjIdInfo() = 0;
 
+    void clear(){
+        m_objStack.clear();
+    }
 public:
     std::vector<PyObjPtr>    m_objStack;
     ObjIdInfo*               m_pObjIdInfo;
@@ -350,6 +353,13 @@ public:
         PyObjPtr                    modCache;
     };
 public:
+    ~PyContext(){
+        std::map<std::string, PyObjPtr>::iterator it = allBuiltin.begin();
+        for (; it != allBuiltin.end(); ++it){
+            it->second->clear();
+        }
+        allBuiltin.clear();
+    }
     PyObjPtr& cacheResult(PyObjPtr v){
         evalResult = v;
         return evalResult;
@@ -440,7 +450,7 @@ public:
     PyObjPtr curstack;//!cur using context
     
     std::map<std::string, PyObjPtr>  allBuiltin;
-    PyObjPtr                         strClass;//!str interface like upper lower...
+    
 };
 #define TRACE_EXPR() context.setTraceExpr(this)
 #define TRACE_EXPR_PUSH() context.pushTraceExpr(this)

@@ -53,6 +53,17 @@ bool PyClassHandler::handleIsInstance(PyContext& context, PyObjPtr& self, PyObjP
             }
         }
     }
+    else{
+        PyContextBackUp backup(context);
+        context.curstack = val;
+        
+        ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__class__");
+        PyObjPtr classDef = expr->eval(context);
+        if (classDef.get() == self.get()){
+            return true;
+        }
+        
+    }
     return false;
 }
 

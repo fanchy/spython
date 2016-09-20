@@ -106,3 +106,5 @@ testtuple = (1, 2)
 testlen = len('1222')
 tests1 = 'abc'
 tests2 = tests1.upper()
+tests3 = tests1.__class__
+a1 = isinstance(1, tests3)
