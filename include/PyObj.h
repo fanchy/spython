@@ -54,6 +54,7 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjInt> >::instance_ptr()->objInfo;
     }
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
 };
 
 class PyObjFloat:public PyObj {
@@ -65,6 +66,7 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjFloat> >::instance_ptr()->objInfo;
     }
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
 };
 class PyObjBool:public PyObj {
 public:
@@ -208,17 +210,21 @@ public:
 
 class PyObjClassDef:public PyObj {
 public:
-    PyObjClassDef(const std::string& s);
-    PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a);
+    static PyObjPtr build(PyContext& context, const std::string& s, ObjIdInfo* p = NULL);
+    static PyObjPtr build(PyContext& context, const std::string& s, std::vector<PyObjPtr>& parentClass);
+    PyObjClassDef(const std::string& s, ObjIdInfo* p = NULL);
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
     virtual std::map<std::string, PyObjPtr> getAllFieldData();
     void processInheritInfo(PyContext& context, PyObjPtr& self);
-
+    PyObjPtr& getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex);
+    void processInit(PyContext& context, PyObjPtr& self);
+    
     std::string             name;
     std::vector<PyObjPtr>   parentClass;
     ObjIdInfo               selfObjInfo;
+    int                     __class__fieldindex; 
 };
 
 class PyObjClassInstance:public PyObj {

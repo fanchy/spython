@@ -472,9 +472,8 @@ PyObjPtr& ClassDefExprAST::eval(PyContext& context){TRACE_EXPR();
             parentClass.push_back(inheritClass);
         }
     }
-    PyObjPtr rval = new PyObjClassDef(classname.cast<VariableExprAST>()->name, parentClass);
-    rval.cast<PyObjClassDef>()->processInheritInfo(context, rval);
-    
+    PyObjPtr rval = PyObjClassDef::build(context, classname.cast<VariableExprAST>()->name, parentClass);
+
     PyObjPtr& lval = classname->assignVal(context, rval);
 
     if (suite){

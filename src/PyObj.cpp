@@ -4,6 +4,46 @@
 
 using namespace std;
 using namespace ff;
+PyObjPtr& PyObjInt::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex)
+{
+    PyObjPtr& strClass = context.allBuiltin["int"];
+    PyObjPtr& ret = strClass->getVar(context, strClass, nFieldIndex);
+
+    if (false == IS_NULL(ret)){
+        if (ret->getType() == PY_FUNC_DEF){
+            return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
+        }
+        return ret;
+    }
+
+    for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
+        m_objStack.push_back(PyObjTool::buildNULL());
+    }
+    
+    ret = m_objStack[nFieldIndex];
+
+    return ret;
+}
+PyObjPtr& PyObjFloat::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex)
+{
+    PyObjPtr& strClass = context.allBuiltin["float"];
+    PyObjPtr& ret = strClass->getVar(context, strClass, nFieldIndex);
+
+    if (false == IS_NULL(ret)){
+        if (ret->getType() == PY_FUNC_DEF){
+            return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
+        }
+        return ret;
+    }
+
+    for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
+        m_objStack.push_back(PyObjTool::buildNULL());
+    }
+    
+    ret = m_objStack[nFieldIndex];
+
+    return ret;
+}
 
 PyObjPtr& PyObjStr::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex)
 {
@@ -248,27 +288,62 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
     
     return context.cacheResult(PyObjTool::buildNone());
 }
-PyObjClassDef::PyObjClassDef(const std::string& s):name(s){
-    selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
+PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, ObjIdInfo* p)
+{
+    PyObjPtr ret = new PyObjClassDef(s, p);
+    ret.cast<PyObjClassDef>()->processInit(context, ret);
+    return ret;
+}
+PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, std::vector<PyObjPtr>& parentClass){
+    PyObjPtr ret = new PyObjClassDef(s);
+    ret.cast<PyObjClassDef>()->parentClass = parentClass;
+    ret.cast<PyObjClassDef>()->processInheritInfo(context, ret);
+    ret.cast<PyObjClassDef>()->processInit(context, ret);
+    return ret;
+}
+
+PyObjClassDef::PyObjClassDef(const std::string& s, ObjIdInfo* p):name(s),__class__fieldindex(-1){
+    if (p){
+        selfObjInfo = *p;
+    }
+    else{
+        selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
+    }
+    
     //!different function has different object id 
     selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
     this->handler = singleton_t<PyClassHandler>::instance_ptr();
 }
-PyObjClassDef::PyObjClassDef(const std::string& s, std::vector<PyObjPtr>& a):name(s), parentClass(a) {
-    selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
-    //!different function has different object id 
-    selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
-    this->handler = singleton_t<PyClassHandler>::instance_ptr();
-}
+
 std::map<std::string, PyObjPtr> PyObjClassDef::getAllFieldData(){
     std::map<std::string, PyObjPtr> ret;
 
     const ObjIdInfo& p = this->getObjIdInfo();
     for (unsigned int i = 0; i < this->m_objStack.size(); ++i) {
+        if (!this->m_objStack[i]){//!ignore __init__
+            continue;
+        }
         string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFieldName(p.nModuleId, p.nObjectId, i);
         ret[n]   = this->m_objStack[i];
     }
 
+    return ret;
+}
+void PyObjClassDef::processInit(PyContext& context, PyObjPtr& self){
+    if (__class__fieldindex < 0){
+        PyContextBackUp backup(context);
+        context.curstack = self;
+        
+        __class__fieldindex = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__class__")->getFieldIndex(context);
+        PyObjPtr& retClass = PyObj::getVar(context, self, __class__fieldindex);
+        retClass = NULL;
+    }
+}
+PyObjPtr& PyObjClassDef::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex) {
+    if (__class__fieldindex == int(nFieldIndex)){//! return __class__
+        return context.cacheResult(self);
+    }
+    PyObjPtr& ret = PyObj::getVar(context, self, nFieldIndex);
     return ret;
 }
 

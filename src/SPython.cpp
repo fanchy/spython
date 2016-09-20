@@ -48,7 +48,7 @@ struct PyExtException{
 SPython::SPython(){
     pycontext.curstack = new PyObjModule("__main__", "built-in");
     pycontext.allBuiltin["None"] = PyObjTool::buildNone();
-    pycontext.allBuiltin["int"] = new PyBuiltinTypeInfo(PY_INT);
+    //pycontext.allBuiltin["int"] = new PyBuiltinTypeInfo(PY_INT);
     pycontext.allBuiltin["float"] = new PyBuiltinTypeInfo(PY_FLOAT);
     
     pycontext.allBuiltin["tuple"] = new PyBuiltinTypeInfo(PY_TUPLE);
@@ -60,11 +60,20 @@ SPython::SPython(){
     pycontext.allBuiltin["len"] = PyCppUtil::genFunc(pyLen, "len");
     pycontext.allBuiltin["isinstance"] = PyCppUtil::genFunc(pyIsinstance, "isinstance");
     
-    PyObjPtr strClass = new PyObjClassDef("str");
-    strClass.cast<PyObjClassDef>()->selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo;
-    PyCppUtil::setAttr(pycontext, strClass, "upper", PyCppUtil::genFunc(strUpper, "upper"));
-    PyCppUtil::setAttr(pycontext, strClass, "__class__", strClass);
-    pycontext.allBuiltin["str"] = strClass;
+    {
+        PyObjPtr strClass = PyObjClassDef::build(pycontext, "str", &singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo);
+        
+        PyCppUtil::setAttr(pycontext, strClass, "upper", PyCppUtil::genFunc(strUpper, "upper"));
+        //PyCppUtil::setAttr(pycontext, strClass, "__class__", strClass);
+        pycontext.allBuiltin["str"] = strClass;
+    }
+    
+    {
+        PyObjPtr strClass = PyObjClassDef::build(pycontext, "int", &singleton_t<ObjIdTypeTraits<PyObjInt> >::instance_ptr()->objInfo);
+
+        //PyCppUtil::setAttr(pycontext, strClass, "__class__", strClass);
+        pycontext.allBuiltin["int"] = strClass;
+    }
 }
 
 PyObjPtr SPython::importFile(const std::string& modname){

@@ -252,7 +252,7 @@ unsigned int ExprAST::getFieldIndex(PyContext& pycontext){
     return (unsigned int)nIndex;
 }
 PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
-    //DMSG(("filedname %s\n", this->name.c_str()));
+    DMSG(("filedname %s\n", this->name.c_str()));
     PyObjPtr& context = pycontext.curstack;
     return context->getVar(pycontext, context, this->getFieldIndex(pycontext));
 }
