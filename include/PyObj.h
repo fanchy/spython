@@ -219,7 +219,6 @@ public:
     virtual std::map<std::string, PyObjPtr> getAllFieldData();
     void processInheritInfo(PyContext& context, PyObjPtr& self);
     PyObjPtr& getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex, ExprAST* e);
-    void processInit(PyContext& context, PyObjPtr& self);
     
     std::string             name;
     std::vector<PyObjPtr>   parentClass;

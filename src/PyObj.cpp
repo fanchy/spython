@@ -6,8 +6,8 @@ using namespace std;
 using namespace ff;
 PyObjPtr& PyObjInt::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e)
 {
-    PyObjPtr& strClass = context.allBuiltin["int"];
-    PyObjPtr& ret = strClass->getVar(context, strClass, e->getFieldIndex(strClass), e);
+    PyObjPtr& classObj = context.allBuiltin["int"];
+    PyObjPtr& ret = classObj->getVar(context, classObj, e->getFieldIndex(classObj), e);
 
     if (false == IS_NULL(ret)){
         if (ret->getType() == PY_FUNC_DEF){
@@ -26,8 +26,8 @@ PyObjPtr& PyObjInt::getVar(PyContext& context, PyObjPtr& self, unsigned int nFie
 }
 PyObjPtr& PyObjFloat::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e)
 {
-    PyObjPtr& strClass = context.allBuiltin["float"];
-    PyObjPtr& ret = strClass->getVar(context, strClass, e->getFieldIndex(strClass), e);
+    PyObjPtr& classObj = context.allBuiltin["float"];
+    PyObjPtr& ret = classObj->getVar(context, classObj, e->getFieldIndex(classObj), e);
 
     if (false == IS_NULL(ret)){
         if (ret->getType() == PY_FUNC_DEF){
@@ -47,8 +47,8 @@ PyObjPtr& PyObjFloat::getVar(PyContext& context, PyObjPtr& self, unsigned int nF
 
 PyObjPtr& PyObjStr::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e)
 {
-    PyObjPtr& strClass = context.allBuiltin["str"];
-    PyObjPtr& ret = strClass->getVar(context, strClass, e->getFieldIndex(strClass), e);
+    PyObjPtr& classObj = context.allBuiltin["str"];
+    PyObjPtr& ret = classObj->getVar(context, classObj, e->getFieldIndex(classObj), e);
 
     if (false == IS_NULL(ret)){
         if (ret->getType() == PY_FUNC_DEF){
@@ -288,14 +288,12 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
 PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, ObjIdInfo* p)
 {
     PyObjPtr ret = new PyObjClassDef(s, p);
-    ret.cast<PyObjClassDef>()->processInit(context, ret);
     return ret;
 }
 PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, std::vector<PyObjPtr>& parentClass){
-    PyObjPtr ret = new PyObjClassDef(s);
+    PyObjPtr ret = PyObjClassDef::build(context, s);
     ret.cast<PyObjClassDef>()->parentClass = parentClass;
     ret.cast<PyObjClassDef>()->processInheritInfo(context, ret);
-    ret.cast<PyObjClassDef>()->processInit(context, ret);
     return ret;
 }
 
@@ -327,8 +325,7 @@ std::map<std::string, PyObjPtr> PyObjClassDef::getAllFieldData(){
 
     return ret;
 }
-void PyObjClassDef::processInit(PyContext& context, PyObjPtr& self){
-}
+
 PyObjPtr& PyObjClassDef::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e) {
     if (e == expr__class__){//! return __class__
         return context.cacheResult(self);
