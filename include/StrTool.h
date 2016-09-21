@@ -115,6 +115,16 @@ struct StrTool
         }
         return ret;
     }
+    static std::string lower(const std::string& str)
+    {
+        std::string ret = str;
+        for (unsigned int i = 0; i < ret.size(); ++i){
+            if (ret[i] >= 'A' && ret[i] <= 'Z'){
+                ret[i] += 32;
+            }
+        }
+        return ret;
+    }
 };
 
 }
