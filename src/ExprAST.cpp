@@ -33,7 +33,7 @@ PyObjPtr& VariableExprAST::eval(PyContext& context) {
         if (ret2){
             return context.cacheResult(ret2);
         }
-        context.curstack->getType();
+
         if (IsFuncCallStack(context.curstack)){
             PyContextBackUp backup(context);
             context.curstack = context.curstack.cast<PyCallTmpStack>()->modBelong;

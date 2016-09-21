@@ -89,7 +89,7 @@ bool PyObjHandler::handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr
     return false;
 }
 
-PyObjPtr& PyObj::getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex) {
+PyObjPtr& PyObj::getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex, ExprAST* e) {
     //DMSG(("nFieldIndex %d\n", nFieldIndex));
     if (nFieldIndex < m_objStack.size()) {
         return m_objStack[nFieldIndex];
@@ -226,10 +226,11 @@ bool PyObjTool::handleBool(PyObjPtr b){
     }
     return false;
 }
-
+/*
 unsigned int ExprAST::getFieldIndex(PyContext& pycontext){
-    
-    PyObjPtr& context = pycontext.curstack;
+    return this->getFieldIndex(pycontext.curstack);
+}*/
+unsigned int ExprAST::getFieldIndex(PyObjPtr& context){
     const ObjIdInfo& p = context->getObjIdInfo();
     if (p.nModuleId >= module2objcet2fieldIndex.size()){
         module2objcet2fieldIndex.resize(p.nModuleId + 1);
@@ -254,7 +255,7 @@ unsigned int ExprAST::getFieldIndex(PyContext& pycontext){
 PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
     //DMSG(("filedname %s\n", this->name.c_str()));
     PyObjPtr& context = pycontext.curstack;
-    return context->getVar(pycontext, context, this->getFieldIndex(pycontext));
+    return context->getVar(pycontext, context, this->getFieldIndex(context), this);
 }
 
 

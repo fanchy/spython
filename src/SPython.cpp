@@ -9,8 +9,6 @@
 using namespace std;
 using namespace ff;
 
-
-
 SPython::SPython(){
     pycontext.curstack = new PyObjModule("__main__", "built-in");
     PyBaseExt::init(pycontext);

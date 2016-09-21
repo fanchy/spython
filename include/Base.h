@@ -145,6 +145,7 @@ struct ObjIdTypeTraits{
 };
 class PyObjHandler;
 class PyContext;
+class ExprAST;
 class PyObj {
 public:
     typedef SmartPtr<PyObj> PyObjPtr;
@@ -155,7 +156,7 @@ public:
     virtual int getFieldNum() const { return m_objStack.size(); }
     static std::string dump(PyObjPtr& self, int preBlank = 0);
 
-    virtual PyObjPtr& getVar(PyContext& c, PyObjPtr& self, unsigned int nFieldIndex);
+    virtual PyObjPtr& getVar(PyContext& c, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
     virtual const ObjIdInfo& getObjIdInfo() = 0;
 
     void clear(){
@@ -203,7 +204,9 @@ public:
     virtual ~ExprAST() {}
     virtual PyObjPtr& eval(PyContext& context) = 0;
 
-    unsigned int getFieldIndex(PyContext& context);
+    //unsigned int getFieldIndex(PyContext& context);
+    unsigned int getFieldIndex(PyObjPtr& context);
+    
     virtual PyObjPtr& getFieldVal(PyContext& context);
     virtual PyObjPtr& assignVal(PyContext& context, PyObjPtr& v){
         PyObjPtr& lval = this->eval(context);

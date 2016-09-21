@@ -121,7 +121,7 @@ public:
     virtual int getFieldNum() const { 
         return std::max(m_objStack.size(), classDefPtr->m_objStack.size()); 
     }
-    virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex){
+    virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
         return self;//!TODO
     }
     

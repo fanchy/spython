@@ -54,7 +54,7 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjInt> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
 };
 
 class PyObjFloat:public PyObj {
@@ -66,7 +66,7 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjFloat> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
 };
 class PyObjBool:public PyObj {
 public:
@@ -91,7 +91,7 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
 };
 
 
@@ -218,13 +218,14 @@ public:
     }
     virtual std::map<std::string, PyObjPtr> getAllFieldData();
     void processInheritInfo(PyContext& context, PyObjPtr& self);
-    PyObjPtr& getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex);
+    PyObjPtr& getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex, ExprAST* e);
     void processInit(PyContext& context, PyObjPtr& self);
     
     std::string             name;
     std::vector<PyObjPtr>   parentClass;
     ObjIdInfo               selfObjInfo;
-    int                     __class__fieldindex; 
+    //int                     __class__fieldindex;
+    ExprAST*                expr__class__;
 };
 
 class PyObjClassInstance:public PyObj {
@@ -241,7 +242,7 @@ public:
     virtual int getFieldNum() const { 
         return std::max(m_objStack.size(), classDefPtr->m_objStack.size()); 
     }
-    virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex);
+    virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
     
     virtual PyObjPtr& assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v); //!special process field assign
     
