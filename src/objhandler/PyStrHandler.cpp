@@ -81,3 +81,8 @@ long PyStrHandler::handleLen(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjStr>()->value.size();
 }
 
+PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int stop, int step){
+    return self;
+}
+
+

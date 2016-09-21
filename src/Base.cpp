@@ -88,6 +88,9 @@ size_t PyObjHandler::handleHash(const PyObjPtr& self) const{
 bool PyObjHandler::handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     return false;
 }
+PyObjPtr& PyObjHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int stop, int step){
+    throw PyException::buildException("handleSlice invalid");return self;
+}
 
 PyObjPtr& PyObj::getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex, ExprAST* e) {
     //DMSG(("nFieldIndex %d\n", nFieldIndex));

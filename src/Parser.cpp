@@ -1564,13 +1564,40 @@ ExprASTPtr Parser::parse_trailer(){
     }
     else if (m_curScanner->getToken()->strVal == "["){ //!call [] operator
         m_curScanner->seek(1);
-        if (m_curScanner->getToken()->strVal != "]"){
-            ExprASTPtr subscriptlist = parse_subscriptlist();
-            if (!subscriptlist){
-                THROW_ERROR("subscriptlist parse failed when parse trailer after [");
+        //!parse slice operation
+        ExprASTPtr opStart = parse_test();
+        if (!opStart){
+            THROW_ERROR("slice parse failed when parse trailer after [");
+        }
+        ExprASTPtr ret = ALLOC_EXPR<SliceExprAST>();
+        ret.cast<SliceExprAST>()->start = opStart;
+        if (m_curScanner->getToken()->strVal == ":"){
+            m_curScanner->seek(1);
+            //!parse slice operation
+            if (m_curScanner->getToken()->strVal == "]"){
+                ret.cast<SliceExprAST>()->stopFlag = SliceExprAST::FLAG_END;
+            }
+            else{
+                ret.cast<SliceExprAST>()->stop = parse_test();
+                if (!ret.cast<SliceExprAST>()->stop){
+                    THROW_ERROR("slice parse failed when parse trailer after [:");
+                }
+                
+                if (m_curScanner->getToken()->strVal == ":"){
+                    m_curScanner->seek(1);
+                    ret.cast<SliceExprAST>()->step = parse_test();
+                    if (!ret.cast<SliceExprAST>()->step){
+                        THROW_ERROR("slice parse failed when parse trailer after [::");
+                    }
+                }
             }
         }
+        
+        if (m_curScanner->getToken()->strVal != "]"){
+            THROW_ERROR("subscriptlist parse failed when parse trailer after [");
+        }
         m_curScanner->seek(1);
+        return ret;
     }
     else if (m_curScanner->getToken()->strVal == "."){ //!call [] operator
         m_curScanner->seek(1);

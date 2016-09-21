@@ -695,6 +695,28 @@ public:
     ExprASTPtr fieldName;
 };
 
+class SliceExprAST : public TrailerExprAST {
+public:
+    enum SliceStopFlag{
+        FLAG_NULL = 0,
+        FLAG_END,
+    };
+    SliceExprAST():stopFlag(FLAG_NULL) {
+    }
+    virtual int getType() {
+        return EXPR_SLICEOP;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr& eval(PyContext& context);
+    
+    //PyObjPtr& assignToField(PyContext& context, PyObjPtr& v);
+public:
+    ExprASTPtr start;
+    ExprASTPtr stop;
+    ExprASTPtr step;
+    int        stopFlag;
+};
+
 /// CallExprAST - Expression class for function calls.
 class CallExprAST : public TrailerExprAST {
 public:

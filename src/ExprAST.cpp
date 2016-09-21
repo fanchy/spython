@@ -778,7 +778,23 @@ PyObjPtr& DotGetFieldExprAST::assignToField(PyContext& context, PyObjPtr& v){
     ref = v;
     return ref;
 }
+string SliceExprAST::dump(int nDepth){
+    string ret;
+    for (int i = 0; i < nDepth; ++i){
+        ret += "-";
+    }
+    ret += preExpr->dump(0);
+    return ret;
+}
 
+PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
+    PyObjPtr obj = preExpr->eval(context);
+    PyContextBackUp backup(context);
+    context.curstack = obj;
+    //string strObj = PyObj::dump(obj);
+    //printf("%p %s:obj:\n %s", obj.get(), fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
+    return context.curstack;
+}
 std::string CallExprAST::dump(int nDepth){
     string ret;
     for (int i = 0; i < nDepth; ++i){
