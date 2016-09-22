@@ -89,7 +89,7 @@ string StmtAST::dump(int nDepth){
 PyObjPtr& PrintAST::eval(PyContext& context){TRACE_EXPR();
     for (unsigned int i = 0; i < exprs.size(); ++i){
         PyObjPtr v = exprs[i]->eval(context);
-        string   s = v->handler->handleStr(v);
+        string   s = v->getHandler()->handleStr(v);
         
         if (i == 0){
             printf("%s", s.c_str());
@@ -261,7 +261,7 @@ string IfExprAST::dump(int nDepth){
 PyObjPtr& IfExprAST::eval(PyContext& context){TRACE_EXPR();
     for (unsigned int i = 0; i < ifTest.size(); ++i){
         PyObjPtr& caseBool = ifTest[i]->eval(context);
-        if (caseBool->handler->handleBool(context, caseBool)){
+        if (caseBool->getHandler()->handleBool(context, caseBool)){
             ifSuite[i]->eval(context);
             return context.cacheResult(PyObjTool::buildNone());
         }
@@ -292,7 +292,7 @@ PyObjPtr& WhileExprAST::eval(PyContext& context){TRACE_EXPR();
     while (true){
         try{
             PyObjPtr& caseBool = test->eval(context);
-            if (caseBool->handler->handleBool(context, caseBool)){
+            if (caseBool->getHandler()->handleBool(context, caseBool)){
                 doElse = false;
                 suite->eval(context);
             }
@@ -572,7 +572,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
                 PyObjPtr& lval = left->assignVal(context, rval);
                 return lval;
             }
-            //DMSG(("assign %s\n%s,%s\n", left->dump(0).c_str(), right->dump(0).c_str(), rval->handler->handleStr(rval).c_str()));
+            //DMSG(("assign %s\n%s,%s\n", left->dump(0).c_str(), right->dump(0).c_str(), rval->getHandler()->handleStr(rval).c_str()));
 
             PyObjPtr& lval = left->eval(context);
             lval = rval;
@@ -581,32 +581,32 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_ADD:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            return lval->handler->handleAdd(context, lval, rval);
+            return lval->getHandler()->handleAdd(context, lval, rval);
         }break;
         case OP_SUB:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            return lval->handler->handleSub(context, lval, rval);
+            return lval->getHandler()->handleSub(context, lval, rval);
         }break;
         case OP_MUL:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            return lval->handler->handleMul(context, lval, rval);
+            return lval->getHandler()->handleMul(context, lval, rval);
         }break;
         case OP_DIV:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            return lval->handler->handleDiv(context, lval, rval);
+            return lval->getHandler()->handleDiv(context, lval, rval);
         }break;
         case OP_MOD:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            return lval->handler->handleMod(context, lval, rval);
+            return lval->getHandler()->handleMod(context, lval, rval);
         }break;
         case OP_EQ:{
             PyObjPtr& rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleEqual(context, lval, rval)){
+            if (lval->getHandler()->handleEqual(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             return context.cacheResult(PyObjTool::buildFalse());
@@ -614,7 +614,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_NOTEQ:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleEqual(context, lval, rval)){
+            if (lval->getHandler()->handleEqual(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildFalse());
             }
             return context.cacheResult(PyObjTool::buildTrue());
@@ -622,7 +622,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_LESS:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleLess(context, lval, rval)){
+            if (lval->getHandler()->handleLess(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildFalse());
             }
             return context.cacheResult(PyObjTool::buildFalse());
@@ -630,7 +630,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_GREAT:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleGreat(context, lval, rval)){
+            if (lval->getHandler()->handleGreat(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             return context.cacheResult(PyObjTool::buildFalse());
@@ -638,7 +638,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_LESSEQ:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleLessEqual(context, lval, rval)){
+            if (lval->getHandler()->handleLessEqual(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             return context.cacheResult(PyObjTool::buildFalse());
@@ -646,7 +646,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_GREATEQ:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleGreatEqual(context, lval, rval)){
+            if (lval->getHandler()->handleGreatEqual(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             return context.cacheResult(PyObjTool::buildFalse());
@@ -654,7 +654,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_IN:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleIn(context, lval, rval)){
+            if (lval->getHandler()->handleIn(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             return context.cacheResult(PyObjTool::buildFalse());
@@ -662,19 +662,19 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_NOTIN:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleIn(context, lval, rval)){
+            if (lval->getHandler()->handleIn(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildFalse());
             }
             return context.cacheResult(PyObjTool::buildTrue());
         }break;
         case OP_OR:{
             PyObjPtr& lval = left->eval(context);
-            if (lval->handler->handleBool(context, lval)){
+            if (lval->getHandler()->handleBool(context, lval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             
             PyObjPtr& rval = right->eval(context);
-            if (rval->handler->handleBool(context, rval)){
+            if (rval->getHandler()->handleBool(context, rval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             return context.cacheResult(PyObjTool::buildFalse());
@@ -682,7 +682,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_AND:{
             PyObjPtr& lval = left->eval(context);
             PyObjPtr& rval = right->eval(context);
-            if (lval->handler->handleBool(context, lval) && rval->handler->handleBool(context, rval)){
+            if (lval->getHandler()->handleBool(context, lval) && rval->getHandler()->handleBool(context, rval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             return context.cacheResult(PyObjTool::buildFalse());
@@ -791,9 +791,42 @@ PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
     PyObjPtr obj = preExpr->eval(context);
     PyContextBackUp backup(context);
     context.curstack = obj;
-    //string strObj = PyObj::dump(obj);
-    //printf("%p %s:obj:\n %s", obj.get(), fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
-    return context.curstack;
+    
+    PyObjPtr startVal = start->eval(context);
+    if (startVal->getType() != PY_INT){
+        throw PyException::buildException("slice arg1 must be int");
+    }
+    int nStart = startVal.cast<PyObjInt>()->value;
+    int nStep  = 1;
+    int nStop  = nStart + nStep;
+    if (step){
+        PyObjPtr stepVal = step->eval(context);
+        if (stepVal->getType() != PY_INT){
+            throw PyException::buildException("slice arg3 must be int");
+        }
+        nStep = stepVal.cast<PyObjInt>()->value;
+        if (nStep == 0){
+            throw PyException::buildException("slice arg3 can't' be zero");
+        }
+    }
+    
+    if (stop){
+        PyObjPtr stopVal = stop->eval(context);
+        if (stopVal->getType() != PY_INT){
+            throw PyException::buildException("slice arg2 must be int");
+        }
+        nStop = stopVal.cast<PyObjInt>()->value;
+    }
+    else if (stopFlag == FLAG_END){
+        if (nStep > 0){
+            nStop = INT_MAX;
+        }
+        else if (nStep < 0){
+            nStop = 0;
+        }
+    }
+    
+    return obj->getHandler()->handleSlice(context, obj, nStart, nStop, nStep);
 }
 std::string CallExprAST::dump(int nDepth){
     string ret;
@@ -822,7 +855,7 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
             allValue.push_back(v);
         }
         
-        PyObjPtr& ret = funcObj->handler->handleCall(context, funcObj, allArgsTypeInfo, allValue);
+        PyObjPtr& ret = funcObj->getHandler()->handleCall(context, funcObj, allArgsTypeInfo, allValue);
         TRACE_EXPR_POP();
         return ret;
     }
@@ -879,7 +912,7 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
         }
     }
     
-    PyObjPtr& ret = funcObj->handler->handleCall(context, funcObj, newArgTypeInfo, allValue);
+    PyObjPtr& ret = funcObj->getHandler()->handleCall(context, funcObj, newArgTypeInfo, allValue);
     TRACE_EXPR_POP();
     return ret;
 }
@@ -1112,7 +1145,7 @@ PyObjPtr& TryAst::eval(PyContext& context){TRACE_EXPR();
             }
 
             PyObjPtr exceptType = info.exceptType->eval(context);
-            if (exceptType->handler->handleIsInstance(context, exceptType, excepVal)){
+            if (exceptType->getHandler()->handleIsInstance(context, exceptType, excepVal)){
                 hit = true;
                 info.exceptSuite->eval(context);
                 break;
@@ -1150,7 +1183,7 @@ PyObjPtr& DecoratorAST::eval(PyContext& context){TRACE_EXPR();
         vector<PyObjPtr> allValue;
         allValue.push_back(objFunc);
         
-        objFunc = funcObj->handler->handleCall(context, funcObj, allArgsTypeInfo, allValue);
+        objFunc = funcObj->getHandler()->handleCall(context, funcObj, allArgsTypeInfo, allValue);
         if (funcDef->getType() == EXPR_FUNCDEF){
             funcDef.cast<FuncDefExprAST>()->funcname->assignVal(context, objFunc);
         }

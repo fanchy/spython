@@ -14,7 +14,7 @@ struct PyBuiltinExt{
             throw PyException::buildException("TypeError: len() takes exactly 1 argument (%u given)", argAssignVal.size());
         }
         PyObjPtr& param = argAssignVal[0];
-        long ret = param->handler->handleLen(context, param);
+        long ret = param->getHandler()->handleLen(context, param);
         if (ret < 0){
             throw PyException::buildException("TypeError: object of type '%d' has no len()", param->getType());
         }
@@ -27,7 +27,7 @@ struct PyBuiltinExt{
         PyObjPtr& paramObj   = argAssignVal[0];
         PyObjPtr& paramClass = argAssignVal[1];
         
-        bool ret = paramClass->handler->handleIsInstance(context, paramClass, paramObj);
+        bool ret = paramClass->getHandler()->handleIsInstance(context, paramClass, paramObj);
         return PyObjTool::buildBool(ret);
     }
 

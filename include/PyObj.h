@@ -145,8 +145,8 @@ public:
     {
         bool operator()(const PyObjPtr &k1, const PyObjPtr &k2)const
         {
-            std::size_t a = k1->handler->handleHash(k1);
-            std::size_t b = k2->handler->handleHash(k2);
+            std::size_t a = k1->getHandler()->handleHash(k1);
+            std::size_t b = k2->getHandler()->handleHash(k2);
             return a < b;
         }
     };
@@ -264,6 +264,59 @@ public:
 };
 
 
+class PyCppFuncWrap: public PyCppFunc{
+public:
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, std::vector<PyObjPtr>& argAssignVal);
+    
+    PyCppFuncWrap(PyCppFunc f):cppFunc(f){
+    }
+    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
+        if (cppFunc){
+            PyObjPtr v = (*cppFunc)(context, argAssignVal);
+            return context.cacheResult(v);
+        }
+        return context.cacheResult(PyObjTool::buildNone());
+    }
+public:
+    PyCppFunc     cppFunc;
+};
+class PyCppClassFuncWrap: public PyCppFunc{
+public:
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal);
+    
+    PyCppClassFuncWrap(PyCppFunc f):cppFunc(f){
+    }
+    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
+        if (cppFunc){
+            PyObjPtr& selfobj = self.cast<PyObjFuncDef>()->classInstance;
+            if (!selfobj){
+                throw PyException::buildException("arg self not assigned");
+            }
+            PyObjPtr v = (*cppFunc)(context, selfobj, argAssignVal);
+            return context.cacheResult(v);
+        }
+        return context.cacheResult(PyObjTool::buildNone());
+    }
+public:
+    PyCppFunc     cppFunc;
+};
+
+struct PyCppUtil{
+    static PyObjPtr genInt(long n){
+        return new PyObjInt(n);
+    }
+    static PyObjPtr genStr(const std::string& s){
+        return new PyObjStr(s);
+    }
+    static PyObjPtr genFunc(PyCppFuncWrap::PyCppFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrap(f));
+    }
+    static PyObjPtr genFunc(PyCppClassFuncWrap::PyCppFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrap(f));
+    }
+    static PyObjPtr getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname);
+    static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v);
+};
 }
 #endif
 

@@ -6,7 +6,7 @@ using namespace std;
 using namespace ff;
 
 string PyObj::dump(PyObjPtr& self, int preBlank) {
-    string ret = self->handler->dump(self);
+    string ret = self->getHandler()->dump(self);
     if (ret.empty() == false)
         return ret;
     string blank;
@@ -36,7 +36,7 @@ string PyObj::dump(PyObjPtr& self, int preBlank) {
             ret += PyObj::dump(self->m_objStack[i], preBlank + 1);
             continue;
         }
-        ret += self->m_objStack[i]->handler->handleStr(self->m_objStack[i]);
+        ret += self->m_objStack[i]->getHandler()->handleStr(self->m_objStack[i]);
         ret += "\n";
     }
     return ret;
@@ -245,7 +245,7 @@ unsigned int ExprAST::getFieldIndex(PyObjPtr& context){
         object2index.resize(p.nObjectId + 1, -1);
         object2index[p.nObjectId] = context->getFieldNum();
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
-        //DMSG(("filedname2 %s %s %d\n", context->handler->handleStr(context).c_str(), this->name.c_str(), object2index[p.nObjectId]));
+        //DMSG(("filedname2 %s %s %d\n", context->getHandler()->handleStr(context).c_str(), this->name.c_str(), object2index[p.nObjectId]));
     }
     
     int& nIndex = object2index[p.nObjectId];

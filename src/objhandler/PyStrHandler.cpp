@@ -82,7 +82,32 @@ long PyStrHandler::handleLen(PyContext& context, PyObjPtr& self){
 }
 
 PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int stop, int step){
-    return self;
+    const string& s = self.cast<PyObjStr>()->value;
+
+    string newVal;
+    if (step > 0){
+        for (int i = start; i < stop; i += step){
+            if (i < 0){
+                int index = (int)s.size() + i;
+                if (index < 0){
+                    break;
+                }
+                newVal += s[index];
+            }
+            else{
+                if (i >= (int)s.size()){
+                    break;
+                }
+                newVal += s[i];
+            }
+        }
+    }
+    else{
+        for (size_t i = start; i > stop; i = start + step){
+            newVal += s[i];
+        }
+    }
+    return context.cacheResult(PyCppUtil::genStr(newVal));
 }
 
 

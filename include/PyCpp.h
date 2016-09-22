@@ -14,71 +14,6 @@
 
 namespace ff {
 
-class PyCppFuncWrap: public PyCppFunc{
-public:
-    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, std::vector<PyObjPtr>& argAssignVal);
-    
-    PyCppFuncWrap(PyCppFunc f):cppFunc(f){
-    }
-    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
-        if (cppFunc){
-            PyObjPtr v = (*cppFunc)(context, argAssignVal);
-            return context.cacheResult(v);
-        }
-        return context.cacheResult(PyObjTool::buildNone());
-    }
-public:
-    PyCppFunc     cppFunc;
-};
-class PyCppClassFuncWrap: public PyCppFunc{
-public:
-    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal);
-    
-    PyCppClassFuncWrap(PyCppFunc f):cppFunc(f){
-    }
-    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
-        if (cppFunc){
-            PyObjPtr& selfobj = self.cast<PyObjFuncDef>()->classInstance;
-            if (!selfobj){
-                throw PyException::buildException("arg self not assigned");
-            }
-            PyObjPtr v = (*cppFunc)(context, selfobj, argAssignVal);
-            return context.cacheResult(v);
-        }
-        return context.cacheResult(PyObjTool::buildNone());
-    }
-public:
-    PyCppFunc     cppFunc;
-};
-
-struct PyCppUtil{
-    static PyObjPtr genInt(long n){
-        return new PyObjInt(n);
-    }
-    static PyObjPtr genStr(const std::string& s){
-        return new PyObjStr(s);
-    }
-    static PyObjPtr genFunc(PyCppFuncWrap::PyCppFunc f, std::string n = ""){
-        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrap(f));
-    }
-    static PyObjPtr genFunc(PyCppClassFuncWrap::PyCppFunc f, std::string n = ""){
-        return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrap(f));
-    }
-    static PyObjPtr getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname){
-        PyContextBackUp backup(context);
-        context.curstack = obj;
-        
-        ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(filedname);
-        return expr->eval(context);
-    }
-    static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v){
-        PyContextBackUp backup(context);
-        context.curstack = obj;
-        
-        ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(fieldName);
-        expr->assignVal(context, v);
-    }
-};
 template <typename T>
 class PyCppClassHandler: public PyClassHandler{
 public:
@@ -147,7 +82,7 @@ PyObjPtr& PyCppClassHandler<T>::handleCall(PyContext& context, PyObjPtr& self, s
 
     if (__init__func && __init__func->getType() == PY_FUNC_DEF){
         //DMSG(("__init__func =%d", __init__func->getType()));
-        __init__func->handler->handleCall(context, __init__func, allArgsVal, argAssignVal);
+        __init__func->getHandler()->handleCall(context, __init__func, allArgsVal, argAssignVal);
     }
     else{
         objcpp = new T();

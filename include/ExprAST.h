@@ -185,7 +185,7 @@ public:
     }
     virtual PyObjPtr& eval(PyContext& context) {
         PyObjPtr& val = expr->eval(context);
-        if (val->handler->handleBool(context, val)){
+        if (val->getHandler()->handleBool(context, val)){
             return context.cacheResult(PyObjTool::buildFalse());
         }
         return context.cacheResult(PyObjTool::buildTrue());

@@ -162,6 +162,8 @@ public:
     void clear(){
         m_objStack.clear();
     }
+    inline PyObjHandler* getHandler() { return handler; }
+    inline const PyObjHandler* getHandler() const { return handler; }
 public:
     std::vector<PyObjPtr>    m_objStack;
     ObjIdInfo*               m_pObjIdInfo;
@@ -275,13 +277,13 @@ public:
     virtual bool handleIn(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     
     virtual bool handleLess(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
-        if (self->handler->handleGreatEqual(context, self, val) == false){
+        if (self->getHandler()->handleGreatEqual(context, self, val) == false){
             return true;
         }
         return false;
     }
     virtual bool handleGreat(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
-        if (self->handler->handleLessEqual(context, self, val) == false){
+        if (self->getHandler()->handleLessEqual(context, self, val) == false){
             return true;
         }
         return false;

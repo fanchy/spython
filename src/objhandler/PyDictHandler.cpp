@@ -11,9 +11,9 @@ string PyDictHandler::handleStr(const PyObjPtr& self) const {
     const PyObjDict* pD = self.cast<PyObjDict>();
     for (PyObjDict::DictMap::const_iterator it = pD->value.begin(); it != pD->value.end(); ++it){
         if (ret.empty())
-            ret += "{"+it->first->handler->handleStr(it->first) + ": " + it->second->handler->handleStr(it->second);
+            ret += "{"+it->first->getHandler()->handleStr(it->first) + ": " + it->second->getHandler()->handleStr(it->second);
         else
-            ret += ", "+it->first->handler->handleStr(it->first) + ": " + it->second->handler->handleStr(it->second);
+            ret += ", "+it->first->getHandler()->handleStr(it->first) + ": " + it->second->getHandler()->handleStr(it->second);
     }
     if (ret.empty()){
         ret = "{}";
@@ -40,10 +40,10 @@ bool PyDictHandler::handleEqual(PyContext& context, const PyObjPtr& self, const 
     PyObjDict::DictMap::const_iterator it = pD->value.begin();
     PyObjDict::DictMap::const_iterator it2 = pD2->value.begin();
     for (; it != pD->value.end(); ++it){
-        if (it->first->handler->handleEqual(context, it->first, it2->first) == false){
+        if (it->first->getHandler()->handleEqual(context, it->first, it2->first) == false){
             return false;
         }
-        if (it->second->handler->handleEqual(context, it->second, it2->second) == false){
+        if (it->second->getHandler()->handleEqual(context, it->second, it2->second) == false){
             return false;
         }
         ++it2;
@@ -61,10 +61,10 @@ bool PyDictHandler::handleLessEqual(PyContext& context, const PyObjPtr& self, co
     PyObjDict::DictMap::const_iterator it = pD->value.begin();
     PyObjDict::DictMap::const_iterator it2 = pD2->value.begin();
     for (; it != pD->value.end() && it2 != pD2->value.end(); ++it){
-        if (it->first->handler->handleLessEqual(context, it->first, it2->first) == false){
+        if (it->first->getHandler()->handleLessEqual(context, it->first, it2->first) == false){
             return false;
         }
-        if (it->second->handler->handleLessEqual(context, it->second, it2->second) == false){
+        if (it->second->getHandler()->handleLessEqual(context, it->second, it2->second) == false){
             return false;
         }
         ++it2;
@@ -85,10 +85,10 @@ bool PyDictHandler::handleGreatEqual(PyContext& context, const PyObjPtr& self, c
     PyObjDict::DictMap::const_iterator it = pD->value.begin();
     PyObjDict::DictMap::const_iterator it2 = pD2->value.begin();
     for (; it != pD->value.end() && it2 != pD2->value.end(); ++it){
-        if (it->first->handler->handleGreatEqual(context, it->first, it2->first) == false){
+        if (it->first->getHandler()->handleGreatEqual(context, it->first, it2->first) == false){
             return false;
         }
-        if (it->second->handler->handleGreatEqual(context, it->second, it2->second) == false){
+        if (it->second->getHandler()->handleGreatEqual(context, it->second, it2->second) == false){
             return false;
         }
         ++it2;

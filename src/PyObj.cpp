@@ -91,7 +91,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
 {
     if (nFieldIndex < m_objStack.size()) {
         PyObjPtr& ret = m_objStack[nFieldIndex];
-        //DMSG(("PyObjClassInstance::getVar...%u %d, %ds", nFieldIndex, ret->getType(), ret->handler->handleStr(ret).c_str()));
+        //DMSG(("PyObjClassInstance::getVar...%u %d, %ds", nFieldIndex, ret->getType(), ret->getHandler()->handleStr(ret).c_str()));
         if (false == IS_NULL(ret)){
             if (ret->getType() == PY_FUNC_DEF){
                 return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
@@ -369,3 +369,17 @@ void PyObjClassDef::processInheritInfo(PyContext& context, PyObjPtr& self){
     }
 }
 
+PyObjPtr PyCppUtil::getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname){
+    PyContextBackUp backup(context);
+    context.curstack = obj;
+    
+    ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(filedname);
+    return expr->eval(context);
+}
+void PyCppUtil::setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v){
+    PyContextBackUp backup(context);
+    context.curstack = obj;
+    
+    ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(fieldName);
+    expr->assignVal(context, v);
+}

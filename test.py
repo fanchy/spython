@@ -110,4 +110,4 @@ tests3 = tests2.lower()
 #tests3 = tests2.lower()
 
 #a1 = isinstance(1, tests3)
-xx = tests3[0]
+xx = tests3[1:30:2]
