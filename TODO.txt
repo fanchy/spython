@@ -16,3 +16,7 @@
 16.Slice 
 17.eval
 18. \ 多行支持
+19. open close 文件操作 with
+20. global 的实现
+21.lambda
+22. del
