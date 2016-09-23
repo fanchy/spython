@@ -109,7 +109,6 @@ PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, int star
             for (int i = start; i < *stop && i < s.size(); i += step){
                 newVal += s[i];
             }
-            return context.cacheResult(PyCppUtil::genStr(newVal));
         }
     }
     else{

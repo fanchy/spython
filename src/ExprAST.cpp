@@ -556,26 +556,11 @@ string ImportAST::dump(int nDepth){
 PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
     switch (optype){
         case OP_ASSIGN:{
-            //DMSG(("BinaryExprAST file:%d line %d", this->lineInfo.fileId, this->lineInfo.nLine));
             PyObjPtr rval = right->eval(context);
             if (!rval){
                 throw PyException::buildException("var is not defined");
             }
-            
-            if (left->getType() == EXPR_DOT_GET_FIELD){ //!special process class instance filed assign
-                return left.cast<DotGetFieldExprAST>()->assignToField(context, rval);
-            }
-            else if (left->getType() == EXPR_TUPLE){ //!special process assign for tuple
-                return left.cast<TupleExprAST>()->assignToField(context, rval);
-            }
-            else if (left->getType() == EXPR_VAR){ //!special process assign for var
-                PyObjPtr& lval = left->assignVal(context, rval);
-                return lval;
-            }
-            //DMSG(("assign %s\n%s,%s\n", left->dump(0).c_str(), right->dump(0).c_str(), rval->getHandler()->handleStr(rval).c_str()));
-
-            PyObjPtr& lval = left->eval(context);
-            lval = rval;
+            PyObjPtr& lval = left->assignVal(context, rval);
             return lval;
         }break;
         case OP_ADD:{
@@ -733,7 +718,7 @@ PyObjPtr& TupleExprAST::eval(PyContext& context){TRACE_EXPR();
     return context.cacheResult(ret);
 }
 
-PyObjPtr& TupleExprAST::assignToField(PyContext& context, PyObjPtr& v){
+PyObjPtr& TupleExprAST::assignVal(PyContext& context, PyObjPtr& v){
     if (v->getType() != PY_TUPLE){
         throw PyException::buildException("value must be tuple");
     }
@@ -747,8 +732,7 @@ PyObjPtr& TupleExprAST::assignToField(PyContext& context, PyObjPtr& v){
         if (values[i]->getType() != EXPR_VAR){
             throw PyException::buildException("left tuple must be var");
         }
-        PyObjPtr& ref = values[i]->eval(context);
-        ref = tuple->value[i];
+        values[i]->assignVal(context, tuple->value[i]);
     }
     return v;
 }
@@ -771,7 +755,7 @@ PyObjPtr& DotGetFieldExprAST::eval(PyContext& context){TRACE_EXPR();
     return fieldName->eval(context);
 }
 
-PyObjPtr& DotGetFieldExprAST::assignToField(PyContext& context, PyObjPtr& v){
+PyObjPtr& DotGetFieldExprAST::assignVal(PyContext& context, PyObjPtr& v){
     PyObjPtr obj = preExpr->eval(context);
     if (obj->getType() == PY_CLASS_INST){
         return obj.cast<PyObjClassInstance>()->assignToField(context, obj, fieldName, v);

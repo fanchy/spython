@@ -629,7 +629,7 @@ public:
         return EXPR_TUPLE;
     }
     virtual PyObjPtr& eval(PyContext& context);
-    PyObjPtr& assignToField(PyContext& context, PyObjPtr& v);
+    PyObjPtr& assignVal(PyContext& context, PyObjPtr& v);
 };
 
 class FuncArglist : public ExprAST {
@@ -690,7 +690,7 @@ public:
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
     
-    PyObjPtr& assignToField(PyContext& context, PyObjPtr& v);
+    PyObjPtr& assignVal(PyContext& context, PyObjPtr& v);
 public:
     ExprASTPtr fieldName;
 };
