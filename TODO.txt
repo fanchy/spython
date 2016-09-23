@@ -14,3 +14,5 @@
 14.assert
 15.__module__
 16.Slice 
+17.eval
+18. \ 多行支持
