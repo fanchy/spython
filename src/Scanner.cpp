@@ -88,6 +88,17 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
         return retToken;
     }
 
+    int nPlusMinus = 1;
+    if (cLastOne == '-'){//! check plus symbol
+       char nextOne = getCharNext(content, index);
+       if (::isdigit(nextOne)){
+           nPlusMinus = -1;
+           cLastOne = nextOne;
+       }
+       else{
+           index--;//! back push one char
+       }
+    }
     if (::isdigit(cLastOne)) { // Number: [0-9.]+
         string strNum;
         bool isFloat = false;
@@ -100,11 +111,11 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
         } while (::isdigit(cLastOne) || cLastOne == '.');
 
         if (false == isFloat){
-            retToken.nVal = ::atol(strNum.c_str());
+            retToken.nVal = nPlusMinus * ::atol(strNum.c_str());
             retToken.nTokenType = TOK_INT;
         }
         else{
-            retToken.fVal = ::atof(strNum.c_str());
+            retToken.fVal = nPlusMinus * ::atof(strNum.c_str());
             retToken.nTokenType = TOK_FLOAT;
         }
 

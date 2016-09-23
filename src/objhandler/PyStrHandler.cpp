@@ -81,30 +81,47 @@ long PyStrHandler::handleLen(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjStr>()->value.size();
 }
 
-PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int stop, int step){
+PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step){
     const string& s = self.cast<PyObjStr>()->value;
-
+    
     string newVal;
+    if (NULL == stop){
+        if (start < 0){
+            start = int(s.size()) + start;
+        }
+        if (start >= 0 && start < (int)s.size()){
+            newVal = s[start];
+        }
+        return context.cacheResult(PyCppUtil::genStr(newVal));
+    }
+    
     if (step > 0){
-        for (int i = start; i < stop; i += step){
-            if (i < 0){
-                int index = (int)s.size() + i;
-                if (index < 0){
-                    break;
-                }
-                newVal += s[index];
-            }
-            else{
-                if (i >= (int)s.size()){
-                    break;
-                }
+        if (start < 0){
+            start += (int)s.size();
+        }
+        if (*stop <= start){
+            return context.cacheResult(PyCppUtil::genStr(newVal));
+        }
+        if (step == 1){
+            newVal = s.substr(start, *stop - start);
+        }
+        else{
+            for (int i = start; i < *stop && i < s.size(); i += step){
                 newVal += s[i];
             }
+            return context.cacheResult(PyCppUtil::genStr(newVal));
         }
     }
     else{
-        for (size_t i = start; i > stop; i = start + step){
-            newVal += s[i];
+        for (int i = start; i > *stop; i = start + step){
+            int index = i;
+            if (index < 0){
+                index = int(s.size()) + index;
+            }
+            if (index < 0 || index >= (int)s.size()){
+                break;
+            }
+            newVal += s[index];
         }
     }
     return context.cacheResult(PyCppUtil::genStr(newVal));

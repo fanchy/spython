@@ -699,7 +699,14 @@ string BinaryExprAST::dump(int nDepth){
     for (int i = 0; i < nDepth; ++i){
         ret += "-";
     }
-    ret += left->dump(0) + this->name + right->dump(0);
+    if (left){
+        ret += left->dump(0);
+    }
+    ret +=  this->name;
+    
+    if (right){
+        ret += right->dump(0);
+    }
     return ret;
 }
 
@@ -810,23 +817,27 @@ PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
         }
     }
     
+    int *pStop = NULL;
     if (stop){
         PyObjPtr stopVal = stop->eval(context);
         if (stopVal->getType() != PY_INT){
             throw PyException::buildException("slice arg2 must be int");
         }
         nStop = stopVal.cast<PyObjInt>()->value;
+        pStop = &nStop;
     }
     else if (stopFlag == FLAG_END){
         if (nStep > 0){
             nStop = INT_MAX;
+            pStop = &nStop;
         }
         else if (nStep < 0){
             nStop = 0;
+            pStop = &nStop;
         }
     }
     
-    return obj->getHandler()->handleSlice(context, obj, nStart, nStop, nStep);
+    return obj->getHandler()->handleSlice(context, obj, nStart, pStop, nStep);
 }
 std::string CallExprAST::dump(int nDepth){
     string ret;

@@ -1,4 +1,4 @@
-
+cc = -1
 a = 10
 b = a + 1
 c = b - 2
@@ -85,7 +85,7 @@ else:
 finally:
     tef = 78
 
-ecpp = exception
+#ecpp = exception
 
 def wf2():
     return 6633
@@ -104,10 +104,11 @@ testD = wf()
 testN = None
 testtuple = (1, 2)
 testlen = len('1222')
-tests1 = 'abc'
+tests1 = 'abcdefg'
 tests2 = tests1.upper()
 tests3 = tests2.lower()
 #tests3 = tests2.lower()
 
 #a1 = isinstance(1, tests3)
-xx = tests3[1:30:2]
+xx = tests3[3:100]
+print(xx)
