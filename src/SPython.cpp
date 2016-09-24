@@ -10,7 +10,8 @@ using namespace std;
 using namespace ff;
 
 SPython::SPython(){
-    pycontext.curstack = new PyObjModule("__main__", "built-in");
+    pycontext.curstack = PyObjModule::BuildModule(pycontext, "__main__", "built-in");
+    pycontext.curstack.cast<PyObjModule>()->loadFlag = PyObjModule::MOD_LOADOK;
     PyBaseExt::init(pycontext);
 }
 

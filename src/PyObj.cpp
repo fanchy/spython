@@ -294,6 +294,8 @@ PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, std::vec
     PyObjPtr ret = PyObjClassDef::build(context, s);
     ret.cast<PyObjClassDef>()->parentClass = parentClass;
     ret.cast<PyObjClassDef>()->processInheritInfo(context, ret);
+    PyCppUtil::setAttr(context, ret, "__module__", context.curstack);
+    PyCppUtil::setAttr(context, ret, "__name__", PyCppUtil::genStr(s));
     return ret;
 }
 
@@ -311,21 +313,6 @@ PyObjClassDef::PyObjClassDef(const std::string& s, ObjIdInfo* p):name(s){
     expr__class__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__class__").get();
 }
 
-std::map<std::string, PyObjPtr> PyObjClassDef::getAllFieldData(){
-    std::map<std::string, PyObjPtr> ret;
-
-    const ObjIdInfo& p = this->getObjIdInfo();
-    for (unsigned int i = 0; i < this->m_objStack.size(); ++i) {
-        if (!this->m_objStack[i]){//!ignore __init__
-            continue;
-        }
-        string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFieldName(p.nModuleId, p.nObjectId, i);
-        ret[n]   = this->m_objStack[i];
-    }
-
-    return ret;
-}
-
 PyObjPtr& PyObjClassDef::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e) {
     if (e == expr__class__){//! return __class__
         return context.cacheResult(self);
@@ -333,16 +320,9 @@ PyObjPtr& PyObjClassDef::getVar(PyContext& context, PyObjPtr& self, unsigned int
     PyObjPtr& ret = PyObj::getVar(context, self, e->getFieldIndex(self), e);
     return ret;
 }
-
-std::map<std::string, PyObjPtr> PyObjModule::getAllFieldData(){
-    std::map<std::string, PyObjPtr> ret;
-
-    const ObjIdInfo& p = this->getObjIdInfo();
-    for (unsigned int i = 0; i < this->m_objStack.size(); ++i) {
-        string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFieldName(p.nModuleId, p.nObjectId, i);
-        ret[n]   = this->m_objStack[i];
-    }
-
+PyObjPtr PyObjModule::BuildModule(PyContext& context, const std::string& s, const std::string& p){
+    PyObjPtr ret = new PyObjModule(s, p);
+    PyCppUtil::setAttr(context, ret, "__name__", PyCppUtil::genStr(s));
     return ret;
 }
 
@@ -355,7 +335,7 @@ void PyObjClassDef::processInheritInfo(PyContext& context, PyObjPtr& self){
         if (v->getType() != PY_CLASS_DEF)
            continue;
 
-        std::map<std::string, PyObjPtr> fieldData = v.cast<PyObjClassDef>()->getAllFieldData();
+        std::map<std::string, PyObjPtr> fieldData = PyCppUtil::getAllFieldData(v);
         std::map<std::string, PyObjPtr>::iterator it = fieldData.begin();
         for (; it != fieldData.end(); ++it){
             ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(it->first);
@@ -383,3 +363,19 @@ void PyCppUtil::setAttr(PyContext& context, PyObjPtr& obj, const std::string& fi
     ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(fieldName);
     expr->assignVal(context, v);
 }
+
+std::map<std::string, PyObjPtr> PyCppUtil::getAllFieldData(PyObjPtr obj){
+    std::map<std::string, PyObjPtr> ret;
+
+    const ObjIdInfo& p = obj->getObjIdInfo();
+    for (unsigned int i = 0; i < obj->m_objStack.size(); ++i) {
+        if (!obj->m_objStack[i]){//!ignore __init__
+            continue;
+        }
+        string n = singleton_t<ObjFieldMetaData>::instance_ptr()->getFieldName(p.nModuleId, p.nObjectId, i);
+        ret[n]   = obj->m_objStack[i];
+    }
+
+    return ret;
+}
+

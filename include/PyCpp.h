@@ -29,8 +29,6 @@ public:
     PyCppClassDef(const std::string& s, std::vector<PyObjPtr>& a):PyObjClassDef(s){
         this->handler = singleton_t<PyCppClassHandler<T> >::instance_ptr();
     }
-
-    //!TODO virtual std::map<std::string, PyObjPtr> getAllFieldData();
 };
 
 template<typename T>

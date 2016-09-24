@@ -359,11 +359,23 @@ public:
     };
 public:
     ~PyContext(){
-        std::map<std::string, PyObjPtr>::iterator it = allBuiltin.begin();
-        for (; it != allBuiltin.end(); ++it){
-            it->second->clear();
+        {
+            std::map<std::string, PyObjPtr>::iterator it = allBuiltin.begin();
+            for (; it != allBuiltin.end(); ++it){
+                it->second->clear();
+            }
+            allBuiltin.clear();
         }
-        allBuiltin.clear();
+        
+        {
+            std::map<int, FileInfo>::iterator it = fileId2Info.begin();
+            for (; it != fileId2Info.end(); ++it){
+                if (it->second.modCache){
+                    it->second.modCache->clear();
+                }
+            }
+            fileId2Info.clear();
+        }
     }
     PyObjPtr& cacheResult(PyObjPtr v){
         evalResult = v;

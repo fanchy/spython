@@ -978,7 +978,7 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, s
     rootExpr = parser.parse(scanner);
 
     string modname = asName;
-    PyObjPtr mod = new PyObjModule(modname, realpath);
+    PyObjPtr mod = PyObjModule::BuildModule(context, modname, realpath);
     context.setFileIdModCache(nFileId, mod);
     TmpImportCacheGuard guardCache(context, nFileId);
     
@@ -1097,7 +1097,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
         }
         
         if (!importChildProp.empty() && mod){
-            map<string, PyObjPtr> ret = mod.cast<PyObjModule>()->getAllFieldData();
+            map<string, PyObjPtr> ret = PyCppUtil::getAllFieldData(mod);
             if (importChildProp == "*"){
                 map<string, PyObjPtr>::iterator it = ret.begin();
                 for (; it != ret.end(); ++it){

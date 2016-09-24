@@ -12,7 +12,7 @@
 12.builtin-type int float str tuple dict exception -- ok
 13.自定义类如何方便实现
 14.assert
-15.__module__
+15.__module__		-- ok
 16.Slice 
 17.eval
 18. \ 多行支持

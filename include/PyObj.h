@@ -101,6 +101,7 @@ public:
         MOD_LOADING = 0,
         MOD_LOADOK
     };
+    static PyObjPtr BuildModule(PyContext& context, const std::string& s, const std::string& p);
     PyObjModule(const std::string& v, std::string p = "built-in"):loadFlag(MOD_LOADING), moduleName(v),path(p) {
         this->handler = singleton_t<PyModHandler>::instance_ptr();
         selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjModule> >::instance_ptr()->objInfo;
@@ -111,7 +112,6 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
-    std::map<std::string, PyObjPtr> getAllFieldData();
 public:
     int                             loadFlag; //!0 loading 1 load ok
     std::string                     moduleName;
@@ -216,7 +216,6 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
-    virtual std::map<std::string, PyObjPtr> getAllFieldData();
     void processInheritInfo(PyContext& context, PyObjPtr& self);
     PyObjPtr& getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex, ExprAST* e);
     
@@ -316,6 +315,8 @@ struct PyCppUtil{
     }
     static PyObjPtr getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname);
     static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v);
+    
+    static std::map<std::string, PyObjPtr> getAllFieldData(PyObjPtr obj);
 };
 }
 #endif

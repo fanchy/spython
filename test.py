@@ -112,3 +112,5 @@ tests3 = tests2.lower()
 #a1 = isinstance(1, tests3)
 xx = tests3[3:100]
 print(xx)
+fooname = Foo.__name__
+
