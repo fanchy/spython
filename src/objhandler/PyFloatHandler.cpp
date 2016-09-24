@@ -8,7 +8,7 @@ using namespace std;
 using namespace ff;
 
 
-string PyFloatHandler::handleStr(const PyObjPtr& self)  const{
+string PyFloatHandler::handleStr(PyContext& context, const PyObjPtr& self)  const{
     char msg[64] = {0};
     snprintf(msg, sizeof(msg), "%g", self.cast<PyObjFloat>()->value);
     return string(msg);

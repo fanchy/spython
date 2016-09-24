@@ -6,7 +6,7 @@
 using namespace std;
 using namespace ff;
 
-string PyBuiltinTypeHandler::handleStr(const PyObjPtr& self) const {
+string PyBuiltinTypeHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     char msg[128] = {0};
     snprintf(msg, sizeof(msg), "<type '%d'>", self.cast<PyBuiltinTypeInfo>()->nType);
     return string(msg);

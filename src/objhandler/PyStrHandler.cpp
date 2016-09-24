@@ -6,7 +6,7 @@
 using namespace std;
 using namespace ff;
 
-string PyStrHandler::handleStr(const PyObjPtr& self) const {
+string PyStrHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     string ret = "'";
     ret += self.cast<PyObjStr>()->value + "'";
     return ret;

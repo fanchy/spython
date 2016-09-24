@@ -18,7 +18,7 @@ struct PyTupleExt{
         PyObjTuple* pTuple = self.cast<PyObjTuple>();
         long ret = 0;
         for (size_t i = 0; i < pTuple->value.size(); ++i){
-            if (param->handler->handleEqual(context, param, pTuple->value[i])){
+            if (param->getHandler()->handleEqual(context, param, pTuple->value[i])){
                 ++ret;
             }
         }
@@ -33,7 +33,7 @@ struct PyTupleExt{
         PyObjTuple* pTuple = self.cast<PyObjTuple>();
 
         for (size_t i = 0; i < pTuple->value.size(); ++i){
-            if (param->handler->handleEqual(context, param, pTuple->value[i])){
+            if (param->getHandler()->handleEqual(context, param, pTuple->value[i])){
                 return PyCppUtil::genInt(i);
             }
         }

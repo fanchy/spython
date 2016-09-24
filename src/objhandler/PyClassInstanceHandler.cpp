@@ -8,7 +8,12 @@ using namespace ff;
 PyClassInstanceHandler::PyClassInstanceHandler(){
     __init__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__init__");
 }
-string PyClassInstanceHandler::handleStr(const PyObjPtr& self) const {
+string PyClassInstanceHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
+    string ret = this->PyCommonHandler::handleStr(context, self);
+    if (!ret.empty()){
+        return ret;
+    }
+    
     char msg[128] = {0};
     snprintf(msg, sizeof(msg), "<__main__.%s instance at %p>", self.cast<PyObjClassInstance>()->classDefPtr.cast<PyObjClassDef>()->name.c_str(), self.get());
     return string(msg);

@@ -38,6 +38,8 @@ class F:
 
 class Foo(F):
     a = 10
+    def __str__(self):
+        return 'AAABBB'
     def go(self):
         self.c = 20
         print('go')
@@ -46,6 +48,7 @@ class Foo(F):
         return a
 f = F()
 foo = Foo()
+print(foo)
 ee = foo.hi()
 foo.c = 201
 foo.a = 20

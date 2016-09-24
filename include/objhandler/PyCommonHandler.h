@@ -15,17 +15,18 @@ namespace ff {
 
 class PyCommonHandler: public PyObjHandler{
 public:
+    PyCommonHandler();
     virtual int getType() const {
         return 0;
     }
-    //!比较是否相等 
-    virtual bool handleEQ(PyObjPtr& self, PyObjPtr& args);
     virtual PyIterPtr getIter(){
         return NULL;
     }
-    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args);
-    virtual std::string handleStr(const PyObjPtr& self) const;
-
+    virtual std::string handleStr(PyContext& context, const PyObjPtr& self) const;
+    
+    virtual std::string handleRepr(PyContext& context, const PyObjPtr& self) const{
+        return this->handleStr(context, self);
+    }
     virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;
     virtual bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     virtual bool handleLessEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
@@ -59,6 +60,10 @@ public:
         return "";
     }
     virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step);
+    
+public:
+    ExprASTPtr  expr__str__;
+    ExprASTPtr  expr__eq__;
 };
 
 

@@ -6,14 +6,14 @@
 using namespace std;
 using namespace ff;
 
-string PyDictHandler::handleStr(const PyObjPtr& self) const {
+string PyDictHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     string ret;
     const PyObjDict* pD = self.cast<PyObjDict>();
     for (PyObjDict::DictMap::const_iterator it = pD->value.begin(); it != pD->value.end(); ++it){
         if (ret.empty())
-            ret += "{"+it->first->getHandler()->handleStr(it->first) + ": " + it->second->getHandler()->handleStr(it->second);
+            ret += "{"+it->first->getHandler()->handleStr(context, it->first) + ": " + it->second->getHandler()->handleStr(context, it->second);
         else
-            ret += ", "+it->first->getHandler()->handleStr(it->first) + ": " + it->second->getHandler()->handleStr(it->second);
+            ret += ", "+it->first->getHandler()->handleStr(context, it->first) + ": " + it->second->getHandler()->handleStr(context, it->second);
     }
     if (ret.empty()){
         ret = "{}";

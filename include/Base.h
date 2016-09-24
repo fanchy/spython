@@ -154,7 +154,7 @@ public:
 
     int getType() const;
     virtual int getFieldNum() const { return m_objStack.size(); }
-    static std::string dump(PyObjPtr& self, int preBlank = 0);
+    static std::string dump(PyContext& context, PyObjPtr& self, int preBlank = 0);
 
     virtual PyObjPtr& getVar(PyContext& c, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
     virtual const ObjIdInfo& getObjIdInfo() = 0;
@@ -252,17 +252,14 @@ public:
     
     virtual int getType() const = 0;
 
-    //!比较是否相等 
-    virtual bool handleEQ(PyObjPtr& self, PyObjPtr& args){
-        return false;
-    }
     virtual PyIterPtr getIter(){
         return NULL;
     }
-    virtual PyObjPtr handleCall(PyObjPtr context, std::list<PyObjPtr>& args){
-        return NULL;
+
+    virtual std::string handleStr(PyContext& context, const PyObjPtr& self) const{
+        return "";
     }
-    virtual std::string handleStr(const PyObjPtr& self) const{
+    virtual std::string handleRepr(PyContext& context, const PyObjPtr& self) const{
         return "";
     }
 
@@ -306,7 +303,7 @@ public:
     virtual int getType() const{
         return PY_NONE;
     }
-    virtual std::string handleStr(const PyObjPtr& self) const{
+    virtual std::string handleStr(PyContext& context, const PyObjPtr& self) const{
         return "None";
     }
     bool handleBool(PyContext& context, const PyObjPtr& self){

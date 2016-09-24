@@ -90,7 +90,7 @@ string StmtAST::dump(int nDepth){
 PyObjPtr& PrintAST::eval(PyContext& context){TRACE_EXPR();
     for (unsigned int i = 0; i < exprs.size(); ++i){
         PyObjPtr v = exprs[i]->eval(context);
-        string   s = v->getHandler()->handleStr(v);
+        string   s = v->getHandler()->handleStr(context, v);
         
         if (i == 0){
             printf("%s", s.c_str());

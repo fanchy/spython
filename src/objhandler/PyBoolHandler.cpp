@@ -6,7 +6,7 @@
 using namespace std;
 using namespace ff;
 
-string PyBoolHandler::handleStr(const PyObjPtr& self) const {
+string PyBoolHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     if (self.cast<PyObjBool>()->value){
         return "True";
     }

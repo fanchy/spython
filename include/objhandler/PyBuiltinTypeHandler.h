@@ -18,7 +18,7 @@ public:
     virtual int getType() const {
         return PY_BUILTIN_TYPE;
     }
-    virtual std::string handleStr(const PyObjPtr& self) const;
+    virtual std::string handleStr(PyContext& context, const PyObjPtr& self) const;
     virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;
     virtual bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);

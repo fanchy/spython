@@ -46,13 +46,6 @@ public:
         DMSG(("%ld(int)", value));
     }
     
-    virtual bool handleEQ(PyObjPtr arg){
-        if (arg && arg->getType() == this->getType()){
-            return arg.cast<PyObjInt>()->value == this->value;
-        }
-        return false;
-    }
-    
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjInt> >::instance_ptr()->objInfo;
     }
@@ -336,6 +329,7 @@ struct PyCppUtil{
     static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v);
     
     static std::map<std::string, PyObjPtr> getAllFieldData(PyObjPtr obj);
+    static PyObjPtr& callPyfunc(PyContext& context, PyObjPtr& func, std::vector<PyObjPtr>& args);
 };
 
 #define PyCheckInt(x) (x->getType() == PY_INT)

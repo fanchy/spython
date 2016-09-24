@@ -6,7 +6,7 @@
 using namespace std;
 using namespace ff;
 
-string PyFuncHandler::handleStr(const PyObjPtr& self) const {
+string PyFuncHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     char msg[128] = {0};
     snprintf(msg, sizeof(msg), "<function %s at 0x%p>", self.cast<PyObjFuncDef>()->name.c_str(), self.get());
     return string(msg);

@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
             printf("eval Ê§°Ü£¡\n");
             return 0;
         }
-        string strObj = PyObj::dump(spython.getPyContext().curstack);
+        string strObj = PyObj::dump(spython.getPyContext(), spython.getPyContext().curstack);
         printf("%s", strObj.c_str());
     }
     catch(exception& e){

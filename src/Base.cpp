@@ -5,7 +5,7 @@
 using namespace std;
 using namespace ff;
 
-string PyObj::dump(PyObjPtr& self, int preBlank) {
+string PyObj::dump(PyContext& context, PyObjPtr& self, int preBlank) {
     string ret = self->getHandler()->dump(self);
     if (ret.empty() == false)
         return ret;
@@ -33,10 +33,10 @@ string PyObj::dump(PyObjPtr& self, int preBlank) {
             ret += blank + msg;
         }
         if (PyCheckModule(self->m_objStack[i]) && preBlank < 3){
-            ret += PyObj::dump(self->m_objStack[i], preBlank + 1);
+            ret += PyObj::dump(context, self->m_objStack[i], preBlank + 1);
             continue;
         }
-        ret += self->m_objStack[i]->getHandler()->handleStr(self->m_objStack[i]);
+        ret += self->m_objStack[i]->getHandler()->handleStr(context, self->m_objStack[i]);
         ret += "\n";
     }
     return ret;

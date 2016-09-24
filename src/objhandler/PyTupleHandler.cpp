@@ -6,14 +6,14 @@
 using namespace std;
 using namespace ff;
 
-string PyTupleHandler::handleStr(const PyObjPtr& self) const {
+string PyTupleHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     string ret;
     const PyObjTuple* pT = self.cast<PyObjTuple>();
     for (size_t i = 0; i < pT->value.size(); ++i){
         if (ret.empty())
-            ret += "("+pT->value[i]->getHandler()->handleStr(pT->value[i]);
+            ret += "("+pT->value[i]->getHandler()->handleStr(context, pT->value[i]);
         else
-            ret += ", " + pT->value[i]->getHandler()->handleStr(pT->value[i]);
+            ret += ", " + pT->value[i]->getHandler()->handleStr(context, pT->value[i]);
     }
     if (ret.empty()){
         ret = "()";

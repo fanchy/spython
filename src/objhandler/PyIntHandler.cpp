@@ -6,7 +6,7 @@
 using namespace std;
 using namespace ff;
 
-string PyIntHandler::handleStr(const PyObjPtr& self) const {
+string PyIntHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     char msg[64] = {0};
     snprintf(msg, sizeof(msg), "%ld", self.cast<PyObjInt>()->value);
     return string(msg);
