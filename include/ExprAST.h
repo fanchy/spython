@@ -600,23 +600,6 @@ public:
     }
 };
 
-class ForExprASTOld: public ExprAST {
-public:
-    ExprASTPtr                  iterTuple;
-    ExprASTPtr                  iterFunc;
-    std::vector<ExprASTPtr>     forBody;
-public:
-    ForExprASTOld(){
-        this->name = "for";
-        //DMSG(("FunctionAST Proto.name=%s\n", proto->name.c_str()));
-    }
-    virtual int getType() {
-        return EXPR_FOR_STMT;
-    }
-    virtual PyObjPtr& eval(PyContext& context);
-};
-
-
 class TupleExprAST: public ExprAST {
 public:
     std::vector<ExprASTPtr>    values;

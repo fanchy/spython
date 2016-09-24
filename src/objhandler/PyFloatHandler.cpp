@@ -18,7 +18,7 @@ bool PyFloatHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return self.cast<PyObjFloat>()->value != 0.0;
 }
 bool PyFloatHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
-    if (val->getType() == PY_INT && self.cast<PyObjInt>()->value == val.cast<PyObjInt>()->value){
+    if (PyCheckInt(val) && self.cast<PyObjInt>()->value == val.cast<PyObjInt>()->value){
         return true;
     }
     return false;

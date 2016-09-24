@@ -41,12 +41,12 @@ enum PyObjType{
     PY_INT,
     PY_FLOAT,
     PY_STR,
+    PY_BOOL,
     PY_FUNC_DEF,
     PY_CLASS_FUNC,
     PY_CLASS_DEF,
     PY_CLASS_INST,
     PY_MOD,
-    PY_BOOL,
     PY_TUPLE,
     PY_LIST,
     PY_DICT,
@@ -265,10 +265,6 @@ public:
     virtual std::string handleStr(const PyObjPtr& self) const{
         return "";
     }
-    virtual PyObjPtr& handleAssign(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-        self = val;
-        return self;
-    }
 
     virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;
     virtual bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
@@ -362,7 +358,9 @@ public:
         {
             std::map<std::string, PyObjPtr>::iterator it = allBuiltin.begin();
             for (; it != allBuiltin.end(); ++it){
-                it->second->clear();
+                if (it->second){
+                    it->second->clear();
+                }
             }
             allBuiltin.clear();
         }
@@ -507,7 +505,7 @@ public:
 class PyExceptionSignal: public std::exception{
 public:
 };
-
+#define PY_RAISE(context, v) context.cacheResult(v); throw PyExceptionSignal()
 
 enum EEXPR_TYPE{ 
     EXPR_SINGLE_INPUT,

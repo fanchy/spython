@@ -32,7 +32,7 @@ string PyObj::dump(PyObjPtr& self, int preBlank) {
         }else{
             ret += blank + msg;
         }
-        if (self->m_objStack[i]->getType() == PY_MOD && preBlank < 3){
+        if (PyCheckModule(self->m_objStack[i]) && preBlank < 3){
             ret += PyObj::dump(self->m_objStack[i], preBlank + 1);
             continue;
         }
@@ -221,10 +221,10 @@ bool PyObjTool::handleBool(PyObjPtr b){
     if (!b){
         return false;
     }
-    if (b->getType() == PY_BOOL){
+    if (PyCheckBool(b)){
         return b.cast<PyObjBool>()->value;
     }
-    else if (b->getType() == PY_INT){
+    else if (PyCheckInt(b)){
         return b.cast<PyObjInt>()->value != 0;
     }
     return false;

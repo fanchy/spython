@@ -15,7 +15,7 @@ bool PyIntHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return self.cast<PyObjInt>()->value != 0;
 }
 bool PyIntHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
-    if (val->getType() == PY_INT && self.cast<PyObjInt>()->value == val.cast<PyObjInt>()->value){
+    if (PyCheckInt(val) && self.cast<PyObjInt>()->value == val.cast<PyObjInt>()->value){
         return true;
     }
     return false;

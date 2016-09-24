@@ -102,7 +102,9 @@ def wf():
 
 testD = wf()
 testN = None
-testtuple = (1, 2)
+testtuple = (1, 2, 3, 4, 2)
+testtupcount = testtuple.index(4)
+
 testlen = len('1222')
 tests1 = 'abcdefg'
 tests2 = tests1.upper()

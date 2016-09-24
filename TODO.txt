@@ -20,3 +20,5 @@
 20. global µÄÊµÏÖ
 21.lambda
 22. del
+23.tuple list dict func -- ok
+24.linux

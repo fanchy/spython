@@ -89,7 +89,7 @@ PyObjPtr& PyTupleHandler::handleSub(PyContext& context, PyObjPtr& self, PyObjPtr
     return self;
 }
 PyObjPtr& PyTupleHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    if (PY_INT == val->getType()){
+    if (PyCheckInt(val)){
         PyObjPtr ret   = new PyObjTuple();
         long newVal = self.cast<PyObjInt>()->value * val.cast<PyObjInt>()->value;
         

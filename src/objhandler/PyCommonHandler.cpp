@@ -1,21 +1,21 @@
 
 #include "PyObj.h"
 #include "ExprAST.h"
-#include "objhandler/PyBoolHandler.h"
+#include "objhandler/PyCommonHandler.h"
 
 using namespace std;
 using namespace ff;
 
-string PyBoolHandler::handleStr(const PyObjPtr& self) const {
+string PyCommonHandler::handleStr(const PyObjPtr& self) const {
     if (self.cast<PyObjBool>()->value){
         return "True";
     }
     return "False";
 }
-bool PyBoolHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
+bool PyCommonHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return self.cast<PyObjBool>()->value;
 }
-bool PyBoolHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
+bool PyCommonHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     if (PyCheckBool(val) && self.cast<PyObjBool>()->value == val.cast<PyObjBool>()->value){
         return true;
     }

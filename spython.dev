@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=3
 CompilerSettings=0000000100000000001000000
-UnitCount=42
+UnitCount=45
 
 [VersionInfo]
 Major=1
@@ -462,6 +462,36 @@ BuildCmd=
 
 [Unit39]
 FileName=src\objhandler\PyBuiltinTypeHandler.cpp
+CompileCpp=1
+Folder=src/objhandler
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit43]
+FileName=include\Ext\PyTupleExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit44]
+FileName=include\objhandler\PyCommonHandler.h
+CompileCpp=1
+Folder=include/objhandler
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit45]
+FileName=src\objhandler\PyCommonHandler.cpp
 CompileCpp=1
 Folder=src/objhandler
 Compile=1

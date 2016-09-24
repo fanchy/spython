@@ -42,7 +42,8 @@ PyObjPtr& VariableExprAST::eval(PyContext& context) {
                 return ret3;
             }
         }
-        throw PyException::buildException("NameError: global name '%s' is not defined %d", this->name.c_str(), context.curstack->getType());
+        PY_RAISE_STR(context, 
+            PyCppUtil::strFormat("NameError: global name '%s' is not defined %d", this->name.c_str(), context.curstack->getType()));
     }
     return ret;
 }
@@ -154,8 +155,7 @@ PyObjPtr& RaiseAST::eval(PyContext& context){TRACE_EXPR();
         throw PyExceptionSignal();
     }
     PyObjPtr v = exprs[0]->eval(context);
-    context.cacheResult(v);
-    throw PyExceptionSignal();
+    PY_RAISE(context, v);
     return context.cacheResult(PyObjTool::buildNone());
 }
 string RaiseAST::dump(int nDepth){
@@ -465,7 +465,7 @@ PyObjPtr& ClassDefExprAST::eval(PyContext& context){TRACE_EXPR();
 
     if (testlist){
         PyObjPtr inheritClass = testlist->eval(context);
-        if (inheritClass->getType() == PY_TUPLE){
+        if (PyCheckTuple(inheritClass)){
             parentClass = inheritClass.cast<PyObjTuple>()->value;
         }
         else{
@@ -485,64 +485,6 @@ PyObjPtr& ClassDefExprAST::eval(PyContext& context){TRACE_EXPR();
     return lval;
 }
 
-
-
-PyObjPtr& ForExprASTOld::eval(PyContext& context){TRACE_EXPR();
-    PyObjPtr& iterObj = iterFunc->eval(context);
-    if (!iterObj)
-    {
-        return context.curstack;
-    }
-    //DMSG(("\n"));
-    ForBreakContinueFlag* pFlag =  singleton_t<ForBreakContinueFlag>::instance_ptr();
-    pFlag->flagContinue = false;
-    pFlag->flagBreak = false;
-    
-    switch (iterObj->getType())
-    {
-        case PY_TUPLE:
-        {
-            if (this->iterTuple->getType() != EXPR_VAR){
-                throw PyException::buildException("for key nust be var");
-            }
-            PyObjTuple* pTuple = iterObj.cast<PyObjTuple>();
-
-            for (unsigned int i = 0; i < pTuple->value.size(); ++i){
-                
-                //TODO this->iterTuple->handleAssign(context, pTuple->values[i]);
-                
-                //DMSG((" -------- ForExprAST::eval ------")); 
-                //pTuple->values[i]->dump();
-                //this->iterTuple->eval(context)->dump();
-                //DMSG(("\n"));
-                for (unsigned int j = 0; j < forBody.size(); ++j){
-                    //DMSG((" -------- ForExprAST::eval ------\n")); 
-                    forBody[j]->eval(context);
-                    if (pFlag->flagContinue || pFlag->flagBreak){
-                        break;
-                    }
-                }
-                if (pFlag->flagContinue){
-                    pFlag->flagContinue = false;
-                    continue;
-                }
-                else if (pFlag->flagBreak){
-                    pFlag->flagBreak = false;
-                    break;
-                }
-            }
-            return context.curstack;
-        }
-        break;
-        default:
-            break;
-    }
-
-    for (unsigned int i = 0; i < forBody.size(); ++i){
-        forBody[i]->eval(context);
-    }
-    return context.curstack;
-}
 string ImportAST::dump(int nDepth){
     string ret;
     for (int i = 0; i < nDepth; ++i){
@@ -558,7 +500,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_ASSIGN:{
             PyObjPtr rval = right->eval(context);
             if (!rval){
-                throw PyException::buildException("var is not defined");
+                PY_RAISE_STR(context, "var is not defined");
             }
             PyObjPtr& lval = left->assignVal(context, rval);
             return lval;
@@ -719,18 +661,18 @@ PyObjPtr& TupleExprAST::eval(PyContext& context){TRACE_EXPR();
 }
 
 PyObjPtr& TupleExprAST::assignVal(PyContext& context, PyObjPtr& v){
-    if (v->getType() != PY_TUPLE){
-        throw PyException::buildException("value must be tuple");
+    if (!PyCheckTuple(v)){
+        PY_RAISE_STR(context, "value must be tuple");
     }
     
     PyObjTuple* tuple = v.cast<PyObjTuple>();
     if (values.size() != tuple->value.size()){
-        throw PyException::buildException("value size invalid");
+        PY_RAISE_STR(context, "value size invalid");
     }
     
     for (unsigned int i = 0; i < values.size(); ++i){
         if (values[i]->getType() != EXPR_VAR){
-            throw PyException::buildException("left tuple must be var");
+            PY_RAISE_STR(context, "left tuple must be var");
         }
         values[i]->assignVal(context, tuple->value[i]);
     }
@@ -784,28 +726,28 @@ PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
     context.curstack = obj;
     
     PyObjPtr startVal = start->eval(context);
-    if (startVal->getType() != PY_INT){
-        throw PyException::buildException("slice arg1 must be int");
+    if (!PyCheckInt(startVal)){
+        PY_RAISE_STR(context, "slice arg1 must be int");
     }
     int nStart = startVal.cast<PyObjInt>()->value;
     int nStep  = 1;
     int nStop  = nStart + nStep;
     if (step){
         PyObjPtr stepVal = step->eval(context);
-        if (stepVal->getType() != PY_INT){
-            throw PyException::buildException("slice arg3 must be int");
+        if (!PyCheckInt(stepVal)){
+            PY_RAISE_STR(context, "slice arg3 must be int");
         }
         nStep = stepVal.cast<PyObjInt>()->value;
         if (nStep == 0){
-            throw PyException::buildException("slice arg3 can't' be zero");
+            PY_RAISE_STR(context, "slice arg3 can't' be zero");
         }
     }
     
     int *pStop = NULL;
     if (stop){
         PyObjPtr stopVal = stop->eval(context);
-        if (stopVal->getType() != PY_INT){
-            throw PyException::buildException("slice arg2 must be int");
+        if (!PyCheckInt(stopVal)){
+            PY_RAISE_STR(context, "slice arg2 must be int");
         }
         nStop = stopVal.cast<PyObjInt>()->value;
         pStop = &nStop;
@@ -875,8 +817,8 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
         }
         else if (argInfo.argType == "*"){
             PyObjPtr pVal = argInfo.argVal->eval(context);
-            if (pVal->getType() != PY_TUPLE){
-                throw PyException::buildException("tuple needed after *");
+            if (!PyCheckTuple(pVal)){
+                PY_RAISE_STR(context, "tuple needed after *");
             }
             
             for (unsigned int i = 0; i < pVal.cast<PyObjTuple>()->value.size(); ++i){
@@ -886,16 +828,16 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
         }
         else if (argInfo.argType == "**"){
             PyObjPtr pVal = argInfo.argVal->eval(context);
-            if (pVal->getType() != PY_DICT){
-                throw PyException::buildException("dict needed after **");
+            if (!PyCheckDict(pVal)){
+                PY_RAISE_STR(context, "dict needed after **");
             }
             
             PyObjDict::DictMap::iterator it = pVal.cast<PyObjDict>()->value.begin();
             
             for (; it != pVal.cast<PyObjDict>()->value.end(); ++it){
                 const PyObjPtr& pKey = it->first;
-                if (pKey->getType() != PY_STR){
-                    throw PyException::buildException("dict key must string");
+                if (!PyCheckStr(pKey)){
+                    PY_RAISE_STR(context, "dict key must string");
                 }
                 tmpInfo.argType = "=";
                 tmpInfo.argKey = pKey.cast<PyObjStr>()->value;
@@ -951,7 +893,7 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, s
         }
     }
     if (realpath.empty()){
-        throw PyException::buildException("ImportError: No module named %s", modpath.c_str());
+        PY_RAISE_STR(context, PyCppUtil::strFormat("ImportError: No module named %s", modpath.c_str()));
     }
     Scanner scanner;
     int nFileId = context.allocFileIdByPath(realpath);
@@ -959,7 +901,7 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, s
     PyObjPtr modCache = context.getFileIdModCache(nFileId);
     if (modCache){
         if (modCache.cast<PyObjModule>()->loadFlag == PyObjModule::MOD_LOADING){
-            throw PyException::buildException("ImportError: loop import %s", modpath.c_str());
+            PY_RAISE_STR(context, PyCppUtil::strFormat("ImportError: loop import %s", modpath.c_str()));
         }
         if (assignFlag){
             ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asName);
@@ -1069,7 +1011,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
         }
         
         if (realpath.empty()){
-            throw PyException::buildException("ImportError: No module named %s", info.pathinfo[info.pathinfo.size() - 1].c_str());
+            PY_RAISE_STR(context, PyCppUtil::strFormat("ImportError: No module named %s", info.pathinfo[info.pathinfo.size() - 1].c_str()));
         }
         
         if (allPyInDir.empty() == false){
@@ -1077,7 +1019,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
                 string& modName = allPyInDir[t];
                 PyObjPtr mod = PyOpsUtil::importFile(context, realpath + "/" + modName, modName);
                 if (!mod){
-                    throw PyException::buildException("ImportError: No module named %s", modName.c_str());
+                    PY_RAISE_STR(context, PyCppUtil::strFormat("ImportError: No module named %s", modName.c_str()));
                 }
             }
             continue;
@@ -1093,7 +1035,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
         
         PyObjPtr mod = PyOpsUtil::importFile(context, realpath, asMod, importChildProp.empty());
         if (!mod){
-            throw PyException::buildException("ImportError: No module named %s", info.pathinfo[info.pathinfo.size() - 1].c_str());
+            PY_RAISE_STR(context, PyCppUtil::strFormat("ImportError: No module named %s", info.pathinfo[info.pathinfo.size() - 1].c_str()));
         }
         
         if (!importChildProp.empty() && mod){
@@ -1108,7 +1050,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
             else{
                 map<string, PyObjPtr>::iterator it = ret.find(importChildProp);
                 if (it == ret.end()){
-                    throw PyException::buildException("ImportError: No module named %s", importChildProp.c_str());
+                    PY_RAISE_STR(context, PyCppUtil::strFormat("ImportError: No module named %s", importChildProp.c_str()));
                 }
                 ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(it->first);
                 asExpr->assignVal(context, it->second);
@@ -1167,8 +1109,8 @@ PyObjPtr& DecoratorAST::eval(PyContext& context){TRACE_EXPR();
 
     for (size_t i = 0; i < allDecorators.size(); ++i){
         PyObjPtr funcObj = allDecorators[allDecorators.size() - 1 - i]->eval(context);
-        if (!funcObj || funcObj->getType() != PY_FUNC_DEF){
-            throw PyException::buildException("Decorator must be a func given:%d", funcObj->getType());
+        if (!funcObj || !PyCheckFunc(funcObj)){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("Decorator must be a func given:%d", funcObj->getType()));
         }
         
         vector<ArgTypeInfo> allArgsTypeInfo;

@@ -33,7 +33,9 @@
 namespace ff {
 
 #define THROW_EVAL_ERROR(X) throw PyException::buildException(X)
-
+struct PyObjBuiltinTool{
+    static PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e, const std::string& strType);
+};
 class PyObjInt:public PyObj {
 public:
     long value;
@@ -54,7 +56,9 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjInt> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "int");
+    }
 };
 
 class PyObjFloat:public PyObj {
@@ -66,7 +70,9 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjFloat> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "float");
+    }
 };
 class PyObjBool:public PyObj {
 public:
@@ -77,6 +83,9 @@ public:
 
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjBool> >::instance_ptr()->objInfo;
+    }
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "bool");
     }
 };
 typedef SmartPtr<PyObjBool> PyObjBoolPtr;
@@ -91,7 +100,9 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "str");
+    }
 };
 
 
@@ -128,7 +139,10 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
-
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "tuple");
+    }
+public:
     std::vector<PyObjPtr> value;
 };
 
@@ -222,7 +236,6 @@ public:
     std::string             name;
     std::vector<PyObjPtr>   parentClass;
     ObjIdInfo               selfObjInfo;
-    //int                     __class__fieldindex;
     ExprAST*                expr__class__;
 };
 
@@ -301,6 +314,12 @@ public:
 };
 
 struct PyCppUtil{
+    static std::string strFormat(const char * format, ...);
+    static void pyAssert(PyObjPtr& v, int nType){
+        if (v->getType() != nType){
+            throw PyException::buildException("%d instance needed, given:%d", nType, v->getType());
+        }
+    }
     static PyObjPtr genInt(long n){
         return new PyObjInt(n);
     }
@@ -318,6 +337,30 @@ struct PyCppUtil{
     
     static std::map<std::string, PyObjPtr> getAllFieldData(PyObjPtr obj);
 };
+
+#define PyCheckInt(x) (x->getType() == PY_INT)
+#define PyAssertInt(x) PyCppUtil::pyAssert(x, PY_INT)
+#define PyCheckFloat(x) (x->getType() == PY_FLOAT)
+#define PyAssertFloat(x) PyCppUtil::pyAssert(x, PY_FLOAT)
+#define PyCheckStr(x) (x->getType() == PY_STR)
+#define PyAssertStr(x) PyCppUtil::pyAssert(x, PY_STR)
+#define PyCheckBool(x) (x->getType() == PY_BOOL)
+#define PyAssertBool(x) PyCppUtil::pyAssert(x, PY_BOOL)
+
+#define PyCheckFunc(x) (x->getType() == PY_FUNC_DEF)
+#define PyAsserFunc(x) PyCppUtil::pyAssert(x, PY_FUNC_DEF)
+
+#define PyCheckModule(x) (x->getType() == PY_MOD)
+#define PyAsserModule(x) PyCppUtil::pyAssert(x, PY_MOD)
+
+#define PyCheckTuple(x) (x->getType() == PY_TUPLE)
+#define PyAssertTuple(x) PyCppUtil::pyAssert(x, PY_TUPLE)
+#define PyCheckList(x) (x->getType() == PY_LIST)
+#define PyAssertList(x) PyCppUtil::pyAssert(x, PY_LIST)
+#define PyCheckDict(x) (x->getType() == PY_DICT)
+#define PyAssertDict(x) PyCppUtil::pyAssert(x, PY_DICT)
+
+#define PY_RAISE_STR(context, v) context.cacheResult(PyCppUtil::genStr(v)); throw PyExceptionSignal()
 }
 #endif
 

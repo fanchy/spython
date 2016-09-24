@@ -1,41 +1,27 @@
 
+#include <stdio.h>
+#include <stdarg.h>
+
 #include "PyObj.h"
 #include "ExprAST.h"
 
 using namespace std;
 using namespace ff;
-PyObjPtr& PyObjInt::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e)
+PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e, const string& strType)
 {
-    PyObjPtr& classObj = context.allBuiltin["int"];
+    PyObjPtr& classObj = context.allBuiltin[strType];
+    if (!classObj){
+        return context.cacheResult(classObj);
+    }
     PyObjPtr& ret = classObj->getVar(context, classObj, e->getFieldIndex(classObj), e);
 
     if (false == IS_NULL(ret)){
-        if (ret->getType() == PY_FUNC_DEF){
+        if (PyCheckFunc(ret)){
             return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
         }
         return ret;
     }
-
-    for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
-        m_objStack.push_back(PyObjTool::buildNULL());
-    }
-    
-    ret = m_objStack[nFieldIndex];
-
-    return ret;
-}
-PyObjPtr& PyObjFloat::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e)
-{
-    PyObjPtr& classObj = context.allBuiltin["float"];
-    PyObjPtr& ret = classObj->getVar(context, classObj, e->getFieldIndex(classObj), e);
-
-    if (false == IS_NULL(ret)){
-        if (ret->getType() == PY_FUNC_DEF){
-            return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
-        }
-        return ret;
-    }
-
+    vector<PyObjPtr>& m_objStack = self->m_objStack;
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
         m_objStack.push_back(PyObjTool::buildNULL());
     }
@@ -45,26 +31,6 @@ PyObjPtr& PyObjFloat::getVar(PyContext& context, PyObjPtr& self, unsigned int nF
     return ret;
 }
 
-PyObjPtr& PyObjStr::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e)
-{
-    PyObjPtr& classObj = context.allBuiltin["str"];
-    PyObjPtr& ret = classObj->getVar(context, classObj, e->getFieldIndex(classObj), e);
-
-    if (false == IS_NULL(ret)){
-        if (ret->getType() == PY_FUNC_DEF){
-            return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
-        }
-        return ret;
-    }
-
-    for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
-        m_objStack.push_back(PyObjTool::buildNULL());
-    }
-    
-    ret = m_objStack[nFieldIndex];
-
-    return ret;
-}
 
 bool PyObjFuncDef::hasSelfParam(){
     ParametersExprAST* pParametersExprAST = parameters.cast<ParametersExprAST>();
@@ -93,7 +59,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
         PyObjPtr& ret = m_objStack[nFieldIndex];
         //DMSG(("PyObjClassInstance::getVar...%u %d, %ds", nFieldIndex, ret->getType(), ret->getHandler()->handleStr(ret).c_str()));
         if (false == IS_NULL(ret)){
-            if (ret->getType() == PY_FUNC_DEF){
+            if (PyCheckFunc(ret)){
                 return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
             }
             return ret;
@@ -103,7 +69,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
     PyObjPtr& ret = classDefPtr->getVar(context, classDefPtr, e->getFieldIndex(classDefPtr), e);
 
     if (false == IS_NULL(ret)){
-        if (ret->getType() == PY_FUNC_DEF){
+        if (PyCheckFunc(ret)){
             return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
         }
         return ret;
@@ -124,7 +90,7 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
     
     if (classInstance){//!self param
         if (pParametersExprAST->allParam.empty()){
-            throw PyException::buildException("too many arg num");
+            PY_RAISE_STR(context, "too many arg num");
         }
         ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[0];
         
@@ -150,7 +116,7 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
                 ++hasAssignArgNum;
             }
             else{
-                throw PyException::buildException("need more arg num");
+                PY_RAISE_STR(context, "need more arg num");
             }
             continue;
         }
@@ -178,7 +144,7 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
                     if (bFind){
                         continue;
                     }
-                    throw PyException::buildException("got an unexpected keyword argument");
+                    PY_RAISE_STR(context, "got an unexpected keyword argument");
                     break;
                 }
             }
@@ -212,13 +178,13 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
                     ++hasAssignArgNum;
                 }
                 else{
-                    throw PyException::buildException("need more arg num");
+                    PY_RAISE_STR(context, "need more arg num");
                 }
             }
             break;
         }
         else{
-            throw PyException::buildException("arg not assign value");
+            PY_RAISE_STR(context, "arg not assign value");
         }
     }
     
@@ -250,7 +216,7 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
             for (unsigned int m = hasConsumeArg; m < allArgsVal.size(); ++m){
                 ArgTypeInfo& argInfo = allArgsVal[m];
                 if (argInfo.argType != "="){
-                    throw PyException::buildException("given more arg");
+                    PY_RAISE_STR(context, "given more arg");
                 }
                 const string& keyName = argInfo.argKey;
                 PyObjPtr tmpKey = new PyObjStr(keyName);
@@ -347,6 +313,15 @@ void PyObjClassDef::processInheritInfo(PyContext& context, PyObjPtr& self){
             expr->assignVal(context, it->second);
         }
     }
+}
+string PyCppUtil::strFormat(const char * format, ...) {
+    char msg[512];
+      
+    va_list vl;  
+    va_start(vl, format);  
+  
+    vsprintf(msg, format, vl);  
+    return string(msg);
 }
 
 PyObjPtr PyCppUtil::getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname){
