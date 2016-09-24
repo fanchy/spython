@@ -206,8 +206,7 @@ public:
     virtual ~ExprAST() {}
     virtual PyObjPtr& eval(PyContext& context) = 0;
 
-    //unsigned int getFieldIndex(PyContext& context);
-    unsigned int getFieldIndex(PyObjPtr& context);
+    unsigned int getFieldIndex(PyContext& context, PyObjPtr& obj);
     
     virtual PyObjPtr& getFieldVal(PyContext& context);
     virtual PyObjPtr& assignVal(PyContext& context, PyObjPtr& v){
@@ -267,7 +266,7 @@ public:
     virtual bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     virtual bool handleLessEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     virtual bool handleGreatEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
-    virtual bool handleIn(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
+    virtual bool handleContains(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     
     virtual bool handleLess(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
         if (self->getHandler()->handleGreatEqual(context, self, val) == false){

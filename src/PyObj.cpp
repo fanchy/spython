@@ -13,7 +13,7 @@ PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, unsigned 
     if (!classObj){
         return context.cacheResult(classObj);
     }
-    PyObjPtr& ret = classObj->getVar(context, classObj, e->getFieldIndex(classObj), e);
+    PyObjPtr& ret = classObj->getVar(context, classObj, e->getFieldIndex(context, classObj), e);
 
     if (false == IS_NULL(ret)){
         if (PyCheckFunc(ret)){
@@ -43,7 +43,7 @@ bool PyObjFuncDef::hasSelfParam(){
     return false;
 }
 PyObjPtr& PyObjClassInstance::assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v){
-    unsigned int nFieldIndex = fieldName->getFieldIndex(self);
+    unsigned int nFieldIndex = fieldName->getFieldIndex(context, self);
 
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
         m_objStack.push_back(PyObjTool::buildNULL());
@@ -65,8 +65,8 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
             return ret;
         }
     }
-    
-    PyObjPtr& ret = classDefPtr->getVar(context, classDefPtr, e->getFieldIndex(classDefPtr), e);
+  
+    PyObjPtr& ret = classDefPtr->getVar(context, classDefPtr, e->getFieldIndex(context, classDefPtr), e);
 
     if (false == IS_NULL(ret)){
         if (PyCheckFunc(ret)){
@@ -283,7 +283,7 @@ PyObjPtr& PyObjClassDef::getVar(PyContext& context, PyObjPtr& self, unsigned int
     if (e == expr__class__){//! return __class__
         return context.cacheResult(self);
     }
-    PyObjPtr& ret = PyObj::getVar(context, self, e->getFieldIndex(self), e);
+    PyObjPtr& ret = PyObj::getVar(context, self, e->getFieldIndex(context, self), e);
     return ret;
 }
 PyObjPtr PyObjModule::BuildModule(PyContext& context, const std::string& s, const std::string& p){

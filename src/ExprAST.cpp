@@ -581,7 +581,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_IN:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleIn(context, lval, rval)){
+            if (lval->getHandler()->handleContains(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             return context.cacheResult(PyObjTool::buildFalse());
@@ -589,7 +589,7 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
         case OP_NOTIN:{
             PyObjPtr rval = right->eval(context);
             PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleIn(context, lval, rval)){
+            if (lval->getHandler()->handleContains(context, lval, rval)){
                 return context.cacheResult(PyObjTool::buildFalse());
             }
             return context.cacheResult(PyObjTool::buildTrue());

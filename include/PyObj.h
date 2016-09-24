@@ -331,7 +331,7 @@ struct PyCppUtil{
     static std::map<std::string, PyObjPtr> getAllFieldData(PyObjPtr obj);
     static PyObjPtr& callPyfunc(PyContext& context, PyObjPtr& func, std::vector<PyObjPtr>& args);
 };
-
+#define PyCheckNone(x) (x->getType() == PY_NONE)
 #define PyCheckInt(x) (x->getType() == PY_INT)
 #define PyAssertInt(x) PyCppUtil::pyAssert(x, PY_INT)
 #define PyCheckFloat(x) (x->getType() == PY_FLOAT)

@@ -21,12 +21,7 @@ string PyClassInstanceHandler::handleStr(PyContext& context, const PyObjPtr& sel
 bool PyClassInstanceHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return true;
 }
-bool PyClassInstanceHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
-    if (val->getType() == EXPR_CLASSDEF && self.get() == val.get()){
-        return true;
-    }
-    return false;
-}
+
 PyObjPtr& PyClassInstanceHandler::handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
     PyContextBackUp backup(context);
     
