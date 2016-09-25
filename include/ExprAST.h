@@ -766,6 +766,17 @@ public:
     ExprASTPtr                  funcDef;
 };
 
+class LambdaAST : public ExprAST {
+public:
+    virtual PyObjPtr& eval(PyContext& context);
+    virtual int getType() {
+        return EXPR_LAMBDEF;
+    }
+public:
+    ExprASTPtr                  varargslist;
+    ExprASTPtr                  test;
+};
+
 }
 #endif
 

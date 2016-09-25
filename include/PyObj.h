@@ -313,7 +313,7 @@ public:
 
 class PyCppFuncWrap: public PyCppFunc{
 public:
-    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, std::vector<PyObjPtr>& argAssignVal);
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& , std::vector<PyObjPtr>& );
     
     PyCppFuncWrap(PyCppFunc f):cppFunc(f){
     }
@@ -327,9 +327,27 @@ public:
 public:
     PyCppFunc     cppFunc;
 };
+
+class PyCppFuncWrapWithData: public PyCppFunc{
+public:
+    typedef PyObjPtr  (*PyCppFunc)(PyContext&, std::vector<PyObjPtr>&, std::vector<ExprASTPtr>&);
+    
+    PyCppFuncWrapWithData(PyCppFunc f, std::vector<ExprASTPtr>& data):cppFunc(f), funcdata(data){
+    }
+    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
+        if (cppFunc){
+            PyObjPtr v = (*cppFunc)(context, argAssignVal, funcdata);
+            return context.cacheResult(v);
+        }
+        return context.cacheResult(PyObjTool::buildNone());
+    }
+public:
+    PyCppFunc     cppFunc;
+    std::vector<ExprASTPtr>        funcdata;
+};
 class PyCppFuncWrapArgName: public PyCppFunc{
 public:
-    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& , std::vector<ArgTypeInfo>& , std::vector<PyObjPtr>& );
     
     PyCppFuncWrapArgName(PyCppFunc f):cppFunc(f){
     }
@@ -346,7 +364,7 @@ public:
 
 class PyCppClassFuncWrap: public PyCppFunc{
 public:
-    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal);
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& , PyObjPtr& , std::vector<PyObjPtr>& );
     
     PyCppClassFuncWrap(PyCppFunc f):cppFunc(f){
     }
@@ -366,7 +384,7 @@ public:
 };
 class PyCppClassFuncWrapArgName: public PyCppFunc{
 public:
-    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& , PyObjPtr& , std::vector<ArgTypeInfo>& , std::vector<PyObjPtr>& );
     
     PyCppClassFuncWrapArgName(PyCppFunc f):cppFunc(f){
     }
@@ -397,6 +415,9 @@ struct PyCppUtil{
     }
     static PyObjPtr genStr(const std::string& s){
         return new PyObjStr(s);
+    }
+    static PyObjPtr genFunc(PyCppFuncWrapWithData::PyCppFunc f, std::vector<ExprASTPtr>& data, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrapWithData(f, data));
     }
     static PyObjPtr genFunc(PyCppFuncWrap::PyCppFunc f, std::string n = ""){
         return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrap(f));

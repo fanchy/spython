@@ -162,3 +162,5 @@ testdict4 = testdict2['a']
 
 #listtuple[1] = 2
 
+lambda1 = lambda x : x + 1
+lambda2 = lambda1(120)

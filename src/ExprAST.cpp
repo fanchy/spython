@@ -1205,4 +1205,29 @@ PyObjPtr& DecoratorAST::eval(PyContext& context){TRACE_EXPR();
     }
     return context.cacheResult(PyObjTool::buildNone());
 }
+static PyObjPtr lambdaFunc(PyContext& context, std::vector<PyObjPtr>& argAssignVal, std::vector<ExprASTPtr>& data){
+    ExprASTPtr& varargslist = data[0];
+    if (varargslist){
+        ParametersExprAST* pParametersExprAST = varargslist.cast<ParametersExprAST>();
+        if (pParametersExprAST->allParam.size() != argAssignVal.size()){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("arg num need %u given %u", 
+                                pParametersExprAST->allParam.size(), argAssignVal.size()));
+        }
+        for (size_t i = 0; i < pParametersExprAST->allParam.size(); ++i){
+            ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[i];
+            paramInfo.paramKey->assignVal(context, argAssignVal[i]);
+        }
+    }
+    ExprASTPtr& test = data[1];
+    PyObjPtr ret = test->eval(context);
+    return ret;
+}
+PyObjPtr& LambdaAST::eval(PyContext& context){
+    
+    vector<ExprASTPtr> args;
+    args.push_back(varargslist);
+    args.push_back(test);
+    PyObjPtr func = PyCppUtil::genFunc(lambdaFunc, args, "lambda");
+    return context.cacheResult(func);
+}
 

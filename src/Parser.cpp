@@ -1198,18 +1198,38 @@ ExprASTPtr Parser::parse_testlist_safe(){
 
 //! old_test: or_test | old_lambdef
 ExprASTPtr Parser::parse_old_test(){
-    return parse_or_test();
-    return NULL;
+    ExprASTPtr ret = parse_or_test();
+    if (!ret){
+        ret = parse_old_lambdef();
+    }
+    return ret;
 }
 
 //! old_lambdef: 'lambda' [varargslist] ':' old_test
 ExprASTPtr Parser::parse_old_lambdef(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "lambda"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    ExprASTPtr ret = ALLOC_EXPR<LambdaAST>(); 
+    if (m_curScanner->getToken()->strVal != ":"){
+        ret.cast<LambdaAST>()->varargslist = parse_varargslist();
+    }
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed when parse lambda");
+    }
+    m_curScanner->seek(1);
+    
+    ret.cast<LambdaAST>()->test = parse_old_test();
+    return ret;
 }
 
 //! test: or_test ['if' or_test 'else' test] | lambdef
 ExprASTPtr Parser::parse_test(){
     ExprASTPtr or_test = parse_or_test();
+    if (!or_test){
+        or_test = parse_lambdef();
+    }
     return or_test;
 }
 
@@ -1551,6 +1571,21 @@ ExprASTPtr Parser::parse_testlist_comp(){
 
 //! lambdef: 'lambda' [varargslist] ':' test
 ExprASTPtr Parser::parse_lambdef(){
+    if (m_curScanner->getToken()->strVal != "lambda"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    ExprASTPtr ret = ALLOC_EXPR<LambdaAST>(); 
+    if (m_curScanner->getToken()->strVal != ":"){
+        ret.cast<LambdaAST>()->varargslist = parse_varargslist();
+    }
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed when parse lambda");
+    }
+    m_curScanner->seek(1);
+    
+    ret.cast<LambdaAST>()->test = parse_test();
+    return ret;
     return NULL;
 }
 
