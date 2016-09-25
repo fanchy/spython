@@ -60,6 +60,8 @@ struct PyExtException{
 struct PyBaseExt{
     static bool init(PyContext& pycontext){
         pycontext.allBuiltin["None"] = PyObjTool::buildNone();
+        pycontext.allBuiltin["True"] = PyObjTool::buildTrue();
+        pycontext.allBuiltin["False"] = PyObjTool::buildFalse();
         pycontext.allBuiltin["float"] = new PyBuiltinTypeInfo(PY_FLOAT);
         
         std::vector<PyObjPtr> tmpParent;

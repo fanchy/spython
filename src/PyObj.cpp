@@ -16,6 +16,18 @@ PyObjDict& PyObjDict::set(PyContext& context, PyObjPtr &k, PyObjPtr &v){
     value[keyInfo] = v;
     return *this;
 }
+PyObjPtr& PyObjDict::get(PyContext& context, const PyObjPtr &k){
+    PyObjDict::Key keyInfo;
+    keyInfo.key = k;
+    keyInfo.context = &context;
+    keyInfo.hash= k->getHandler()->handleHash(context, k);
+    
+    DictMap::iterator it = value.find(keyInfo);
+    if (it != value.end()){
+        return it->second;
+    }
+    return context.cacheResult(NULL);
+}
 
 PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e, const string& strType)
 {

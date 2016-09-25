@@ -239,6 +239,16 @@ bool PyCommonHandler::handleIsInstance(PyContext& context, PyObjPtr& self, PyObj
     return 0;
 }
 
-PyObjPtr& PyCommonHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step){
+PyObjPtr& PyCommonHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step){
     return self;
 }
+PyObjPtr& PyCommonHandler::handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v){
+    PyObjPtr& lval = this->handleSlice(context, self, k, NULL, 1);
+    if (lval.get() == context.getCacheResult().get()){
+        PY_RAISE_STR(context, "TypeError: object does not support item assignment");
+    }
+    lval = v;
+    return lval;
+}
+
+

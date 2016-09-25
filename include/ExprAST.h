@@ -647,6 +647,9 @@ public:
         return context.cacheResult(PyObjTool::buildNone());
     }
     void addArg(ExprASTPtr k, ExprASTPtr v, const std::string& s){
+        if (!v){
+            return;
+        }
         ArgInfo info;
         info.argType = s;
         info.argKey  = k;

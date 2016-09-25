@@ -117,8 +117,18 @@ PyObjPtr& PyListHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr&
 long PyListHandler::handleLen(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjList>()->value.size();
 }
-
-PyObjPtr& PyListHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step){
+bool PyListHandler::handleContains(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
+    const vector<PyObjPtr>& s = self.cast<PyObjList>()->value;
+    for (size_t i = 0; i < s.size(); ++i){
+        if (val->getHandler()->handleEqual(context, val, s[i])){
+            return true;
+        }
+    }
+    return false;
+}
+PyObjPtr& PyListHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step){
+    PyAssertInt(startVal);
+    int start = startVal.cast<PyObjInt>()->value;
     vector<PyObjPtr>& s = self.cast<PyObjList>()->value;
     PyObjPtr newVal;
     if (NULL == stop){

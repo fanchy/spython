@@ -27,6 +27,7 @@ public:
     virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    size_t    handleHash(PyContext& context, const PyObjPtr& self) const;
 };
 
 

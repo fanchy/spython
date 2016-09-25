@@ -175,7 +175,7 @@ public:
             key = src.key;
             return *this;
         }
-        long        hash;
+        size_t      hash;
         PyContext*  context;
         PyObjPtr    key;
     };
@@ -202,6 +202,9 @@ public:
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
     PyObjDict& set(PyContext& context, PyObjPtr &k, PyObjPtr &v);
+    PyObjPtr& get(PyContext& context, const PyObjPtr &k);
+    
+    
     typedef std::map<Key, PyObjPtr, cmp_key> DictMap;
     DictMap value;
 };
@@ -324,6 +327,23 @@ public:
 public:
     PyCppFunc     cppFunc;
 };
+class PyCppFuncWrapArgName: public PyCppFunc{
+public:
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
+    
+    PyCppFuncWrapArgName(PyCppFunc f):cppFunc(f){
+    }
+    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
+        if (cppFunc){
+            PyObjPtr v = (*cppFunc)(context, allArgsVal, argAssignVal);
+            return context.cacheResult(v);
+        }
+        return context.cacheResult(PyObjTool::buildNone());
+    }
+public:
+    PyCppFunc     cppFunc;
+};
+
 class PyCppClassFuncWrap: public PyCppFunc{
 public:
     typedef PyObjPtr  (*PyCppFunc)(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal);
@@ -337,6 +357,26 @@ public:
                 throw PyException::buildException("arg self not assigned");
             }
             PyObjPtr v = (*cppFunc)(context, selfobj, argAssignVal);
+            return context.cacheResult(v);
+        }
+        return context.cacheResult(PyObjTool::buildNone());
+    }
+public:
+    PyCppFunc     cppFunc;
+};
+class PyCppClassFuncWrapArgName: public PyCppFunc{
+public:
+    typedef PyObjPtr  (*PyCppFunc)(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
+    
+    PyCppClassFuncWrapArgName(PyCppFunc f):cppFunc(f){
+    }
+    virtual PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
+        if (cppFunc){
+            PyObjPtr& selfobj = self.cast<PyObjFuncDef>()->classInstance;
+            if (!selfobj){
+                throw PyException::buildException("arg self not assigned");
+            }
+            PyObjPtr v = (*cppFunc)(context, selfobj, allArgsVal, argAssignVal);
             return context.cacheResult(v);
         }
         return context.cacheResult(PyObjTool::buildNone());
@@ -361,9 +401,16 @@ struct PyCppUtil{
     static PyObjPtr genFunc(PyCppFuncWrap::PyCppFunc f, std::string n = ""){
         return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrap(f));
     }
+    static PyObjPtr genFunc(PyCppFuncWrapArgName::PyCppFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrapArgName(f));
+    }
     static PyObjPtr genFunc(PyCppClassFuncWrap::PyCppFunc f, std::string n = ""){
         return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrap(f));
     }
+    static PyObjPtr genFunc(PyCppClassFuncWrapArgName::PyCppFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrapArgName(f));
+    }
+    
     static PyObjPtr getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname);
     static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v);
     

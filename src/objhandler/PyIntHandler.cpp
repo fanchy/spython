@@ -145,5 +145,7 @@ PyObjPtr& PyIntHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& 
     }
     return self;
 }
-
+size_t PyIntHandler::handleHash(PyContext& context, const PyObjPtr& self) const{
+    return self.cast<PyObjInt>()->value;
+}
 

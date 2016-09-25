@@ -124,3 +124,19 @@ long PyDictHandler::handleLen(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjDict>()->value.size();
 }
 
+PyObjPtr& PyDictHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step){
+    
+    PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
+
+    PyObjPtr& ret = self.cast<PyObjDict>()->get(context, startVal);
+    
+    return ret;
+}
+PyObjPtr& PyDictHandler::handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v){
+    PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
+
+    self.cast<PyObjDict>()->set(context, k, v);
+    
+    return v;
+}
+

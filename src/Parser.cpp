@@ -1413,10 +1413,17 @@ ExprASTPtr Parser::parse_atom(){
         retExpr = ALLOC_EXPR<StrExprAST>(m_curScanner->getToken()->strVal);
     }
     else if (m_curScanner->getToken()->nTokenType == TOK_VAR){
-        if (singleton_t<PyHelper>::instance_ptr()->isKeyword(m_curScanner->getToken()->strVal)){
+        if (m_curScanner->getToken()->strVal == "True" ||
+            m_curScanner->getToken()->strVal == "False" ||
+            m_curScanner->getToken()->strVal == "None"){
+            retExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken()->strVal);
+        }
+        else if (singleton_t<PyHelper>::instance_ptr()->isKeyword(m_curScanner->getToken()->strVal)){
             return NULL;
         }
-        retExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken()->strVal);
+        else{
+            retExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(m_curScanner->getToken()->strVal);
+        }
     }
     else if (m_curScanner->getToken()->strVal == "["){
         m_curScanner->seek(1);
@@ -1831,7 +1838,7 @@ ExprASTPtr Parser::parse_argument(ExprASTPtr& pFuncArglist){
     if (m_curScanner->getToken()->strVal == "="){
         m_curScanner->seek(1);
         ExprASTPtr test2 = parse_test();
-        if (!test){
+        if (!test2){
             THROW_ERROR("argvalue needed after =");
         }
         int offset = nIndex - m_curScanner->seek(0);

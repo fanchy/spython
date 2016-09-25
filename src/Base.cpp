@@ -88,8 +88,19 @@ size_t PyObjHandler::handleHash(PyContext& context, const PyObjPtr& self) const{
 bool PyObjHandler::handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     return false;
 }
-PyObjPtr& PyObjHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step){
+PyObjPtr& PyObjHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step){
     throw PyException::buildException("handleSlice invalid");return self;
+}
+PyObjPtr& PyObjHandler::handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v){
+    PyObjPtr& lval = this->handleSlice(context, self, k, NULL, 1);
+    if (lval.get() == context.getCacheResult().get()){
+        throw PyException::buildException("TypeError: object does not support item assignment");
+    }
+    lval = v;
+    return lval;
+}
+int PyObjHandler::handleCmp(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
+    return 0;
 }
 
 PyObjPtr& PyObj::getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex, ExprAST* e) {
@@ -104,16 +115,6 @@ PyObjPtr& PyObj::getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex
 }
 
 
-runtime_error PyException::buildIndentException(ParseHelper& parseHelper, int nNeedIndent, string err) {
-    char msg[1024] = {0};
-    //snprintf(msg, sizeof(msg) - 1, "line:%d,col:%d,err:space indent need %d, given %d %s", parseHelper.line, parseHelper.col, nNeedIndent, parseHelper.nCurIndent, err.c_str());
-    return runtime_error(msg);
-}
-runtime_error PyException::buildException(ParseHelper& parseHelper, const string& err) {
-    char msg[1024] = {0};
-    //snprintf(msg, sizeof(msg) - 1, "line:%d,col:%d,err:%s,curTok=%d", parseHelper.line, parseHelper.col, err.c_str(), parseHelper.at());
-    return runtime_error(msg);
-}
 runtime_error PyException::buildException(const char * format, ...) {
     char msg[512];
       

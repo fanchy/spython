@@ -30,7 +30,8 @@ public:
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual long handleLen(PyContext& context, PyObjPtr& self);
-    virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step);
+    virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step);
+    size_t handleHash(PyContext& context, const PyObjPtr& self) const;
 };
 
 

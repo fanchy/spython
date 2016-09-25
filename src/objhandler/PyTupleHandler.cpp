@@ -117,8 +117,18 @@ PyObjPtr& PyTupleHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr
 long PyTupleHandler::handleLen(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjTuple>()->value.size();
 }
-
-PyObjPtr& PyTupleHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step){
+bool PyTupleHandler::handleContains(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
+    const vector<PyObjPtr>& s = self.cast<PyObjTuple>()->value;
+    for (size_t i = 0; i < s.size(); ++i){
+        if (val->getHandler()->handleEqual(context, val, s[i])){
+            return true;
+        }
+    }
+    return false;
+}
+PyObjPtr& PyTupleHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step){
+    PyAssertInt(startVal);
+    int start = startVal.cast<PyObjInt>()->value;
     vector<PyObjPtr>& s = self.cast<PyObjTuple>()->value;
     PyObjPtr newVal;
     if (NULL == stop){

@@ -122,4 +122,7 @@ PyObjPtr& PyFloatHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr
     return self;
 }
 
+size_t PyFloatHandler::handleHash(PyContext& context, const PyObjPtr& self) const{
+    return size_t(self.cast<PyObjFloat>()->value);
+}
 

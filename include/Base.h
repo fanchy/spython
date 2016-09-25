@@ -92,8 +92,6 @@ private:
 class ParseHelper;
 
 struct PyException {
-    static std::runtime_error buildIndentException(ParseHelper& parseHelper, int nNeedIndent, std::string err = "") ;
-    static std::runtime_error buildException(ParseHelper& parseHelper, const std::string& err);
     static std::runtime_error buildException(const char * format, ...);
 };
 
@@ -261,7 +259,7 @@ public:
     virtual std::string handleRepr(PyContext& context, const PyObjPtr& self) const{
         return "";
     }
-
+    virtual int handleCmp(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;
     virtual bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     virtual bool handleLessEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
@@ -288,13 +286,14 @@ public:
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, 
                                  std::vector<PyObjPtr>& argAssignVal);
-    virtual std::size_t    handleHash(PyContext& context, const PyObjPtr& self) const;
+    virtual size_t    handleHash(PyContext& context, const PyObjPtr& self) const;
     virtual bool handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual long handleLen(PyContext& context, PyObjPtr& self);
     virtual std::string dump(PyObjPtr& self) {
         return "";
     }
-    virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step);
+    virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step);
+    virtual PyObjPtr& handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v);
 };
 
 class PyNoneHandler: public PyObjHandler{

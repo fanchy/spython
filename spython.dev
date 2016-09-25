@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
 CompilerSettings=0000000000000000101000000
-UnitCount=47
+UnitCount=48
 
 [VersionInfo]
 Major=1
@@ -514,6 +514,16 @@ BuildCmd=
 FileName=include\objhandler\PyListHandler.h
 CompileCpp=1
 Folder=include/objhandler
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit48]
+FileName=include\ext\PyListExt.h
+CompileCpp=1
+Folder=include/ext
 Compile=1
 Link=1
 Priority=1000

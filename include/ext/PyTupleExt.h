@@ -12,7 +12,7 @@ struct PyTupleExt{
     static PyObjPtr count(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
         PyAssertTuple(self);
         if (argAssignVal.size() != 1){
-            throw PyException::buildException("TypeError: upper() takes exactly 1 argument (%u given)", argAssignVal.size());
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: count() takes exactly 1 argument (%u given)", argAssignVal.size()));
         }
         PyObjPtr& param = argAssignVal[0];
         PyObjTuple* pTuple = self.cast<PyObjTuple>();
@@ -27,7 +27,7 @@ struct PyTupleExt{
     static PyObjPtr index(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
         PyAssertTuple(self);
         if (argAssignVal.size() != 1){
-            throw PyException::buildException("TypeError: upper() takes exactly 1 argument (%u given)", argAssignVal.size());
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: index() takes exactly 1 argument (%u given)", argAssignVal.size()));
         }
         PyObjPtr& param = argAssignVal[0];
         PyObjTuple* pTuple = self.cast<PyObjTuple>();

@@ -81,7 +81,9 @@ long PyStrHandler::handleLen(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjStr>()->value.size();
 }
 
-PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step){
+PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step){
+    PyAssertInt(startVal);
+    int start = startVal.cast<PyObjInt>()->value;
     const string& s = self.cast<PyObjStr>()->value;
     
     string newVal;
@@ -125,5 +127,18 @@ PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, int star
     }
     return context.cacheResult(PyCppUtil::genStr(newVal));
 }
+static size_t hashStr(const string& s){
+    size_t result = 0;
+    for (size_t i = 0; i < s.size(); ++i) {
+        result = (result * 131) + s[i];
+    }
+    return result; 
+}
+
+size_t PyStrHandler::handleHash(PyContext& context, const PyObjPtr& self) const{
+    return hashStr(self.cast<PyObjStr>()->value);
+}
+
+
 
 

@@ -797,12 +797,9 @@ PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
     context.curstack = obj;
     
     PyObjPtr startVal = start->eval(context);
-    if (!PyCheckInt(startVal)){
-        PY_RAISE_STR(context, "slice arg1 must be int");
-    }
-    int nStart = startVal.cast<PyObjInt>()->value;
+
     int nStep  = 1;
-    int nStop  = nStart + nStep;
+    int nStop  = 0;
     if (step){
         PyObjPtr stepVal = step->eval(context);
         if (!PyCheckInt(stepVal)){
@@ -834,15 +831,13 @@ PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
         }
     }
     
-    return obj->getHandler()->handleSlice(context, obj, nStart, pStop, nStep);
+    return obj->getHandler()->handleSlice(context, obj, startVal, pStop, nStep);
 }
 PyObjPtr& SliceExprAST::assignVal(PyContext& context, PyObjPtr& v){
-    PyObjPtr& lval = eval(context);
-    if (lval.get() == context.getCacheResult().get()){
-        PY_RAISE_STR(context, "TypeError: object does not support item assignment");
-    }
-    lval = v;
-    return lval;
+    
+    PyObjPtr lval = preExpr->eval(context);
+    PyObjPtr startVal = start->eval(context);
+    return lval->getHandler()->handleSliceAssign(context, lval, startVal, v);
 }
 
 std::string CallExprAST::dump(int nDepth){
@@ -868,6 +863,9 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
         for (unsigned int i = 0; i < parg->allArgs.size(); ++i){
             FuncArglist::ArgInfo& argInfo = parg->allArgs[i];
             //DMSG(("PyObjFuncDef::argType...%s\n", argInfo.argType.c_str()));
+            if (!argInfo.argVal){
+                break;
+            }
             PyObjPtr& v = argInfo.argVal->eval(context);
             allValue.push_back(v);
         }

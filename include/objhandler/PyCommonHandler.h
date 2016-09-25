@@ -54,7 +54,8 @@ public:
     virtual std::string dump(PyObjPtr& self) {
         return "";
     }
-    virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step);
+    virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step);
+    virtual PyObjPtr& handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v);
     
 public:
     ExprASTPtr  expr__str__;

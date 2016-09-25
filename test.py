@@ -131,10 +131,29 @@ print(xx)
 fooname = Foo.__name__
 
 lista = [1, 2, 3, 4]
-listb = [5, 6]
+listb = [5, 6, 5]
+listb.append(7)
+listb.extend(lista)
 listc = lista + listb
 listalen = len(lista)
+listb.insert(0, 100)
+listb.insert(2, 102)
+listb.insert(10, 110)
+listb.insert(120, 120)
+listb.pop(1)
+listb.remove(110)
+lista.reverse()
+listb.sort(reverse = True)
+
+listindex= listb.index(6)
+listcount= listb.count(5)
+
 listtuple = (1, 2, 3, 4)
 listtuple = (1, 2, 3, 4)
 testdict2= {k:k for k in listtuple}
+testdict2['a'] = 'aaa'
+testdict3 = testdict2[3]
+testdict4 = testdict2['a']
+
+#listtuple[1] = 2
 
