@@ -118,3 +118,47 @@ long PyTupleHandler::handleLen(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjTuple>()->value.size();
 }
 
+PyObjPtr& PyTupleHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step){
+    vector<PyObjPtr>& s = self.cast<PyObjTuple>()->value;
+    PyObjPtr newVal;
+    if (NULL == stop){
+        if (start < 0){
+            start = int(s.size()) + start;
+        }
+        if (start >= 0 && start < (int)s.size()){
+            newVal = s[start];
+        }
+        else{
+            THROW_EVAL_ERROR("IndexError: tuple index out of range");
+        }
+        return context.cacheResult(newVal);
+    }
+    
+    if (step > 0){
+        if (start < 0){
+            start += (int)s.size();
+        }
+        if (*stop <= start){
+            THROW_EVAL_ERROR("IndexError: tuple index out of range");
+        }
+        newVal = new PyObjTuple();
+        for (int i = start; i < *stop && i < s.size(); i += step){
+            newVal.cast<PyObjTuple>()->value.push_back(s[i]);
+        }
+    }
+    else{
+        newVal = new PyObjTuple();
+        for (int i = start; i > *stop; i += step){
+            int index = i;
+            if (index < 0){
+                index = int(s.size()) + index;
+            }
+            if (index < 0 || index >= (int)s.size()){
+                break;
+            }
+            newVal.cast<PyObjTuple>()->value.push_back(s[index]);
+        }
+    }
+    return context.cacheResult(newVal);
+}
+

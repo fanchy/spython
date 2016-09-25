@@ -702,7 +702,7 @@ public:
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
     
-    //PyObjPtr& assignToField(PyContext& context, PyObjPtr& v);
+    PyObjPtr& assignVal(PyContext& context, PyObjPtr& v);
 public:
     ExprASTPtr start;
     ExprASTPtr stop;

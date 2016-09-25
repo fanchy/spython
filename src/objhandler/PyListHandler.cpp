@@ -118,3 +118,46 @@ long PyListHandler::handleLen(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjList>()->value.size();
 }
 
+PyObjPtr& PyListHandler::handleSlice(PyContext& context, PyObjPtr& self, int start, int* stop, int step){
+    vector<PyObjPtr>& s = self.cast<PyObjList>()->value;
+    PyObjPtr newVal;
+    if (NULL == stop){
+        if (start < 0){
+            start = int(s.size()) + start;
+        }
+        if (start >= 0 && start < (int)s.size()){
+            return s[start];
+        }
+        else{
+            THROW_EVAL_ERROR("IndexError: tuple index out of range");
+        }
+    }
+    
+    if (step > 0){
+        if (start < 0){
+            start += (int)s.size();
+        }
+        if (*stop <= start){
+            THROW_EVAL_ERROR("IndexError: tuple index out of range");
+        }
+        newVal = new PyObjList();
+        for (int i = start; i < *stop && i < s.size(); i += step){
+            newVal.cast<PyObjList>()->value.push_back(s[i]);
+        }
+    }
+    else{
+        newVal = new PyObjList();
+        for (int i = start; i > *stop; i += step){
+            int index = i;
+            if (index < 0){
+                index = int(s.size()) + index;
+            }
+            if (index < 0 || index >= (int)s.size()){
+                break;
+            }
+            newVal.cast<PyObjList>()->value.push_back(s[index]);
+        }
+    }
+    return context.cacheResult(newVal);
+}
+

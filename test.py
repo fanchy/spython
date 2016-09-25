@@ -77,8 +77,8 @@ print('fc', fc)
 fhi = foo.hi()
 fd  = foo.d
 a, b, c = (1, 2, 3)
-from mod import *
-from mod import mb
+#from mod import *
+#from mod import mb
 
 
 import ma
@@ -125,7 +125,7 @@ tests2 = tests1.upper()
 tests3 = tests2.lower()
 tests3 = tests2.lower()
 
-a1 = isinstance(1, tests3)
+
 xx = tests3[3:100]
 print(xx)
 fooname = Foo.__name__
@@ -138,4 +138,8 @@ listtuple = (1, 2, 3, 4)
 for k in listtuple:
     print(k)
 testlistfor = [k*2  for k in lista]
+tupleslice1 = listtuple[-1:-5:-1]
 
+testlistfor[2] = 22
+listslice1 = testlistfor[-1:-5:-1]
+print(listslice1)

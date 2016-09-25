@@ -765,6 +765,7 @@ string SliceExprAST::dump(int nDepth){
 
 PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
     PyObjPtr obj = preExpr->eval(context);
+    context.cacheResult(NULL);
     PyContextBackUp backup(context);
     context.curstack = obj;
     
@@ -808,6 +809,15 @@ PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
     
     return obj->getHandler()->handleSlice(context, obj, nStart, pStop, nStep);
 }
+PyObjPtr& SliceExprAST::assignVal(PyContext& context, PyObjPtr& v){
+    PyObjPtr& lval = eval(context);
+    if (lval.get() == context.getCacheResult().get()){
+        PY_RAISE_STR(context, "TypeError: object does not support item assignment");
+    }
+    lval = v;
+    return lval;
+}
+
 std::string CallExprAST::dump(int nDepth){
     string ret;
     for (int i = 0; i < nDepth; ++i){

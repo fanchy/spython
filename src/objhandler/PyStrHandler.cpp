@@ -112,7 +112,7 @@ PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, int star
         }
     }
     else{
-        for (int i = start; i > *stop; i = start + step){
+        for (int i = start; i > *stop; i += step){
             int index = i;
             if (index < 0){
                 index = int(s.size()) + index;

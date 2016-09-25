@@ -20,6 +20,16 @@ int main(int argc, char** argv) {
         string strObj = PyObj::dump(spython.getPyContext(), spython.getPyContext().curstack);
         printf("%s", strObj.c_str());
     }
+    catch(PyExceptionSignal& e){
+        printf("Traceback (most recent call last):\n");
+        string traceback = PyOpsUtil::traceback(spython.getPyContext());
+        printf("%s", traceback.c_str());
+        PyObjPtr v = spython.getPyContext().getCacheResult();
+        if (v){
+            string info = v->getHandler()->handleStr(spython.getPyContext(), v);
+            printf("%s\n", info.c_str());
+        }
+    }
     catch(exception& e){
         printf("Traceback (most recent call last):\n");
         string traceback = PyOpsUtil::traceback(spython.getPyContext());
