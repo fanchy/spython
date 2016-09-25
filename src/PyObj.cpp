@@ -387,4 +387,17 @@ PyObjPtr& PyCppUtil::callPyfunc(PyContext& context, PyObjPtr& func, std::vector<
     }
     return context.cacheResult(PyObjTool::buildNone());
 }
+PyObjPtr PyCppUtil::getArgVal(std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal, 
+                                size_t index, const std::string& argName){
+    for (size_t i = 0; i < allArgsVal.size() && i < argAssignVal.size(); ++i){
+        if (allArgsVal[i].argKey == argName){
+            return argAssignVal[i];
+        }
+    }
+    
+    if (index < argAssignVal.size()){
+        return argAssignVal[index];
+    }
+    return NULL;
+}
 

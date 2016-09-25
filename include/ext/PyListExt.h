@@ -10,17 +10,32 @@
 
 namespace ff {
 struct PyListCmp{
-    PyListCmp(PyContext& c, bool f = false):context(c), flagReverse(f){
+    PyListCmp(PyContext& c, PyObjPtr& f, PyObjPtr& k, bool flag = false):context(c),funcArg(f),keyArg(k),flagReverse(flag){
     }
     bool operator()(const PyObjPtr &a, const PyObjPtr &b)
     {
-        bool ret = a->getHandler()->handleLess(context, a, b);
+        bool ret = false;
+        if (funcArg){
+            std::vector<PyObjPtr> params;
+            params.push_back(a);
+            params.push_back(b);
+            PyObjPtr retObj = PyCppUtil::callPyfunc(context, funcArg, params);
+            PyAssertInt(retObj);
+            ret = (retObj.cast<PyObjInt>()->value < 0);
+        }
+        else{
+            ret = a->getHandler()->handleLess(context, a, b);
+        }
         if (flagReverse){
             ret = !ret;
         }
         return ret;
     }
+    PyListCmp(const PyListCmp& src):context(src.context),funcArg(src.funcArg),keyArg(src.keyArg),flagReverse(src.flagReverse){
+    }
     PyContext& context;
+    PyObjPtr funcArg;
+    PyObjPtr keyArg;
     bool flagReverse;
 };
 struct PyListExt{
@@ -155,14 +170,13 @@ struct PyListExt{
     static PyObjPtr sort(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
         PyAssertList(self);
         bool flagReverse = false;
-        if (!argAssignVal.empty()){
-           for (size_t i = 0; i < allArgsVal.size(); ++i){
-               if (allArgsVal[i].argKey == "reverse"){
-                   flagReverse = argAssignVal[i]->getHandler()->handleBool(context, argAssignVal[i]);
-               }
-           }
+        PyObjPtr reverseArg = PyCppUtil::getArgVal(allArgsVal, argAssignVal, 2, "reverse");
+        PyObjPtr keyArg     = PyCppUtil::getArgVal(allArgsVal, argAssignVal, 1, "key");
+        PyObjPtr funcArg    = PyCppUtil::getArgVal(allArgsVal, argAssignVal, 0, "func");
+        if (reverseArg){
+            flagReverse = reverseArg->getHandler()->handleBool(context, reverseArg);
         }
-        PyListCmp cmp(context, flagReverse);
+        PyListCmp cmp(context, funcArg, keyArg, flagReverse);
         std::sort(self.cast<PyObjList>()->value.begin(), self.cast<PyObjList>()->value.end(), cmp);
         return PyObjTool::buildNone();
     }

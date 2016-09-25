@@ -143,7 +143,13 @@ listb.insert(120, 120)
 listb.pop(1)
 listb.remove(110)
 lista.reverse()
-listb.sort(reverse = True)
+def cmpf(a, b):
+    if a < b:
+        return -1
+    elif a == b:
+        return 0
+    return 1
+listb.sort(cmpf)
 
 listindex= listb.index(6)
 listcount= listb.count(5)
