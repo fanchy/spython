@@ -12,19 +12,32 @@ namespace ff {
 struct PyListCmp{
     PyListCmp(PyContext& c, PyObjPtr& f, PyObjPtr& k, bool flag = false):context(c),funcArg(f),keyArg(k),flagReverse(flag){
     }
-    bool operator()(const PyObjPtr &a, const PyObjPtr &b)
+
+    bool operator()(const PyObjPtr &v1, const PyObjPtr & v2)
     {
-        bool ret = false;
-        if (funcArg){
+        bool ret = 0;
+        if (funcArg && PyCheckFunc(funcArg)){
             std::vector<PyObjPtr> params;
-            params.push_back(a);
-            params.push_back(b);
+            params.push_back(v1);
+            params.push_back(v2);
+            
             PyObjPtr retObj = PyCppUtil::callPyfunc(context, funcArg, params);
             PyAssertInt(retObj);
+            retObj = PyCppUtil::callPyfunc(context, funcArg, params);
             ret = (retObj.cast<PyObjInt>()->value < 0);
         }
         else{
-            ret = a->getHandler()->handleLess(context, a, b);
+            if (keyArg && PyCheckFunc(keyArg)){
+                std::vector<PyObjPtr> params;
+                params.push_back(v1);
+                PyObjPtr v1key = PyCppUtil::callPyfunc(context, keyArg, params);
+                params[0] = v2;
+                PyObjPtr v2key = PyCppUtil::callPyfunc(context, keyArg, params);
+                ret = v1key->getHandler()->handleLess(context, v1key, v2key);
+            }
+            else{
+                ret = v1->getHandler()->handleLess(context, v1, v2);
+            }
         }
         if (flagReverse){
             ret = !ret;

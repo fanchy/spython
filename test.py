@@ -144,13 +144,12 @@ listb.pop(1)
 listb.remove(110)
 lista.reverse()
 def cmpf(a, b):
-    if a < b:
-        return -1
-    elif a == b:
-        return 0
-    return 1
-listb.sort(cmpf)
+    return b - a
+def keyf(a):
+    return a
 
+listb.sort(None, keyf)
+print(listb)
 listindex= listb.index(6)
 listcount= listb.count(5)
 

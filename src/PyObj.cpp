@@ -122,7 +122,7 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
         ++hasAssignArgNum;
     }
     
-    for (; hasAssignArgNum < pParametersExprAST->allParam.size(); ++hasAssignArgNum){
+    for (; hasAssignArgNum < pParametersExprAST->allParam.size(); ){
         unsigned int j = hasAssignArgNum;
         ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[j];
         
