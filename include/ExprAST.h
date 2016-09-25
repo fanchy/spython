@@ -436,6 +436,14 @@ public:
     virtual PyObjPtr& eval(PyContext& context);
     
 };
+struct IterUtil{
+    IterUtil(PyObjPtr v);
+    PyObjPtr next();
+    
+    PyObjPtr  obj;
+    int       objType;
+    int       index;
+};
 //! for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 class ForExprAST: public ExprAST {
 public:
@@ -456,10 +464,12 @@ public:
     
 };
 //! listmaker: test ( list_for | (',' test)* [','] )
+//! list_for: 'for' exprlist 'in' testlist_safe [list_iter]
 class ListMakerExprAST: public ExprAST {
 public:
     std::vector<ExprASTPtr>  test;
-    ExprASTPtr               list_for;
+    ExprASTPtr               list_for_exprlist;
+    ExprASTPtr               list_for_testlist_safe;
 
 public:
     ListMakerExprAST(){

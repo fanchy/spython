@@ -63,6 +63,8 @@ PyCommonHandler::PyCommonHandler(){
     expr__long__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__long__");
     expr__enter__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__enter__");
     expr__exit__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__exit__");
+    
+    expr__call__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__call__");
 }
 string PyCommonHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     PyContextBackUp backup(context);
@@ -199,13 +201,38 @@ PyObjPtr& PyCommonHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPt
     return handleBinOps(context, self, val, expr__div__);
 }
 PyObjPtr& PyCommonHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    return self;
+    return handleBinOps(context, self, val, expr__mod__);
 }
 PyObjPtr& PyCommonHandler::handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, 
                                  std::vector<PyObjPtr>& argAssignVal){
+    PyContextBackUp backup(context);
+    context.curstack = self;
+    ExprASTPtr expr = expr__call__;
+    PyObjPtr func = expr->getFieldVal(context);
+    backup.rollback();
+    
+    if (func && PyCheckFunc(func) && func.get() != self.get()){
+        return func->getHandler()->handleCall(context, func, allArgsVal, argAssignVal);
+    }
+    PY_RAISE_STR(context, PyCppUtil::strFormat("no %s defined", expr.cast<VariableExprAST>()->name.c_str()));
     return self;
 }
-std::size_t PyCommonHandler::handleHash(const PyObjPtr& self) const{
+std::size_t PyCommonHandler::handleHash(PyContext& context, const PyObjPtr& self) const{
+    PyContextBackUp backup(context);
+    context.curstack = self;
+    
+    ExprASTPtr  expr  = expr__hash__;
+    PyObjPtr func = expr->getFieldVal(context);
+    backup.rollback();
+    
+    if (func && PyCheckFunc(func)){
+        vector<PyObjPtr> argAssignVal;
+        PyObjPtr ret = PyCppUtil::callPyfunc(context, func, argAssignVal);
+        if (PyCheckInt(ret)){
+            return ret.cast<PyObjInt>()->value;
+        }
+    }
+    PY_RAISE_STR(context, PyCppUtil::strFormat("no %s defined", expr.cast<VariableExprAST>()->name.c_str()));
     return 0;
 }
 bool PyCommonHandler::handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val){

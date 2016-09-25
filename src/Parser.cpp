@@ -1192,11 +1192,13 @@ ExprASTPtr Parser::parse_suite(){
 
 //! testlist_safe: old_test [(',' old_test)+ [',']]
 ExprASTPtr Parser::parse_testlist_safe(){
+    return parse_old_test();
     return NULL;
 }
 
 //! old_test: or_test | old_lambdef
 ExprASTPtr Parser::parse_old_test(){
+    return parse_or_test();
     return NULL;
 }
 
@@ -1515,11 +1517,10 @@ ExprASTPtr Parser::parse_listmaker(){
     listMaker->test.push_back(test);
     
     if (m_curScanner->getToken()->strVal != ","){
-        ExprASTPtr list_for = parse_list_for();
+        ExprASTPtr list_for = parse_list_for(ret);
         if (!list_for){
             THROW_ERROR("list_for needed when parse_listmaker");
         }
-        listMaker->list_for = list_for;
     }
     else{
         while (m_curScanner->getToken()->strVal == ","){
@@ -1645,6 +1646,9 @@ ExprASTPtr Parser::parse_exprlist(){
             break;
         }
         stmtAST->exprs.push_back(expr);
+    }
+    if (stmtAST->exprs.size() == 1){
+        return stmtAST->exprs[0];
     }
     return ret;
 }
@@ -1844,8 +1848,29 @@ ExprASTPtr Parser::parse_list_iter(){
 }
 
 //! list_for: 'for' exprlist 'in' testlist_safe [list_iter]
-ExprASTPtr Parser::parse_list_for(){
-    return NULL;
+ExprASTPtr Parser::parse_list_for(ExprASTPtr& ret){
+    if (m_curScanner->getToken()->strVal != "for"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr exprlist = parse_exprlist();
+    if (!exprlist){
+        THROW_ERROR("exprlist needed after for");
+    }
+    
+    if (m_curScanner->getToken()->strVal != "in"){
+        THROW_ERROR("in needed after for");
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr testlist_safe = parse_testlist_safe();
+    if (!testlist_safe){
+        THROW_ERROR("testlist_safe needed after for ... in ");
+    }
+    ret.cast<ListMakerExprAST>()->list_for_exprlist      = exprlist;
+    ret.cast<ListMakerExprAST>()->list_for_testlist_safe = testlist_safe;
+    return ret;
 }
 
 //! list_if: 'if' old_test [list_iter]

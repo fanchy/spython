@@ -329,18 +329,48 @@ string ForExprAST::dump(int nDepth){
     }
     return ret;
 }
+IterUtil::IterUtil(PyObjPtr v):obj(v), objType(v->getType()), index(0){
+}
+PyObjPtr IterUtil::next(){
+    if (PY_TUPLE == objType){
+        if (index >= obj.cast<PyObjTuple>()->value.size()){
+            return NULL;
+        }
+        return obj.cast<PyObjTuple>()->value[index++];
+    }
+    else if (PY_LIST == objType){
+        if (index >= obj.cast<PyObjList>()->value.size()){
+            return NULL;
+        }
+        return obj.cast<PyObjList>()->value[index++];
+    }
+    return NULL;
+}
 
 PyObjPtr& ForExprAST::eval(PyContext& context){TRACE_EXPR();
+    bool doElse = true;
+    PyObjPtr allVal = testlist->eval(context);
+    IterUtil iterUtil(allVal);
     while (true){
-        PyObjPtr& caseBool = exprlist->eval(context);
-        if (PyObjTool::handleBool(caseBool)){
+        try{
+            PyObjPtr v = iterUtil.next();
+            if (!v){
+                break;
+            }
+            doElse = false;
+            exprlist->assignVal(context, v);
             suite->eval(context);
         }
-        else{
-            break;
+        catch(FlowCtrlSignal& s){
+            if (s.nSignal == FlowCtrlSignal::CONTINUE){
+                continue;
+            }
+            else if (s.nSignal == FlowCtrlSignal::BREAK){
+                break;
+            }
         }
     }
-    if (elseSuite){
+    if (doElse && elseSuite){
         elseSuite->eval(context);
     }
     return context.cacheResult(PyObjTool::buildNone());
@@ -355,20 +385,33 @@ string ListMakerExprAST::dump(int nDepth){
     for (unsigned int i = 0; i < test.size(); ++i){
         ret += "\ntest\n" + test[i]->dump(nDepth+1);
     }
-    if (list_for){
-        ret += "\nlist_for\n" + list_for->dump(nDepth+1);
+    if (list_for_exprlist){
+        ret += "\nlist_for\n" + list_for_exprlist->dump(nDepth+1);
     }
     return ret;
 }
 
 PyObjPtr& ListMakerExprAST::eval(PyContext& context){TRACE_EXPR();
-    for (unsigned int i = 0; i < test.size(); ++i){
-        test[i]->eval(context);
+    PyObjPtr ret = new PyObjList();
+    if (!list_for_exprlist){
+        for (unsigned int i = 0; i < test.size(); ++i){
+            ret.cast<PyObjList>()->value.push_back(test[i]->eval(context));
+        }
     }
-    if (list_for){
-        list_for->eval(context);
+    else{
+        PyObjPtr allVal = list_for_testlist_safe->eval(context);
+        IterUtil iterUtil(allVal);
+        ExprASTPtr& elemExpr = test[0];
+        while (true){
+            PyObjPtr v = iterUtil.next();
+            if (!v){
+                break;
+            }
+            list_for_exprlist->assignVal(context, v);
+            ret.cast<PyObjList>()->value.push_back(elemExpr->eval(context));
+        }
     }
-    return context.cacheResult(PyObjTool::buildNone());
+    return context.cacheResult(ret);
 }
 
 string DictorsetMakerExprAST::dump(int nDepth){

@@ -184,7 +184,7 @@ public:
     //! list_iter: list_for | list_if
     ExprASTPtr parse_list_iter();
     //! list_for: 'for' exprlist 'in' testlist_safe [list_iter]
-    ExprASTPtr parse_list_for();
+    ExprASTPtr parse_list_for(ExprASTPtr& ret);
     //! list_if: 'if' old_test [list_iter]
     ExprASTPtr parse_list_if();
     //! comp_iter: comp_for | comp_if

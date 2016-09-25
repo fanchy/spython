@@ -288,7 +288,7 @@ public:
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, 
                                  std::vector<PyObjPtr>& argAssignVal);
-    virtual std::size_t    handleHash(const PyObjPtr& self) const;
+    virtual std::size_t    handleHash(PyContext& context, const PyObjPtr& self) const;
     virtual bool handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual long handleLen(PyContext& context, PyObjPtr& self);
     virtual std::string dump(PyObjPtr& self) {

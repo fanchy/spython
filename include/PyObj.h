@@ -8,10 +8,14 @@
 #include <vector>
 #include <stdexcept>
 /*
-#ifdef __GNUC__
-#include <ext/hash_map>
+#if __cplusplus < 201103L
+    #ifdef __GNUC__
+    #include <ext/hash_map>
+    #else
+    #include <hash_map>
+    #endif
 #else
-#include <hash_map>
+    #include <unordered_map>
 #endif
 */
 
@@ -23,6 +27,7 @@
 #include "objhandler/PyBoolHandler.h"
 #include "objhandler/PyFuncHandler.h"
 #include "objhandler/PyTupleHandler.h"
+#include "objhandler/PyListHandler.h"
 #include "objhandler/PyDictHandler.h"
 #include "objhandler/PyStrHandler.h"
 #include "objhandler/PyClassHandler.h"
@@ -138,6 +143,21 @@ public:
 public:
     std::vector<PyObjPtr> value;
 };
+class PyObjList:public PyObj {
+public:
+    PyObjList(){
+        this->handler = singleton_t<PyListHandler>::instance_ptr();
+    }
+
+    virtual const ObjIdInfo& getObjIdInfo(){
+        return singleton_t<ObjIdTypeTraits<PyObjList> >::instance_ptr()->objInfo;
+    }
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "list");
+    }
+public:
+    std::vector<PyObjPtr> value;
+};
 
 class PyObjDict:public PyObj {
 public:
@@ -152,8 +172,8 @@ public:
     {
         bool operator()(const PyObjPtr &k1, const PyObjPtr &k2)const
         {
-            std::size_t a = k1->getHandler()->handleHash(k1);
-            std::size_t b = k2->getHandler()->handleHash(k2);
+            std::size_t a = (size_t)k1.get();//->getHandler()->handleHash(k1);
+            std::size_t b = (size_t)k2.get();//->getHandler()->handleHash(k2);
             return a < b;
         }
     };

@@ -4,14 +4,14 @@
 CPP      = g++.exe -D__DEBUG__
 CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-OBJ      = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o src/objhandler/PyClassHandler.o src/objhandler/PyClassInstanceHandler.o src/objhandler/PyModHandler.o src/SPython.o src/Util.o src/objhandler/PyBuiltinTypeHandler.o src/objhandler/PyCommonHandler.o
-LINKOBJ  = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o src/objhandler/PyClassHandler.o src/objhandler/PyClassInstanceHandler.o src/objhandler/PyModHandler.o src/SPython.o src/Util.o src/objhandler/PyBuiltinTypeHandler.o src/objhandler/PyCommonHandler.o
-LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib32" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc -m32 -g3
+OBJ      = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o src/objhandler/PyClassHandler.o src/objhandler/PyClassInstanceHandler.o src/objhandler/PyModHandler.o src/SPython.o src/Util.o src/objhandler/PyBuiltinTypeHandler.o src/objhandler/PyCommonHandler.o src/objhandler/PyListHandler.o
+LINKOBJ  = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o src/objhandler/PyClassHandler.o src/objhandler/PyClassInstanceHandler.o src/objhandler/PyModHandler.o src/SPython.o src/Util.o src/objhandler/PyBuiltinTypeHandler.o src/objhandler/PyCommonHandler.o src/objhandler/PyListHandler.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -pg -g3
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"./include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++" -I"./include"
 BIN      = spython.exe
-CXXFLAGS = $(CXXINCS) -m32 -g3
-CFLAGS   = $(INCS) -m32 -g3
+CXXFLAGS = $(CXXINCS) -pg -g3
+CFLAGS   = $(INCS) -pg -g3
 RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
@@ -83,3 +83,6 @@ src/objhandler/PyBuiltinTypeHandler.o: src/objhandler/PyBuiltinTypeHandler.cpp
 
 src/objhandler/PyCommonHandler.o: src/objhandler/PyCommonHandler.cpp
 	$(CPP) -c src/objhandler/PyCommonHandler.cpp -o src/objhandler/PyCommonHandler.o $(CXXFLAGS)
+
+src/objhandler/PyListHandler.o: src/objhandler/PyListHandler.cpp
+	$(CPP) -c src/objhandler/PyListHandler.cpp -o src/objhandler/PyListHandler.o $(CXXFLAGS)

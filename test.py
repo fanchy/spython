@@ -130,3 +130,12 @@ xx = tests3[3:100]
 print(xx)
 fooname = Foo.__name__
 
+lista = [1, 2, 3, 4]
+listb = [5, 6]
+listc = lista + listb
+listalen = len(lista)
+listtuple = (1, 2, 3, 4)
+for k in listtuple:
+    print(k)
+testlistfor = [k*2  for k in lista]
+

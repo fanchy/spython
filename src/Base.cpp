@@ -82,7 +82,7 @@ PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, std::vect
 long PyObjHandler::handleLen(PyContext& context, PyObjPtr& self){
     return -1;
 }
-size_t PyObjHandler::handleHash(const PyObjPtr& self) const{
+size_t PyObjHandler::handleHash(PyContext& context, const PyObjPtr& self) const{
     return size_t(self.get());
 }
 bool PyObjHandler::handleIsInstance(PyContext& context, PyObjPtr& self, PyObjPtr& val){
@@ -160,6 +160,7 @@ PyHelper::PyHelper(){
     m_allKeyword.insert("print");
     m_allKeyword.insert("continue");
     m_allKeyword.insert("while");
+    m_allKeyword.insert("for");
 }
 
 
