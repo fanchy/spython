@@ -161,6 +161,24 @@ public:
 
 class PyObjDict:public PyObj {
 public:
+    struct Key{
+        Key():hash(0), context(NULL){
+        }
+        Key(const Key& src):hash(src.hash), context(src.context), key(src.key){
+        }
+        bool operator==(const Key& src){
+            return key->getHandler()->handleEqual(*context, key, src.key);
+        }
+        Key& operator =(const Key& src){
+            hash = src.hash;
+            context = src.context;
+            key = src.key;
+            return *this;
+        }
+        long        hash;
+        PyContext*  context;
+        PyObjPtr    key;
+    };
     struct HashUtil{
         std::size_t operator()(const PyObjPtr& a) const {
             return size_t(a.get());
@@ -170,10 +188,10 @@ public:
     //map的比较函数
     struct cmp_key
     {
-        bool operator()(const PyObjPtr &k1, const PyObjPtr &k2)const
+        bool operator()(const Key &k1, const Key &k2)const
         {
-            std::size_t a = (size_t)k1.get();//->getHandler()->handleHash(k1);
-            std::size_t b = (size_t)k2.get();//->getHandler()->handleHash(k2);
+            std::size_t a = (size_t)k1.hash;
+            std::size_t b = (size_t)k2.hash;
             return a < b;
         }
     };
@@ -183,7 +201,8 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
-    typedef std::map<PyObjPtr, PyObjPtr, cmp_key> DictMap;
+    PyObjDict& set(PyContext& context, PyObjPtr &k, PyObjPtr &v);
+    typedef std::map<Key, PyObjPtr, cmp_key> DictMap;
     DictMap value;
 };
 

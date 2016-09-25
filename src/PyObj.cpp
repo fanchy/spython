@@ -7,6 +7,16 @@
 
 using namespace std;
 using namespace ff;
+
+PyObjDict& PyObjDict::set(PyContext& context, PyObjPtr &k, PyObjPtr &v){
+    PyObjDict::Key keyInfo;
+    keyInfo.key = k;
+    keyInfo.context = &context;
+    keyInfo.hash= k->getHandler()->handleHash(context, k);
+    value[keyInfo] = v;
+    return *this;
+}
+
 PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e, const string& strType)
 {
     PyObjPtr& classObj = context.allBuiltin[strType];
@@ -220,7 +230,7 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
                 }
                 const string& keyName = argInfo.argKey;
                 PyObjPtr tmpKey = new PyObjStr(keyName);
-                pVal.cast<PyObjDict>()->value[tmpKey] = argAssignVal[m];
+                pVal.cast<PyObjDict>()->set(context, tmpKey, argAssignVal[m]);
             }
             continue;
         }

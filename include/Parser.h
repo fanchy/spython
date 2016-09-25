@@ -190,7 +190,7 @@ public:
     //! comp_iter: comp_for | comp_if
     ExprASTPtr parse_comp_iter();
     //! comp_for: 'for' exprlist 'in' or_test [comp_iter]
-    ExprASTPtr parse_comp_for();
+    ExprASTPtr parse_comp_for(ExprASTPtr& ret);
     //! comp_if: 'if' old_test [comp_iter]
     ExprASTPtr parse_comp_if();
     //! testlist1: test (',' test)*

@@ -63,12 +63,15 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
     //!ignore comment 
     char cLastOne = getCharNext(content, index);
     
-    while (cLastOne == '#' || cLastOne == ' ') {
+    while (cLastOne == ' ') {
         // Comment until end of line.
         if (cLastOne == ' '){
             cLastOne = getCharNext(content, index);
         }
-        else if (cLastOne == '#'){
+    }
+    while (cLastOne == '#') {
+        // Comment until end of line.
+        if (cLastOne == '#'){
             do{
                 cLastOne = getCharNext(content, index);
             }
@@ -278,10 +281,15 @@ bool Scanner::tokenizeFile(const std::string& path, int nFileId){
         return false;
     }
     
-    char buf[2048];
-    int n = fread(buf, 1, sizeof(buf), fp);
+    char buf[512];
+    int numread = 0;
+    do {
+        numread  = fread(buf, 1, sizeof(buf), fp);
+        if (numread> 0){
+            strCode.append(buf, numread);
+        }
+    }while (numread == sizeof(buf));
     ::fclose(fp);
-    strCode.assign(buf, n);
     m_nCurFileId = nFileId;
     return tokenize(strCode);
 }

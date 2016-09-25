@@ -488,8 +488,8 @@ public:
     std::vector<ExprASTPtr>  testKey;
     std::vector<ExprASTPtr>  testVal;
     
-    //std::vector<ExprASTPtr>  test;
-    ExprASTPtr               comp_for;
+    ExprASTPtr               comp_for_exprlist;
+    ExprASTPtr               comp_for_or_test;
 
 public:
     DictorsetMakerExprAST(){

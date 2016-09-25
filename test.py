@@ -135,11 +135,6 @@ listb = [5, 6]
 listc = lista + listb
 listalen = len(lista)
 listtuple = (1, 2, 3, 4)
-for k in listtuple:
-    print(k)
-testlistfor = [k*2  for k in lista]
-tupleslice1 = listtuple[-1:-5:-1]
+listtuple = (1, 2, 3, 4)
+testdict2= {k:k for k in listtuple}
 
-testlistfor[2] = 22
-listslice1 = testlistfor[-1:-5:-1]
-print(listslice1)

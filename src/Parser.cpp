@@ -1689,6 +1689,11 @@ ExprASTPtr Parser::parse_dictorsetmaker(){
     DictorsetMakerExprAST* dict = ALLOC_EXPR<DictorsetMakerExprAST>();
     ExprASTPtr ret = dict;
     
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed whern parse dict after key");
+        return NULL;
+    }
+    
     if (m_curScanner->getToken()->strVal == ":"){
         m_curScanner->seek(1);
         
@@ -1701,11 +1706,10 @@ ExprASTPtr Parser::parse_dictorsetmaker(){
         dict->testVal.push_back(testVal);
     
         if (m_curScanner->getToken()->strVal != ","){
-            ExprASTPtr comp_for = parse_comp_for();
+            ExprASTPtr comp_for = parse_comp_for(ret);
             if (!comp_for){
                 THROW_ERROR("comp_for needed whern parse dict");
             }
-            dict->comp_for = comp_for;
         }
         else{
             while (m_curScanner->getToken()->strVal == ",")
@@ -1884,8 +1888,29 @@ ExprASTPtr Parser::parse_comp_iter(){
 }
 
 //! comp_for: 'for' exprlist 'in' or_test [comp_iter]
-ExprASTPtr Parser::parse_comp_for(){
-    return NULL;
+ExprASTPtr Parser::parse_comp_for(ExprASTPtr& ret){
+    if (m_curScanner->getToken()->strVal != "for"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr exprlist = parse_exprlist();
+    if (!exprlist){
+        THROW_ERROR("exprlist needed after for");
+    }
+    
+    if (m_curScanner->getToken()->strVal != "in"){
+        THROW_ERROR("in needed after for");
+    }
+    m_curScanner->seek(1);
+    
+    ExprASTPtr or_test = parse_or_test();
+    if (!or_test){
+        THROW_ERROR("or_test needed after for ... in ");
+    }
+    ret.cast<DictorsetMakerExprAST>()->comp_for_exprlist      = exprlist;
+    ret.cast<DictorsetMakerExprAST>()->comp_for_or_test       = or_test;
+    return ret;
 }
 
 //! comp_if: 'if' old_test [comp_iter]

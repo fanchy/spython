@@ -428,21 +428,48 @@ string DictorsetMakerExprAST::dump(int nDepth){
     /*for (unsigned int i = 0; i < test.size(); ++i){
         ret += "\ntest\n" + test[i]->dump(nDepth+1);
     }*/
-    if (comp_for){
-        ret += "\ncomp_for\n" + comp_for->dump(nDepth+1);
+    if (comp_for_exprlist){
+        ret += "\ncomp_for\n" + comp_for_exprlist->dump(nDepth+1);
     }
     return ret;
 }
 
 PyObjPtr& DictorsetMakerExprAST::eval(PyContext& context){TRACE_EXPR();
     PyObjPtr ret = new PyObjDict();
-    for (unsigned int i = 0; i < testKey.size(); ++i){
-        PyObjPtr pObjKey = testKey[i]->eval(context);
-        ret.cast<PyObjDict>()->value[pObjKey] = testVal[i]->eval(context);
-        
+    if (!comp_for_exprlist){
+        for (unsigned int i = 0; i < testKey.size(); ++i){
+            PyObjPtr pObjKey = testKey[i]->eval(context);
+            ret.cast<PyObjDict>()->set(context, pObjKey, testVal[i]->eval(context));
+            
+        }
     }
-    if (comp_for){
-        comp_for->eval(context);
+    else{
+        if (testKey.size() != 1 || testVal.size() != 1){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("Decorator key:val for ... in ... invalid"));
+        }
+
+        PyObjPtr allVal = comp_for_or_test->eval(context);
+        IterUtil iterUtil(allVal);
+        while (true){
+            try{
+                PyObjPtr v = iterUtil.next();
+                if (!v){
+                    break;
+                }
+                comp_for_exprlist->assignVal(context, v);
+                
+                PyObjPtr pObjKey = testKey[0]->eval(context);
+                ret.cast<PyObjDict>()->set(context, pObjKey, testVal[0]->eval(context));
+            }
+            catch(FlowCtrlSignal& s){
+                if (s.nSignal == FlowCtrlSignal::CONTINUE){
+                    continue;
+                }
+                else if (s.nSignal == FlowCtrlSignal::BREAK){
+                    break;
+                }
+            }
+        }
     }
     
     return context.cacheResult(ret);
@@ -888,7 +915,7 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
             PyObjDict::DictMap::iterator it = pVal.cast<PyObjDict>()->value.begin();
             
             for (; it != pVal.cast<PyObjDict>()->value.end(); ++it){
-                const PyObjPtr& pKey = it->first;
+                const PyObjPtr& pKey = it->first.key;
                 if (!PyCheckStr(pKey)){
                     PY_RAISE_STR(context, "dict key must string");
                 }
