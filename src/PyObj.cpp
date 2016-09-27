@@ -401,3 +401,21 @@ PyObjPtr PyCppUtil::getArgVal(std::vector<ArgTypeInfo>& allArgsVal, std::vector<
     return NULL;
 }
 
+IterUtil::IterUtil(PyObjPtr v):obj(v), index(0){
+}
+PyObjPtr IterUtil::next(){
+    if (PyCheckTuple(obj)){
+        if (index >= obj.cast<PyObjTuple>()->value.size()){
+            return NULL;
+        }
+        return obj.cast<PyObjTuple>()->value[index++];
+    }
+    else if (PY_LIST == objType){
+        if (index >= obj.cast<PyObjList>()->value.size()){
+            return NULL;
+        }
+        return obj.cast<PyObjList>()->value[index++];
+    }
+    return NULL;
+}
+

@@ -158,6 +158,8 @@ public:
 public:
     std::vector<PyObjPtr> value;
 };
+#define DICT_ITER_KEY(X) (X->first.key)
+#define DICT_ITER_VAL(X) (X->second)
 
 class PyObjDict:public PyObj {
 public:
@@ -465,6 +467,15 @@ struct PyCppUtil{
 #define PyAssertDict(x) PyCppUtil::pyAssert(x, PY_DICT)
 
 #define PY_RAISE_STR(context, v) context.cacheResult(PyCppUtil::genStr(v)); throw PyExceptionSignal()
+
+struct IterUtil{
+    IterUtil(PyObjPtr v);
+    PyObjPtr next();
+    
+    PyObjPtr  obj;
+    int       index;
+};
+
 }
 #endif
 

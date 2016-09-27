@@ -329,23 +329,6 @@ string ForExprAST::dump(int nDepth){
     }
     return ret;
 }
-IterUtil::IterUtil(PyObjPtr v):obj(v), objType(v->getType()), index(0){
-}
-PyObjPtr IterUtil::next(){
-    if (PY_TUPLE == objType){
-        if (index >= obj.cast<PyObjTuple>()->value.size()){
-            return NULL;
-        }
-        return obj.cast<PyObjTuple>()->value[index++];
-    }
-    else if (PY_LIST == objType){
-        if (index >= obj.cast<PyObjList>()->value.size()){
-            return NULL;
-        }
-        return obj.cast<PyObjList>()->value[index++];
-    }
-    return NULL;
-}
 
 PyObjPtr& ForExprAST::eval(PyContext& context){TRACE_EXPR();
     bool doElse = true;
@@ -913,7 +896,7 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
             PyObjDict::DictMap::iterator it = pVal.cast<PyObjDict>()->value.begin();
             
             for (; it != pVal.cast<PyObjDict>()->value.end(); ++it){
-                const PyObjPtr& pKey = it->first.key;
+                const PyObjPtr& pKey = DICT_ITER_KEY(it);
                 if (!PyCheckStr(pKey)){
                     PY_RAISE_STR(context, "dict key must string");
                 }
@@ -921,7 +904,7 @@ PyObjPtr& CallExprAST::eval(PyContext& context){TRACE_EXPR_PUSH();
                 tmpInfo.argKey = pKey.cast<PyObjStr>()->value;
                 newArgTypeInfo.push_back(tmpInfo);
                 
-                PyObjPtr& v = it->second;
+                PyObjPtr& v = DICT_ITER_VAL(it);
                 allValue.push_back(v);
             }
         }

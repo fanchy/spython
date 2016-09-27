@@ -436,14 +436,7 @@ public:
     virtual PyObjPtr& eval(PyContext& context);
     
 };
-struct IterUtil{
-    IterUtil(PyObjPtr v);
-    PyObjPtr next();
-    
-    PyObjPtr  obj;
-    int       objType;
-    int       index;
-};
+
 //! for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 class ForExprAST: public ExprAST {
 public:
