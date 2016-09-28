@@ -140,6 +140,13 @@ public:
     PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
         return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "tuple");
     }
+    void clear(){
+        value.clear();
+    }
+    PyObjTuple& append(const PyObjPtr& v){
+        value.push_back(v);
+        return *this;
+    }
 public:
     std::vector<PyObjPtr> value;
 };
@@ -154,6 +161,13 @@ public:
     }
     PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
         return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "list");
+    }
+    void clear(){
+        value.clear();
+    }
+    PyObjList& append(const PyObjPtr& v){
+        value.push_back(v);
+        return *this;
     }
 public:
     std::vector<PyObjPtr> value;
@@ -197,18 +211,23 @@ public:
             return a < b;
         }
     };
-    PyObjDict(){
-        this->handler = singleton_t<PyDictHandler>::instance_ptr();
-    }
+    PyObjDict();
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "dict");
+    }
     PyObjDict& set(PyContext& context, PyObjPtr &k, PyObjPtr &v);
-    PyObjPtr& get(PyContext& context, const PyObjPtr &k);
-    
-    
+    PyObjPtr get(PyContext& context, const PyObjPtr &k);
+    PyObjPtr pop(PyContext& context, const PyObjPtr &k);
+    PyObjPtr getValueAsList();//!return all dict key and value as [(key, value), ....]
+public:
     typedef std::map<Key, PyObjPtr, cmp_key> DictMap;
-    DictMap value;
+    DictMap     value;
+    size_t      version;
+    size_t      versionCache;
+    PyObjPtr    cacheAsList;
 };
 
 class PyCppFunc{
@@ -435,6 +454,7 @@ struct PyCppUtil{
     }
     
     static PyObjPtr getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname);
+    static bool hasAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname);
     static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v);
     
     static std::map<std::string, PyObjPtr> getAllFieldData(PyObjPtr obj);
@@ -466,14 +486,20 @@ struct PyCppUtil{
 #define PyCheckDict(x) (x->getType() == PY_DICT)
 #define PyAssertDict(x) PyCppUtil::pyAssert(x, PY_DICT)
 
+#define PyCheckInstance(x) (x->getType() == PY_CLASS_INST)
+#define PyAssertInstance(x) PyCppUtil::pyAssert(x, PY_CLASS_INST)
+
 #define PY_RAISE_STR(context, v) context.cacheResult(PyCppUtil::genStr(v)); throw PyExceptionSignal()
 
 struct IterUtil{
-    IterUtil(PyObjPtr v);
+    IterUtil(PyContext& context, PyObjPtr v);
     PyObjPtr next();
     
+    PyContext& context;
     PyObjPtr  obj;
     int       index;
+    PyObjPtr  funcNext;
+    std::vector<PyObjPtr> funcagsTmp;
 };
 
 }

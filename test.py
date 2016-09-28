@@ -164,4 +164,10 @@ testdict4 = testdict2['a']
 
 lambda1 = lambda x : x + 1
 lambda2 = lambda1(120)
+testdict5 = testdict2.items()
+testdict2.pop(3)
+testdict6 = testdict2.items()
+for (k, v) in testdict2.items():
+    print(k, v)
+
 

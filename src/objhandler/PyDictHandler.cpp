@@ -128,9 +128,8 @@ PyObjPtr& PyDictHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPt
     
     PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
 
-    PyObjPtr& ret = self.cast<PyObjDict>()->get(context, startVal);
-    
-    return ret;
+    PyObjPtr ret = self.cast<PyObjDict>()->get(context, startVal);
+    return context.cacheResult(ret);
 }
 PyObjPtr& PyDictHandler::handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v){
     PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;

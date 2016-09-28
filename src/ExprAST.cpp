@@ -333,7 +333,7 @@ string ForExprAST::dump(int nDepth){
 PyObjPtr& ForExprAST::eval(PyContext& context){TRACE_EXPR();
     bool doElse = true;
     PyObjPtr allVal = testlist->eval(context);
-    IterUtil iterUtil(allVal);
+    IterUtil iterUtil(context, allVal);
     while (true){
         try{
             PyObjPtr v = iterUtil.next();
@@ -383,7 +383,7 @@ PyObjPtr& ListMakerExprAST::eval(PyContext& context){TRACE_EXPR();
     }
     else{
         PyObjPtr allVal = list_for_testlist_safe->eval(context);
-        IterUtil iterUtil(allVal);
+        IterUtil iterUtil(context, allVal);
         ExprASTPtr& elemExpr = test[0];
         while (true){
             PyObjPtr v = iterUtil.next();
@@ -432,7 +432,7 @@ PyObjPtr& DictorsetMakerExprAST::eval(PyContext& context){TRACE_EXPR();
         }
 
         PyObjPtr allVal = comp_for_or_test->eval(context);
-        IterUtil iterUtil(allVal);
+        IterUtil iterUtil(context, allVal);
         while (true){
             try{
                 PyObjPtr v = iterUtil.next();

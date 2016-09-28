@@ -8,15 +8,22 @@
 using namespace std;
 using namespace ff;
 
+PyObjDict::PyObjDict():version(0), versionCache(0){
+    this->handler = singleton_t<PyDictHandler>::instance_ptr();
+    cacheAsList = new PyObjList();
+}
 PyObjDict& PyObjDict::set(PyContext& context, PyObjPtr &k, PyObjPtr &v){
     PyObjDict::Key keyInfo;
     keyInfo.key = k;
     keyInfo.context = &context;
     keyInfo.hash= k->getHandler()->handleHash(context, k);
+    //pair<DictMap::iterator, bool> > ret = value.insert(make_pair(keyInfo, v));
+
     value[keyInfo] = v;
+    ++version;
     return *this;
 }
-PyObjPtr& PyObjDict::get(PyContext& context, const PyObjPtr &k){
+PyObjPtr PyObjDict::get(PyContext& context, const PyObjPtr &k){
     PyObjDict::Key keyInfo;
     keyInfo.key = k;
     keyInfo.context = &context;
@@ -26,7 +33,35 @@ PyObjPtr& PyObjDict::get(PyContext& context, const PyObjPtr &k){
     if (it != value.end()){
         return it->second;
     }
-    return context.cacheResult(NULL);
+    return NULL;
+}
+PyObjPtr PyObjDict::pop(PyContext& context, const PyObjPtr &k){
+    PyObjDict::Key keyInfo;
+    keyInfo.key = k;
+    keyInfo.context = &context;
+    keyInfo.hash= k->getHandler()->handleHash(context, k);
+    
+    DictMap::iterator it = value.find(keyInfo);
+    if (it != value.end()){
+        PyObjPtr ret = DICT_ITER_VAL(it);
+        value.erase(it);
+        ++version;
+        return ret;
+    }
+    return NULL;
+}
+PyObjPtr PyObjDict::getValueAsList(){//!return all dict key and value as [(key, value), ....]
+    if (versionCache != version){
+        cacheAsList.cast<PyObjList>()->clear();
+        DictMap::iterator it = value.begin();
+        for (; it != value.end(); ++it){
+            PyObjPtr t = new PyObjTuple();
+            t.cast<PyObjTuple>()->append(DICT_ITER_KEY(it)).append(DICT_ITER_VAL(it));
+            cacheAsList.cast<PyObjList>()->append(t);
+        }
+        versionCache = version;
+    }
+    return cacheAsList;
 }
 
 PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e, const string& strType)
@@ -353,6 +388,19 @@ PyObjPtr PyCppUtil::getAttr(PyContext& context, PyObjPtr& obj, const std::string
     ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(filedname);
     return expr->eval(context);
 }
+
+bool PyCppUtil::hasAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname){
+    PyContextBackUp backup(context);
+    context.curstack = obj;
+    
+    ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(filedname);
+    PyObjPtr   ret  = expr->getFieldVal(context);
+    if (ret){
+        return true;
+    }
+    return false;
+}
+
 void PyCppUtil::setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v){
     PyContextBackUp backup(context);
     context.curstack = obj;
@@ -401,7 +449,13 @@ PyObjPtr PyCppUtil::getArgVal(std::vector<ArgTypeInfo>& allArgsVal, std::vector<
     return NULL;
 }
 
-IterUtil::IterUtil(PyObjPtr v):obj(v), index(0){
+IterUtil::IterUtil(PyContext& c, PyObjPtr v):context(c), obj(v), index(0){
+    if (PyCheckDict(obj)){
+        obj = obj.cast<PyObjDict>()->getValueAsList();
+    }
+    else if (PyCheckInstance(obj) && PyCppUtil::hasAttr(context, obj, "next")){
+        funcNext = PyCppUtil::getAttr(context, obj, "next");
+    }
 }
 PyObjPtr IterUtil::next(){
     if (PyCheckTuple(obj)){
@@ -410,11 +464,20 @@ PyObjPtr IterUtil::next(){
         }
         return obj.cast<PyObjTuple>()->value[index++];
     }
-    else if (PY_LIST == objType){
+    else if (PyCheckList(obj)){
         if (index >= obj.cast<PyObjList>()->value.size()){
             return NULL;
         }
         return obj.cast<PyObjList>()->value[index++];
+    }
+    else if (funcNext){//!Ê¹ÓÃµü´úÆ÷ 
+        try{
+            PyObjPtr ret = PyCppUtil::callPyfunc(context, funcNext, funcagsTmp);
+            return ret;
+        }
+        catch(PyExceptionSignal& e){
+            return NULL;
+        }
     }
     return NULL;
 }

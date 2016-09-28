@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
 CompilerSettings=0000000000000000101000000
-UnitCount=48
+UnitCount=49
 
 [VersionInfo]
 Major=1
@@ -522,6 +522,16 @@ BuildCmd=
 
 [Unit48]
 FileName=include\ext\PyListExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit49]
+FileName=include\ext\PyDictExt.h
 CompileCpp=1
 Folder=include/ext
 Compile=1
