@@ -616,6 +616,10 @@ public:
     }
     virtual PyObjPtr& eval(PyContext& context);
     PyObjPtr& assignVal(PyContext& context, PyObjPtr& v);
+    TupleExprAST& append(ExprASTPtr& v){
+        values.push_back(v);
+        return *this;
+    }
 };
 
 class FuncArglist : public ExprAST {

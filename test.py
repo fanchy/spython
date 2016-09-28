@@ -167,7 +167,8 @@ lambda2 = lambda1(120)
 testdict5 = testdict2.items()
 testdict2.pop(3)
 testdict6 = testdict2.items()
-for (k, v) in testdict2.items():
+for k, v in testdict2.items():
     print(k, v)
 
-
+for k  in testdict2:
+    print('xxxx', k)

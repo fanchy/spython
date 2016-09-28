@@ -169,6 +169,9 @@ public:
         value.push_back(v);
         return *this;
     }
+    size_t size(){
+        return value.size();
+    }
 public:
     std::vector<PyObjPtr> value;
 };

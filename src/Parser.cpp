@@ -1677,21 +1677,25 @@ ExprASTPtr Parser::parse_exprlist(){
         return NULL;
     }
 
-    StmtAST* stmtAST = ALLOC_EXPR<StmtAST>();
-    stmtAST->exprs.push_back(expr);
-    ExprASTPtr ret   = stmtAST;
-
+    ExprASTPtr ret   = expr;
+    
+    ExprASTPtr t;
+    
     while (m_curScanner->getToken()->strVal == ","){
         m_curScanner->seek(1);
         expr = parse_expr();
         if (!expr){
             break;
         }
-        stmtAST->exprs.push_back(expr);
+        if (!t){
+           t = ALLOC_EXPR<TupleExprAST>();
+           t.cast<TupleExprAST>()->append(ret);
+           ret = t;
+        }
+
+        t.cast<TupleExprAST>()->append(expr);
     }
-    if (stmtAST->exprs.size() == 1){
-        return stmtAST->exprs[0];
-    }
+
     return ret;
 }
 

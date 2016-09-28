@@ -470,6 +470,20 @@ PyObjPtr IterUtil::next(){
         }
         return obj.cast<PyObjList>()->value[index++];
     }
+    else if (PyCheckDict(obj)){
+        PyObjPtr listCache = obj.cast<PyObjDict>()->getValueAsList();
+        PyAssertList(listCache);
+        
+        if (index >= listCache.cast<PyObjList>()->size()){
+            return NULL;
+        }
+        PyObjPtr ret = listCache.cast<PyObjList>()->value[index++];
+        PyAssertTuple(ret);
+        if (ret.cast<PyObjTuple>()->value.size() == 2){
+            return ret.cast<PyObjTuple>()->value[0];
+        }
+        return NULL;
+    }
     else if (funcNext){//!Ê¹ÓÃµü´úÆ÷ 
         try{
             PyObjPtr ret = PyCppUtil::callPyfunc(context, funcNext, funcagsTmp);
