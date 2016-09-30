@@ -229,6 +229,7 @@ public:
     void clear();
     PyObjPtr copy();
     PyObjPtr keys();
+    size_t   size();
 public:
     typedef std::map<Key, PyObjPtr, cmp_key> DictMap;
     DictMap     value;

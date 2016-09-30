@@ -105,6 +105,17 @@ struct PyDictExt{
         PY_RAISE_STR(context, PyCppUtil::strFormat("KeyError: %s", indexObj->getHandler()->handleStr(context, indexObj).c_str()));
         return PyObjTool::buildNone();
     }
+    static PyObjPtr popitem(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        PyAssertDict(self);
+        if (argAssignVal.size() != 0){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: popitem() takes exactly 0 argument (%u given)", argAssignVal.size()));
+        }
+        if (0 == self.cast<PyObjDict>()->size()){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("KeyError: 'popitem(): dictionary is empty'"));
+        }
+
+        return self.cast<PyObjDict>()->popitem();
+    }
     static bool init(PyContext& pycontext){
         {
             PyObjPtr objClass = PyObjClassDef::build(pycontext, "dict", &singleton_t<ObjIdTypeTraits<PyObjDict> >::instance_ptr()->objInfo);

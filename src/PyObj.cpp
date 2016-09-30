@@ -82,7 +82,10 @@ PyObjPtr PyObjDict::keys(){
     for (; it != value.end(); ++it){
         ret.cast<PyObjList>()->append(DICT_ITER_KEY(it));
     }
-    return cacheAsList;
+    return ret;
+}
+size_t PyObjDict::size(){
+    return value.size();
 }
 PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e, const string& strType)
 {
