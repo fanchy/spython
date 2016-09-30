@@ -13,7 +13,7 @@
 #include "PyObj.h"
 
 namespace ff {
-
+/*
 template <typename T>
 class PyCppClassHandler: public PyClassHandler{
 public:
@@ -88,7 +88,7 @@ PyObjPtr& PyCppClassHandler<T>::handleCall(PyContext& context, PyObjPtr& self, s
     PyObjPtr ret = new PyCppClassInstance<T>(objcpp, self);
     
     return context.cacheResult(ret);
-}
+}*/
 }
 #endif
 

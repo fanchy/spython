@@ -775,9 +775,7 @@ string SliceExprAST::dump(int nDepth){
 
 PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
     PyObjPtr obj = preExpr->eval(context);
-    context.cacheResult(NULL);
-    PyContextBackUp backup(context);
-    context.curstack = obj;
+    
     
     PyObjPtr startVal = start->eval(context);
 
@@ -813,7 +811,7 @@ PyObjPtr& SliceExprAST::eval(PyContext& context){TRACE_EXPR();
             pStop = &nStop;
         }
     }
-    
+
     return obj->getHandler()->handleSlice(context, obj, startVal, pStop, nStep);
 }
 PyObjPtr& SliceExprAST::assignVal(PyContext& context, PyObjPtr& v){

@@ -171,4 +171,10 @@ for k, v in testdict2.items():
     print(k, v)
 
 for k  in testdict2:
-    print('xxxx', k)
+    print('xxxx', k, testdict2[k])
+testdict7 = testdict2.copy()
+testdict7.clear()
+testdict7 = dict.fromkeys(listtuple, 122)
+testdict8 = testdict7.get(12, 13)
+testdict9 = testdict7.has_key(12)
+

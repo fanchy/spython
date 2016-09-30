@@ -52,11 +52,6 @@ struct PyStrExt{
 };
 
 
-struct PyExtException{
-    
-};
-
-
 struct PyBaseExt{
     static bool init(PyContext& pycontext){
         pycontext.allBuiltin["None"] = PyObjTool::buildNone();
@@ -65,7 +60,7 @@ struct PyBaseExt{
         pycontext.allBuiltin["float"] = new PyBuiltinTypeInfo(PY_FLOAT);
         
         std::vector<PyObjPtr> tmpParent;
-        pycontext.allBuiltin["Exception"] = new PyCppClassDef<PyExtException>("Exception", tmpParent);
+        pycontext.allBuiltin["Exception"] = PyObjClassDef::build(pycontext, "Exception");
         
         pycontext.allBuiltin["len"] = PyCppUtil::genFunc(PyBuiltinExt::len, "len");
         pycontext.allBuiltin["isinstance"] = PyCppUtil::genFunc(PyBuiltinExt::isinstance, "isinstance");

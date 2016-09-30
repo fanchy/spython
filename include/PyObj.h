@@ -215,8 +215,9 @@ public:
         }
     };
     PyObjDict();
+    static PyObjPtr build();
     virtual const ObjIdInfo& getObjIdInfo(){
-        return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
+        return singleton_t<ObjIdTypeTraits<PyObjDict> >::instance_ptr()->objInfo;
     }
     PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
         return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "dict");
@@ -225,6 +226,9 @@ public:
     PyObjPtr get(PyContext& context, const PyObjPtr &k);
     PyObjPtr pop(PyContext& context, const PyObjPtr &k);
     PyObjPtr getValueAsList();//!return all dict key and value as [(key, value), ....]
+    void clear();
+    PyObjPtr copy();
+    PyObjPtr keys();
 public:
     typedef std::map<Key, PyObjPtr, cmp_key> DictMap;
     DictMap     value;
@@ -493,6 +497,12 @@ struct PyCppUtil{
 #define PyAssertInstance(x) PyCppUtil::pyAssert(x, PY_CLASS_INST)
 
 #define PY_RAISE_STR(context, v) context.cacheResult(PyCppUtil::genStr(v)); throw PyExceptionSignal()
+#define PY_ASSERT_ARG_SIZE(context, given, need, funcname) \
+    do{ if(given != need){ \
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: %s() takes exactly %d argument (%u given)", std::string(funcname).c_str(), need, given)); \
+        } \
+    }while(0)
+
 
 struct IterUtil{
     IterUtil(PyContext& context, PyObjPtr v);

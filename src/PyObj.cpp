@@ -7,7 +7,9 @@
 
 using namespace std;
 using namespace ff;
-
+PyObjPtr PyObjDict::build(){
+    return new PyObjDict();
+}
 PyObjDict::PyObjDict():version(0), versionCache(0){
     this->handler = singleton_t<PyDictHandler>::instance_ptr();
     cacheAsList = new PyObjList();
@@ -63,7 +65,25 @@ PyObjPtr PyObjDict::getValueAsList(){//!return all dict key and value as [(key, 
     }
     return cacheAsList;
 }
+void PyObjDict::clear(){
+    value.clear();
+    ++version;
+}
+PyObjPtr PyObjDict::copy(){
+    PyObjPtr ret = new PyObjDict();
+    ret.cast<PyObjDict>()->value = value;
+    ret.cast<PyObjDict>()->version++;
+    return ret;
+}
 
+PyObjPtr PyObjDict::keys(){
+    PyObjPtr ret = new PyObjList();
+    DictMap::iterator it = value.begin();
+    for (; it != value.end(); ++it){
+        ret.cast<PyObjList>()->append(DICT_ITER_KEY(it));
+    }
+    return cacheAsList;
+}
 PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e, const string& strType)
 {
     PyObjPtr& classObj = context.allBuiltin[strType];
@@ -327,11 +347,11 @@ PyObjClassDef::PyObjClassDef(const std::string& s, ObjIdInfo* p):name(s){
         selfObjInfo = *p;
     }
     else{
-        selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjFuncDef> >::instance_ptr()->objInfo;
+        selfObjInfo = singleton_t<ObjIdTypeTraits<PyObjClassDef> >::instance_ptr()->objInfo;
+        //!different function has different object id 
+        selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
     }
     
-    //!different function has different object id 
-    selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
     this->handler = singleton_t<PyClassHandler>::instance_ptr();
     expr__class__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__class__").get();
 }
@@ -450,10 +470,7 @@ PyObjPtr PyCppUtil::getArgVal(std::vector<ArgTypeInfo>& allArgsVal, std::vector<
 }
 
 IterUtil::IterUtil(PyContext& c, PyObjPtr v):context(c), obj(v), index(0){
-    if (PyCheckDict(obj)){
-        obj = obj.cast<PyObjDict>()->getValueAsList();
-    }
-    else if (PyCheckInstance(obj) && PyCppUtil::hasAttr(context, obj, "next")){
+    if (PyCheckInstance(obj) && PyCppUtil::hasAttr(context, obj, "next")){
         funcNext = PyCppUtil::getAttr(context, obj, "next");
     }
 }
