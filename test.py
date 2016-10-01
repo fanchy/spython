@@ -182,4 +182,10 @@ testdict7.popitem()
 testdict7.update({3:333, 1:1111})
 testdict11 = testdict7.values()
 
+dictiter = dict_iter(testdict7)
+dictiter1= dictiter.next()
+for m, n in testdict7.iteritems():
+    print('iter', m, n)
+
+
 

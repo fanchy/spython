@@ -34,7 +34,11 @@ PyObjPtr& PyClassHandler::handleCall(PyContext& context, PyObjPtr& self, std::ve
     PyObjPtr ret = new PyObjClassInstance(self);
 
     if (__init__func && PyCheckFunc(__init__func)){
-        return __init__func->getHandler()->handleCall(context, __init__func, allArgsVal, argAssignVal);
+        std::vector<ArgTypeInfo> allArgsVal2 = allArgsVal;
+        ArgTypeInfo tmp;
+        allArgsVal2.push_back(tmp);
+        argAssignVal.insert(argAssignVal.begin(), ret);
+        __init__func->getHandler()->handleCall(context, __init__func, allArgsVal, argAssignVal);
     }
     
     return context.cacheResult(ret);

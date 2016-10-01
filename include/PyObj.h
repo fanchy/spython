@@ -306,6 +306,18 @@ public:
     ExprAST*                expr__class__;
 };
 
+class PyInstanceData{
+public:
+    PyInstanceData():nValue(0){
+    }
+    virtual ~PyInstanceData(){}
+    
+    int                        nValue;
+    std::vector<ExprASTPtr>    exprValues;
+    std::vector<PyObjPtr>      objValues;
+};
+typedef SmartPtr<PyInstanceData> PyInstanceDataPtr;
+
 class PyObjClassInstance:public PyObj {
 public:
     PyObjClassInstance(PyObjPtr& v):classDefPtr(v){
@@ -327,6 +339,7 @@ public:
     
     PyObjPtr            classDefPtr;
     ObjIdInfo           selfObjInfo;
+    PyInstanceDataPtr   instanceData;
 };
 
 class PyBuiltinTypeInfo:public PyObj {
@@ -486,6 +499,7 @@ struct PyCppUtil{
 
 #define PyCheckFunc(x) (x->getType() == PY_FUNC_DEF)
 #define PyAsserFunc(x) PyCppUtil::pyAssert(x, PY_FUNC_DEF)
+#define PyCheckCallable(x) (x->getType() == PY_FUNC_DEF || x->getType() == PY_CLASS_DEF)
 
 #define PyCheckModule(x) (x->getType() == PY_MOD)
 #define PyAsserModule(x) PyCppUtil::pyAssert(x, PY_MOD)

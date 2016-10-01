@@ -487,7 +487,7 @@ std::map<std::string, PyObjPtr> PyCppUtil::getAllFieldData(PyObjPtr obj){
 }
 
 PyObjPtr& PyCppUtil::callPyfunc(PyContext& context, PyObjPtr& func, std::vector<PyObjPtr>& argAssignVal){
-    if (func && PyCheckFunc(func)){
+    if (func && PyCheckCallable(func)){
         vector<ArgTypeInfo> allArgsVal;
         for (size_t i = 0; i < argAssignVal.size(); ++i){
             ArgTypeInfo info;

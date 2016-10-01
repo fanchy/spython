@@ -9,6 +9,74 @@
 #include "StrTool.h"
 
 namespace ff {
+    
+class PyDictIterData:public PyInstanceData{
+public:
+    PyDictIterData():version(0){
+    }
+    size_t                       version;
+    PyObjDict::DictMap::iterator it;
+};
+struct PyDictIterExt{
+    static PyObjPtr iter__init__(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+
+        if (argAssignVal.size() != 2){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: get() takes exactly 1 argument (%u given)", argAssignVal.size()));
+        }
+        PyObjPtr& iterself = argAssignVal[0];
+        PyObjPtr& dictself = argAssignVal[1];
+        
+        PyAssertInstance(iterself);
+        PyAssertDict(dictself);
+        
+        PyDictIterData* instanceData = new PyDictIterData();
+        instanceData->it = dictself.cast<PyObjDict>()->value.begin();
+        instanceData->version = dictself.cast<PyObjDict>()->version;
+        instanceData->objValues.push_back(dictself);
+        PyObjPtr iterRetTupleCache = new PyObjTuple();
+        instanceData->objValues.push_back(iterRetTupleCache);
+        
+        iterself.cast<PyObjClassInstance>()->instanceData = instanceData;
+        
+        return PyObjTool::buildTrue();
+    }
+    static PyObjPtr next(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        PyAssertInstance(self);
+        if (argAssignVal.size() != 0){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: next() takes exactly 0 argument (%u given)", argAssignVal.size()));
+        }
+        if (!(self.cast<PyObjClassInstance>()->instanceData)){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: next() takes exactly 0 argument (%u given)", argAssignVal.size()));
+        }
+        PyDictIterData* instanceData = self.cast<PyObjClassInstance>()->instanceData.cast<PyDictIterData>();
+        PyObjPtr& iterRetTupleCache = self.cast<PyObjClassInstance>()->instanceData->objValues[1];
+        
+        PyObjPtr& dictself = self.cast<PyObjClassInstance>()->instanceData->objValues[0];
+        if (instanceData->version != dictself.cast<PyObjDict>()->version){
+            if (dictself.cast<PyObjDict>()->value.empty()){
+                instanceData->it = dictself.cast<PyObjDict>()->value.end();
+                return NULL;
+            }
+            instanceData->version = dictself.cast<PyObjDict>()->version;
+            instanceData->it = dictself.cast<PyObjDict>()->value.begin();
+            for (size_t i = 0; i < instanceData->nValue; ++i){
+                ++instanceData->it;
+            }
+        }
+        if (instanceData->it != dictself.cast<PyObjDict>()->value.end()){
+            iterRetTupleCache.cast<PyObjTuple>()->clear();
+            iterRetTupleCache.cast<PyObjTuple>()->append(DICT_ITER_KEY(instanceData->it));
+            iterRetTupleCache.cast<PyObjTuple>()->append(DICT_ITER_VAL(instanceData->it));
+
+            ++instanceData->it;
+            ++instanceData->nValue;//!index
+            return iterRetTupleCache;
+        }
+        return NULL;
+    }
+    
+};
+
 struct PyDictExt{
     static PyObjPtr clear(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
         PyAssertDict(self);
@@ -79,6 +147,16 @@ struct PyDictExt{
         PY_ASSERT_ARG_SIZE(context, argAssignVal.size(), 0, "items");
         
         PyObjPtr ret = self.cast<PyObjDict>()->getValueAsList();
+        return ret;
+    }
+    static PyObjPtr iteritems(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        PyAssertDict(self);
+        PY_ASSERT_ARG_SIZE(context, argAssignVal.size(), 0, "iteritems");
+        
+        std::vector<PyObjPtr> constructArgs;
+        constructArgs.push_back(self);
+        
+        PyObjPtr ret = PyCppUtil::callPyfunc(context, context.allBuiltin["dict_iter"], constructArgs);
         return ret;
     }
     static PyObjPtr keys(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
@@ -152,6 +230,12 @@ struct PyDictExt{
     }
     static bool init(PyContext& pycontext){
         {
+            PyObjPtr objClass  = PyObjClassDef::build(pycontext, "dictionary-itemiterator");
+            PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyDictIterExt::iter__init__, "__init__"));
+            PyCppUtil::setAttr(pycontext, objClass, "next", PyCppUtil::genFunc(PyDictIterExt::next, "next"));
+            pycontext.allBuiltin["dict_iter"] = objClass;
+        }
+        {            
             PyObjPtr objClass = PyObjClassDef::build(pycontext, "dict", &singleton_t<ObjIdTypeTraits<PyObjDict> >::instance_ptr()->objInfo);
             
             PyCppUtil::setAttr(pycontext, objClass, "clear", PyCppUtil::genFunc(PyDictExt::clear, "clear"));
@@ -160,6 +244,7 @@ struct PyDictExt{
             PyCppUtil::setAttr(pycontext, objClass, "get", PyCppUtil::genFunc(PyDictExt::get, "get"));
             PyCppUtil::setAttr(pycontext, objClass, "has_key", PyCppUtil::genFunc(PyDictExt::has_key, "has_key"));
             PyCppUtil::setAttr(pycontext, objClass, "items", PyCppUtil::genFunc(PyDictExt::items, "items"));
+            PyCppUtil::setAttr(pycontext, objClass, "iteritems", PyCppUtil::genFunc(PyDictExt::iteritems, "iteritems"));
             PyCppUtil::setAttr(pycontext, objClass, "keys", PyCppUtil::genFunc(PyDictExt::keys, "keys"));
             PyCppUtil::setAttr(pycontext, objClass, "pop", PyCppUtil::genFunc(PyDictExt::pop, "pop"));
             PyCppUtil::setAttr(pycontext, objClass, "popitem", PyCppUtil::genFunc(PyDictExt::popitem, "popitem"));
