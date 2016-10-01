@@ -19,9 +19,7 @@ public:
     virtual int getType() const {
         return 0;
     }
-    virtual PyIterPtr getIter(){
-        return NULL;
-    }
+
     virtual std::string handleStr(PyContext& context, const PyObjPtr& self) const;
     
     virtual std::string handleRepr(PyContext& context, const PyObjPtr& self) const{

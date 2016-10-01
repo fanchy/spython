@@ -110,12 +110,24 @@ struct PyDictExt{
         if (argAssignVal.size() != 0){
             PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: popitem() takes exactly 0 argument (%u given)", argAssignVal.size()));
         }
-        if (0 == self.cast<PyObjDict>()->size()){
+        PyObjPtr ret = self.cast<PyObjDict>()->popitem();
+        if (!ret){
             PY_RAISE_STR(context, PyCppUtil::strFormat("KeyError: 'popitem(): dictionary is empty'"));
         }
 
-        return self.cast<PyObjDict>()->popitem();
+        return ret;
     }
+    static PyObjPtr setdefault(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        PyAssertDict(self);
+        if (argAssignVal.size() < 1){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: setdefault() takes exactly 2 argument (%u given)", argAssignVal.size()));
+        }
+        
+        PyObjPtr& indexObj = argAssignVal[0];
+        PyObjPtr ret = self.cast<PyObjDict>()->setdefault(context, indexObj, argAssignVal[1]);
+        return ret;
+    }
+    
     static bool init(PyContext& pycontext){
         {
             PyObjPtr objClass = PyObjClassDef::build(pycontext, "dict", &singleton_t<ObjIdTypeTraits<PyObjDict> >::instance_ptr()->objInfo);
@@ -128,6 +140,8 @@ struct PyDictExt{
             PyCppUtil::setAttr(pycontext, objClass, "items", PyCppUtil::genFunc(PyDictExt::items, "items"));
             PyCppUtil::setAttr(pycontext, objClass, "keys", PyCppUtil::genFunc(PyDictExt::keys, "keys"));
             PyCppUtil::setAttr(pycontext, objClass, "pop", PyCppUtil::genFunc(PyDictExt::pop, "pop"));
+            PyCppUtil::setAttr(pycontext, objClass, "popitem", PyCppUtil::genFunc(PyDictExt::popitem, "popitem"));
+            PyCppUtil::setAttr(pycontext, objClass, "setdefault", PyCppUtil::genFunc(PyDictExt::setdefault, "setdefault"));
             pycontext.allBuiltin["dict"] = objClass;
         }
         return true;

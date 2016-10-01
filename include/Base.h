@@ -105,8 +105,6 @@ struct PyHelper{
 class PyContext;
 
 class ExprAST;
-class PyIter;
-typedef SmartPtr<PyIter> PyIterPtr;
 
 struct ObjIdInfo{
     ObjIdInfo():nModuleId(0), nObjectId(0){}
@@ -154,7 +152,7 @@ public:
     virtual int getFieldNum() const { return m_objStack.size(); }
     static std::string dump(PyContext& context, PyObjPtr& self, int preBlank = 0);
 
-    virtual PyObjPtr& getVar(PyContext& c, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
+    virtual PyObjPtr& getVar(PyContext& c, PyObjPtr& self, ExprAST* e);
     virtual const ObjIdInfo& getObjIdInfo() = 0;
 
     void clear(){
@@ -169,14 +167,6 @@ public:
 };
 typedef PyObj::PyObjPtr PyObjPtr;
 
-
-class PyIter{
-public:
-    virtual PyObjPtr next() {
-        return NULL;
-    }
-    virtual ~PyIter(){}
-};
 
 struct PyObjTool{
     static PyObjPtr  buildNULL();
@@ -248,10 +238,6 @@ public:
     virtual ~PyObjHandler(){}
     
     virtual int getType() const = 0;
-
-    virtual PyIterPtr getIter(){
-        return NULL;
-    }
 
     virtual std::string handleStr(PyContext& context, const PyObjPtr& self) const{
         return "";

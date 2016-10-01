@@ -178,5 +178,6 @@ testdict7 = dict.fromkeys(listtuple, 122)
 testdict8 = testdict7.get(12, 13)
 testdict9 = testdict7.has_key(12)
 testdict10= testdict7.keys()
+testdict7.popitem()
 
 

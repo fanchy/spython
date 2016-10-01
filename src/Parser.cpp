@@ -48,10 +48,11 @@ ExprASTPtr Parser::parse_file_input(){
                 stmt->dump(0);
                 allStmt->exprs.push_back(stmt);
             }else{
-                if (m_curScanner->getToken()->strVal == "\n"){
+                if (m_curScanner->getToken()->strVal == "\n" || m_curScanner->getToken()->strVal == " "){
                     m_curScanner->seek(1);
                     continue;
                 }
+                
                 printf("this->parse_stmt Ê§°Ü£¡%d %s\n", m_curScanner->seek(0), m_curScanner->getToken()->dump().c_str());
                 m_curScanner->seek(1);
             }

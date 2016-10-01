@@ -103,7 +103,8 @@ int PyObjHandler::handleCmp(PyContext& context, const PyObjPtr& self, const PyOb
     return 0;
 }
 
-PyObjPtr& PyObj::getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex, ExprAST* e) {
+PyObjPtr& PyObj::getVar(PyContext& pc, PyObjPtr& self2, ExprAST* e) {
+    unsigned int nFieldIndex = e->getFieldIndex(pc, self2);
     //DMSG(("nFieldIndex %d\n", nFieldIndex));
     if (nFieldIndex < m_objStack.size()) {
         return m_objStack[nFieldIndex];
@@ -241,22 +242,28 @@ unsigned int ExprAST::getFieldIndex(PyContext& context, PyObjPtr& obj){
     vector<int>& object2index = module2objcet2fieldIndex[p.nModuleId];
     
     if (p.nObjectId >= object2index.size()){
-        object2index.resize(p.nObjectId + 1, -1);
+        for (size_t i = object2index.size(); i < p.nObjectId + 1; ++i){
+            object2index.push_back(-1);
+            //DMSG(("filedname5 %s %s [%d-%d]\n", obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[i], i));
+        }
+        
         object2index[p.nObjectId] = obj->getFieldNum();
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
-        //DMSG(("filedname2 %s %s %d\n", obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId]));
+        //DMSG(("filedname2 %s %s %d[%d-%d]\n", obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId], p.nModuleId, p.nObjectId));
     }
     
     int& nIndex = object2index[p.nObjectId];
     if (nIndex < 0){
         nIndex = obj->getFieldNum();
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
+        //DMSG(("filedname3 [%d]%s %s %d[%d-%d]\n", obj->getType(), obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId], p.nModuleId, p.nObjectId));
     }
+    //DMSG(("filedname4 [%d]%s %s %d[%d-%d] %d-%p\n", obj->getType(), obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId], p.nModuleId, p.nObjectId, nIndex, this));
     return (unsigned int)nIndex;
 }
 PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
     PyObjPtr& obj = pycontext.curstack;
-    return obj->getVar(pycontext, obj, this->getFieldIndex(pycontext, obj), this);
+    return obj->getVar(pycontext, obj, this);
 }
 
 

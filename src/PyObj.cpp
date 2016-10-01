@@ -87,13 +87,41 @@ PyObjPtr PyObjDict::keys(){
 size_t PyObjDict::size(){
     return value.size();
 }
-PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e, const string& strType)
+PyObjPtr PyObjDict::popitem(){
+    if (value.empty()){
+        return NULL;
+    }
+    PyObjPtr ret = new PyObjTuple();
+    DictMap::iterator it = value.begin();
+    ret.cast<PyObjTuple>()->append(DICT_ITER_KEY(it));
+    ret.cast<PyObjTuple>()->append(DICT_ITER_VAL(it));
+    value.erase(it);
+    ++version;
+    return ret;
+}
+
+PyObjPtr PyObjDict::setdefault(PyContext& context, PyObjPtr &k, PyObjPtr &v){
+    PyObjDict::Key keyInfo;
+    keyInfo.key = k;
+    keyInfo.context = &context;
+    keyInfo.hash= k->getHandler()->handleHash(context, k);
+    //pair<DictMap::iterator, bool> > ret = value.insert(make_pair(keyInfo, v));
+    DictMap::iterator it = value.find(keyInfo);
+    if (it != value.end()){
+        return DICT_ITER_VAL(it);
+    }
+    it->second = v;
+    ++version;
+    return v;
+}
+
+PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, ExprAST* e, const string& strType)
 {
     PyObjPtr& classObj = context.allBuiltin[strType];
     if (!classObj){
         return context.cacheResult(classObj);
     }
-    PyObjPtr& ret = classObj->getVar(context, classObj, e->getFieldIndex(context, classObj), e);
+    PyObjPtr& ret = classObj->getVar(context, classObj, e);
 
     if (false == IS_NULL(ret)){
         if (PyCheckFunc(ret)){
@@ -101,6 +129,7 @@ PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, unsigned 
         }
         return ret;
     }
+    unsigned int nFieldIndex = e->getFieldIndex(context, self);
     vector<PyObjPtr>& m_objStack = self->m_objStack;
     for (unsigned int i = m_objStack.size(); i <= nFieldIndex; ++i){
         m_objStack.push_back(PyObjTool::buildNULL());
@@ -133,8 +162,9 @@ PyObjPtr& PyObjClassInstance::assignToField(PyContext& context, PyObjPtr& self, 
     ret = v;
     return ret;
 }
-PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e)
+PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, ExprAST* e)
 {
+    unsigned int nFieldIndex = e->getFieldIndex(context, self);
     if (nFieldIndex < m_objStack.size()) {
         PyObjPtr& ret = m_objStack[nFieldIndex];
         //DMSG(("PyObjClassInstance::getVar...%u %d, %ds", nFieldIndex, ret->getType(), ret->getHandler()->handleStr(ret).c_str()));
@@ -146,7 +176,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, unsigne
         }
     }
   
-    PyObjPtr& ret = classDefPtr->getVar(context, classDefPtr, e->getFieldIndex(context, classDefPtr), e);
+    PyObjPtr& ret = classDefPtr->getVar(context, classDefPtr, e);
 
     if (false == IS_NULL(ret)){
         if (PyCheckFunc(ret)){
@@ -359,11 +389,11 @@ PyObjClassDef::PyObjClassDef(const std::string& s, ObjIdInfo* p):name(s){
     expr__class__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__class__").get();
 }
 
-PyObjPtr& PyObjClassDef::getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e) {
+PyObjPtr& PyObjClassDef::getVar(PyContext& context, PyObjPtr& self, ExprAST* e) {
     if (e == expr__class__){//! return __class__
         return context.cacheResult(self);
     }
-    PyObjPtr& ret = PyObj::getVar(context, self, e->getFieldIndex(context, self), e);
+    PyObjPtr& ret = PyObj::getVar(context, self, e);
     return ret;
 }
 PyObjPtr PyObjModule::BuildModule(PyContext& context, const std::string& s, const std::string& p){

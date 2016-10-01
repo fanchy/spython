@@ -39,7 +39,7 @@ namespace ff {
 
 #define THROW_EVAL_ERROR(X) throw PyException::buildException(X)
 struct PyObjBuiltinTool{
-    static PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e, const std::string& strType);
+    static PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e, const std::string& strType);
 };
 class PyObjInt:public PyObj {
 public:
@@ -54,8 +54,8 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjInt> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
-        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "int");
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, e, "int");
     }
 };
 
@@ -68,8 +68,8 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjFloat> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
-        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "float");
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, e, "float");
     }
 };
 class PyObjBool:public PyObj {
@@ -82,8 +82,8 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjBool> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
-        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "bool");
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, e, "bool");
     }
 };
 typedef SmartPtr<PyObjBool> PyObjBoolPtr;
@@ -98,8 +98,8 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
-        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "str");
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, e, "str");
     }
 };
 
@@ -137,8 +137,8 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjTuple> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
-        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "tuple");
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, e, "tuple");
     }
     void clear(){
         value.clear();
@@ -159,8 +159,8 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjList> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
-        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "list");
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, e, "list");
     }
     void clear(){
         value.clear();
@@ -219,8 +219,8 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return singleton_t<ObjIdTypeTraits<PyObjDict> >::instance_ptr()->objInfo;
     }
-    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e){
-        return PyObjBuiltinTool::getVar(context, self, nFieldIndex, e, "dict");
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
+        return PyObjBuiltinTool::getVar(context, self, e, "dict");
     }
     PyObjDict& set(PyContext& context, PyObjPtr &k, PyObjPtr &v);
     PyObjPtr get(PyContext& context, const PyObjPtr &k);
@@ -230,6 +230,8 @@ public:
     PyObjPtr copy();
     PyObjPtr keys();
     size_t   size();
+    PyObjPtr popitem();
+    PyObjPtr setdefault(PyContext& context, PyObjPtr &k, PyObjPtr &v);
 public:
     typedef std::map<Key, PyObjPtr, cmp_key> DictMap;
     DictMap     value;
@@ -295,7 +297,7 @@ public:
         return selfObjInfo;
     }
     void processInheritInfo(PyContext& context, PyObjPtr& self);
-    PyObjPtr& getVar(PyContext& pc, PyObjPtr& self2, unsigned int nFieldIndex, ExprAST* e);
+    PyObjPtr& getVar(PyContext& pc, PyObjPtr& self2, ExprAST* e);
     
     std::string             name;
     std::vector<PyObjPtr>   parentClass;
@@ -317,7 +319,7 @@ public:
     virtual int getFieldNum() const { 
         return std::max(m_objStack.size(), classDefPtr->m_objStack.size()); 
     }
-    virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, unsigned int nFieldIndex, ExprAST* e);
+    virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e);
     
     virtual PyObjPtr& assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v); //!special process field assign
     
