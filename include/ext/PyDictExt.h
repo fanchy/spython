@@ -127,7 +127,29 @@ struct PyDictExt{
         PyObjPtr ret = self.cast<PyObjDict>()->setdefault(context, indexObj, argAssignVal[1]);
         return ret;
     }
-    
+    static PyObjPtr update(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        PyAssertDict(self);
+        PY_ASSERT_ARG_SIZE(context, argAssignVal.size(), 1, "update");
+        
+        PyObjPtr& arg1 = argAssignVal[0];
+  
+        self.cast<PyObjDict>()->update(context, arg1);
+
+        return PyObjTool::buildNone();
+    }
+    static PyObjPtr values(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        PyAssertDict(self);
+        PY_ASSERT_ARG_SIZE(context, argAssignVal.size(), 0, "values");
+        
+        PyObjPtr ret = new PyObjList();
+        
+        PyObjDict::DictMap::iterator it = self.cast<PyObjDict>()->value.begin();
+        for (; it != self.cast<PyObjDict>()->value.end(); ++it){
+            ret.cast<PyObjList>()->append(DICT_ITER_VAL(it));
+        }
+  
+        return ret;
+    }
     static bool init(PyContext& pycontext){
         {
             PyObjPtr objClass = PyObjClassDef::build(pycontext, "dict", &singleton_t<ObjIdTypeTraits<PyObjDict> >::instance_ptr()->objInfo);
@@ -142,6 +164,8 @@ struct PyDictExt{
             PyCppUtil::setAttr(pycontext, objClass, "pop", PyCppUtil::genFunc(PyDictExt::pop, "pop"));
             PyCppUtil::setAttr(pycontext, objClass, "popitem", PyCppUtil::genFunc(PyDictExt::popitem, "popitem"));
             PyCppUtil::setAttr(pycontext, objClass, "setdefault", PyCppUtil::genFunc(PyDictExt::setdefault, "setdefault"));
+            PyCppUtil::setAttr(pycontext, objClass, "update", PyCppUtil::genFunc(PyDictExt::update, "update"));
+            PyCppUtil::setAttr(pycontext, objClass, "values", PyCppUtil::genFunc(PyDictExt::values, "values"));
             pycontext.allBuiltin["dict"] = objClass;
         }
         return true;

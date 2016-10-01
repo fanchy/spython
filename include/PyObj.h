@@ -232,6 +232,7 @@ public:
     size_t   size();
     PyObjPtr popitem();
     PyObjPtr setdefault(PyContext& context, PyObjPtr &k, PyObjPtr &v);
+    void update(PyContext& context, PyObjPtr& v);
 public:
     typedef std::map<Key, PyObjPtr, cmp_key> DictMap;
     DictMap     value;

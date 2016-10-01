@@ -114,6 +114,15 @@ PyObjPtr PyObjDict::setdefault(PyContext& context, PyObjPtr &k, PyObjPtr &v){
     ++version;
     return v;
 }
+void PyObjDict::update(PyContext& context, PyObjPtr& v){
+    PyAssertDict(v);
+    
+    DictMap::iterator it = v.cast<PyObjDict>()->value.begin();
+    for (; it != v.cast<PyObjDict>()->value.end(); ++it){
+        value[it->first] = it->second;
+    }
+    ++version;
+}
 
 PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, ExprAST* e, const string& strType)
 {

@@ -179,5 +179,7 @@ testdict8 = testdict7.get(12, 13)
 testdict9 = testdict7.has_key(12)
 testdict10= testdict7.keys()
 testdict7.popitem()
+testdict7.update({3:333, 1:1111})
+testdict11 = testdict7.values()
 
 

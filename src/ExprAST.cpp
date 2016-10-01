@@ -714,20 +714,21 @@ PyObjPtr& TupleExprAST::eval(PyContext& context){TRACE_EXPR();
 }
 
 PyObjPtr& TupleExprAST::assignVal(PyContext& context, PyObjPtr& v){
-    if (!PyCheckTuple(v)){
-        PY_RAISE_STR(context, "value must be tuple");
+    if (values.size() != (size_t)v->getHandler()->handleLen(context, v)){
+        PY_RAISE_STR(context, "value size not equal");
     }
     
-    PyObjTuple* tuple = v.cast<PyObjTuple>();
-    if (values.size() != tuple->value.size()){
-        PY_RAISE_STR(context, "value size invalid");
-    }
-    
+    IterUtil iterUtil(context, v);
+
     for (unsigned int i = 0; i < values.size(); ++i){
+        PyObjPtr key = iterUtil.next();
+        if (!key){
+            PY_RAISE_STR(context, "iter value size not equal");
+        }
         if (values[i]->getType() != EXPR_VAR){
             PY_RAISE_STR(context, "left tuple must be var");
         }
-        values[i]->assignVal(context, tuple->value[i]);
+        values[i]->assignVal(context, key);
     }
     return v;
 }
