@@ -303,21 +303,22 @@ public:
         this->handler = singleton_t<PyNoneHandler>::instance_ptr();
         selfObjInfo   = singleton_t<ObjIdTypeTraits<PyObjNone> >::instance_ptr()->objInfo;
     }
+    /*
     PyObjNone(const ObjIdInfo& m, PyObjPtr v):modBelong(v){
         this->handler = singleton_t<PyNoneHandler>::instance_ptr();
         selfObjInfo   = m;
-    }
+    }*/
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
     ObjIdInfo       selfObjInfo;
     bool            isNull;
-    PyObjPtr        modBelong;
+    //PyObjPtr        modBelong;
 };
-typedef PyObjNone PyCallTmpStack;
+//typedef PyObjNone PyCallTmpStack;
 
 #define IS_NULL(o) (o.get() == NULL)
-#define IsFuncCallStack(o) (o->getType() == PY_NONE && o.cast<PyObjNone>()->modBelong)
+//#define IsFuncCallStack(o) (o->getType() == PY_NONE && o.cast<PyObjNone>()->modBelong)
 
 
 class PyContext{

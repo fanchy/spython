@@ -493,8 +493,11 @@ string FuncDefExprAST::dump(int nDepth){
 }
 
 PyObjPtr& FuncDefExprAST::eval(PyContext& context){TRACE_EXPR();
-    
     PyObjPtr rval = new PyObjFuncDef(funcname.cast<VariableExprAST>()->name, parameters, suite);
+    if (IsFuncCallStack(context.curstack)){ //!closure
+       rval.cast<PyObjFuncDef>()->closureStack = context.curstack;
+    }
+
     PyObjPtr& lval = funcname->assignVal(context, rval);
     return lval;
 }

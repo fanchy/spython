@@ -250,6 +250,23 @@ public:
 };
 typedef SmartPtr<PyCppFunc> PyCppFuncPtr;
 
+class PyCallTmpStack:public PyObj {
+public:
+    PyCallTmpStack(const ObjIdInfo& m, PyObjPtr v, PyObjPtr c):modBelong(v), closureStack(c){
+        this->handler = singleton_t<PyNoneHandler>::instance_ptr();
+        selfObjInfo   = m;
+    }
+    virtual const ObjIdInfo& getObjIdInfo(){
+        return selfObjInfo;
+    }
+    PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e);
+    PyObjPtr copy();
+    ObjIdInfo       selfObjInfo;
+    PyObjPtr        modBelong;
+    PyObjPtr        closureStack;
+};
+#define IsFuncCallStack(o) (o->getType() == PY_NONE && o.cast<PyCallTmpStack>()->modBelong)
+
 class PyObjFuncDef:public PyObj {
 public:
     PyObjFuncDef(const std::string& n, ExprASTPtr p, ExprASTPtr s, PyCppFuncPtr f = NULL):name(n), parameters(p), suite(s), pyCppfunc(f){
@@ -257,9 +274,11 @@ public:
         //!different function has different object id 
         selfObjInfo.nObjectId = singleton_t<ObjFieldMetaData>::instance_ptr()->allocObjId();
         this->handler = singleton_t<PyFuncHandler>::instance_ptr();
+        hasCopyClosure = false;
     }
     PyObjFuncDef(const std::string& n):name(n){
         this->handler = singleton_t<PyFuncHandler>::instance_ptr();
+        hasCopyClosure = false;
     }
     //PyObjPtr& exeFunc(PyContext& context, PyObjPtr& self, ExprASTPtr& arglist);
     void processParam(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal);
@@ -276,9 +295,12 @@ public:
         ret->suite         = suite;
         ret->classInstance = obj;
         ret->pyCppfunc     = pyCppfunc;
+        ret->closureStack  = closureStack;
+        ret->hasCopyClosure= hasCopyClosure;
         return ret;
     }
     bool hasSelfParam();
+    PyObjPtr& getClosureStack();
     
     std::string     name;
     ExprASTPtr      parameters;
@@ -287,6 +309,8 @@ public:
     PyObjPtr        classInstance;
     
     PyCppFuncPtr    pyCppfunc;
+    PyObjPtr        closureStack;
+    bool            hasCopyClosure;//! try avoid loop reference
 };
 
 class PyObjClassDef:public PyObj {

@@ -160,6 +160,27 @@ bool PyObjFuncDef::hasSelfParam(){
     }
     return false;
 }
+PyObjPtr& PyObjFuncDef::getClosureStack(){
+    if (hasCopyClosure || !closureStack){
+        return closureStack;
+    }
+    closureStack = closureStack.cast<PyCallTmpStack>()->copy();
+    hasCopyClosure = true;
+    return closureStack;
+}
+PyObjPtr PyCallTmpStack::copy(){
+    PyObjPtr ret = new PyCallTmpStack(selfObjInfo, modBelong, closureStack);
+    ret->m_objStack = this->m_objStack;
+    return ret;
+}
+PyObjPtr& PyCallTmpStack::getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
+    PyObjPtr& ret = PyObj::getVar(context, self, e);
+    if (!ret && closureStack){
+        return closureStack->getVar(context, closureStack, e);
+    }
+    return ret;
+}
+
 PyObjPtr& PyObjClassInstance::assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v){
     unsigned int nFieldIndex = fieldName->getFieldIndex(context, self);
 
@@ -351,11 +372,11 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
         PyContextBackUp backup(context);
 
         if (pyCppfunc){//!this is cpp func wrap
-            context.curstack = new PyCallTmpStack(this->getObjIdInfo(), NULL);
+            context.curstack = new PyCallTmpStack(this->getObjIdInfo(), NULL, getClosureStack());
             return pyCppfunc->exeFunc(context, self, allArgsVal, argAssignVal);
         }
         else{
-            context.curstack = new PyCallTmpStack(this->getObjIdInfo(), context.getFileIdModCache(this->suite->lineInfo.fileId));
+            context.curstack = new PyCallTmpStack(this->getObjIdInfo(), context.getFileIdModCache(this->suite->lineInfo.fileId), getClosureStack());
         }
 
         processParam(context, self, allArgsVal, argAssignVal);

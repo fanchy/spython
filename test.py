@@ -182,10 +182,19 @@ testdict7.popitem()
 testdict7.update({3:333, 1:1111})
 testdict11 = testdict7.values()
 
-dictiter = dict_iter(testdict7)
-dictiter1= dictiter.next()
 for m, n in testdict7.iteritems():
     print('iter', m, n)
 
-
-
+def closure1():
+    def closure2():
+        print('closure2', mm)
+        def closure3():
+            print('closure3', mm)
+            return mm
+        return closure3
+    
+    mm = 101
+    return closure2
+c1 = closure1()
+c2 = c1()
+c3 = c2()
