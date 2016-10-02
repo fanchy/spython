@@ -452,6 +452,8 @@ public:
     
     //!record obj field id num
     std::map<int, std::map<int, int> >  recordAllFiledIndex;
+    //!cache property class
+    PyObjPtr                            propertyClass;
 };
 #define TRACE_EXPR() context.setTraceExpr(this)
 #define TRACE_EXPR_PUSH() context.pushTraceExpr(this)

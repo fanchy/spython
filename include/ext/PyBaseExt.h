@@ -51,6 +51,33 @@ struct PyStrExt{
     }
 };
 
+struct PyPropertExt{
+    static PyObjPtr property__init__(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+
+        if (argAssignVal.size() < 2){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: property__init__() takes exactly 2/3/4 argument (%u given)", argAssignVal.size()));
+        }
+        PyObjPtr& propertySelf = argAssignVal[0];
+        PyObjPtr& func = argAssignVal[1];
+        PyAssertInstance(propertySelf);
+        
+        PyCppUtil::setAttr(context, propertySelf, "fget", func);
+        PyCppUtil::setAttr(context, propertySelf, "fset", PyObjTool::buildNone());
+        PyCppUtil::setAttr(context, propertySelf, "fdel", PyObjTool::buildNone());
+        
+        return PyObjTool::buildTrue();
+    }
+    static PyObjPtr setter(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        PyAssertInstance(self);
+        if (argAssignVal.size() != 1){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: setter() takes exactly 2 argument (%u given)", argAssignVal.size()));
+        }
+
+        PyCppUtil::setAttr(context, self, "fset", argAssignVal[0]);;
+
+        return self;
+    }
+};
 
 struct PyBaseExt{
     static bool init(PyContext& pycontext){
@@ -78,6 +105,13 @@ struct PyBaseExt{
     
             //PyCppUtil::setAttr(pycontext, strClass, "__class__", strClass);
             pycontext.allBuiltin["int"] = strClass;
+        }
+        {
+            PyObjPtr objClass  = PyObjClassDef::build(pycontext, "property");
+            PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyPropertExt::property__init__, "property__init__"));
+            PyCppUtil::setAttr(pycontext, objClass, "setter", PyCppUtil::genFunc(PyPropertExt::setter, "setter"));
+            pycontext.allBuiltin["property"] = objClass;
+            pycontext.propertyClass = objClass;
         }
         return true;
     }

@@ -38,7 +38,7 @@ PyObjPtr& PyClassHandler::handleCall(PyContext& context, PyObjPtr& self, std::ve
         ArgTypeInfo tmp;
         allArgsVal2.push_back(tmp);
         argAssignVal.insert(argAssignVal.begin(), ret);
-        __init__func->getHandler()->handleCall(context, __init__func, allArgsVal, argAssignVal);
+        __init__func->getHandler()->handleCall(context, __init__func, allArgsVal2, argAssignVal);
     }
     
     return context.cacheResult(ret);

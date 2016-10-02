@@ -212,6 +212,16 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, ExprAST
         if (PyCheckFunc(ret)){
             return context.cacheResult(ret.cast<PyObjFuncDef>()->forkClassFunc(self));
         }
+        else if (IS_PROPERTY_OBJ(context, ret)){//!special for property getter
+            PyObjPtr func = PyCppUtil::getAttr(context, ret, "fget");
+            if (PyCheckFunc(func)){
+                PyObjPtr classFunc = func.cast<PyObjFuncDef>()->forkClassFunc(self);
+                vector<PyObjPtr> allValue;
+                PyObjPtr getterRet = PyCppUtil::callPyfunc(context, classFunc, allValue);
+                return context.cacheResult(getterRet);
+            }
+            return context.cacheResult(PyObjTool::buildNULL());
+        }
         return ret;
     }
 

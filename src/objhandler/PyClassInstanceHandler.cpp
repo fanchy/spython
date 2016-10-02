@@ -35,6 +35,10 @@ PyObjPtr& PyClassInstanceHandler::handleCall(PyContext& context, PyObjPtr& self,
 
     if (__init__func && PyCheckFunc(__init__func)){
         //DMSG(("__init__func =%d", __init__func->getType()));
+        vector<ArgTypeInfo>  allArgsVal2 = allArgsVal;
+        ArgTypeInfo tmp;
+        allArgsVal2.insert(allArgsVal2.begin(), tmp);
+        argAssignVal.insert(argAssignVal.begin(), self);
         __init__func->getHandler()->handleCall(context, __init__func, allArgsVal, argAssignVal);
     }
     

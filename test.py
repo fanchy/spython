@@ -38,6 +38,8 @@ class F:
 
 class Foo(F):
     a = 10
+    def __init__(self):
+        self.b = 1022
     def __str__(self):
         return 'Foo instance:'
     def __len__(self):
@@ -51,9 +53,16 @@ class Foo(F):
         return self
     def say(a):
         return a
+    @property
+    def A(self):
+        print('property self:', self)
+        return self.b
+
 f = Foo()
 f2 = Foo()
 print('lenf', len(f))
+property1 = f.A
+
 f2.c = 10
 if f == f2:
     print('equal2')
@@ -195,6 +204,4 @@ def closure1():
     
     mm = 101
     return closure2
-c1 = closure1()
-c2 = c1()
-c3 = c2()
+

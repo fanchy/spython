@@ -1172,21 +1172,15 @@ PyObjPtr& DecoratorAST::eval(PyContext& context){TRACE_EXPR();
 
     for (size_t i = 0; i < allDecorators.size(); ++i){
         PyObjPtr funcObj = allDecorators[allDecorators.size() - 1 - i]->eval(context);
-        if (!funcObj || !PyCheckFunc(funcObj)){
+        if (!funcObj || !PyCheckCallable(funcObj)){
             PY_RAISE_STR(context, PyCppUtil::strFormat("Decorator must be a func given:%d", funcObj->getType()));
         }
-        
-        vector<ArgTypeInfo> allArgsTypeInfo;
-        ArgTypeInfo info2;
-        allArgsTypeInfo.push_back(info2);
         
         vector<PyObjPtr> allValue;
         allValue.push_back(objFunc);
         
-        objFunc = funcObj->getHandler()->handleCall(context, funcObj, allArgsTypeInfo, allValue);
-        if (funcDef->getType() == EXPR_FUNCDEF){
-            funcDef.cast<FuncDefExprAST>()->funcname->assignVal(context, objFunc);
-        }
+        objFunc = PyCppUtil::callPyfunc(context, funcObj, allValue);
+        funcDef.cast<FuncDefExprAST>()->funcname->assignVal(context, objFunc);
     }
     return context.cacheResult(PyObjTool::buildNone());
 }

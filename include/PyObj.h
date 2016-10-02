@@ -363,6 +363,8 @@ public:
     PyInstanceDataPtr   instanceData;
 };
 
+#define IS_PROPERTY_OBJ(context, x) (x->getType() == PY_CLASS_INST && x.cast<PyObjClassInstance>()->classDefPtr.get() == context.propertyClass.get())
+
 class PyBuiltinTypeInfo:public PyObj {
 public:
     PyBuiltinTypeInfo(int n):nType(n){

@@ -21,7 +21,7 @@ struct PyDictIterExt{
     static PyObjPtr iter__init__(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
 
         if (argAssignVal.size() != 2){
-            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: get() takes exactly 1 argument (%u given)", argAssignVal.size()));
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: iter__init__() takes exactly 2 argument (%u given)", argAssignVal.size()));
         }
         PyObjPtr& iterself = argAssignVal[0];
         PyObjPtr& dictself = argAssignVal[1];

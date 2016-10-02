@@ -23,5 +23,4 @@
 23.tuple list dict func -- ok
 24.linux
 25.range		-- ok
-26.del
-27. ±Õ°ü		-- ok
+26. ±Õ°ü		-- ok
