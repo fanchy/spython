@@ -30,6 +30,7 @@ def f1(a, b, c):
 
 s= f1(**{'a':1, 'b':2, 'c':5})
 class F:
+    'OhThisIsDoc'
     def hi(self):
         self.d = 99
         print('hi')

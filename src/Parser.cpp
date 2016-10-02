@@ -1844,8 +1844,21 @@ ExprASTPtr Parser::parse_classdef(){
         THROW_ERROR(": needed after class");
     }
     m_curScanner->seek(1);
+    /*
+    if (m_curScanner->getToken()->strVal == "\n"){
+        m_curScanner->seek(1);
+    }
     
+    if (m_curScanner->getToken()->nTokenType == TOK_STR){
+        printf("TTTTTTTTTTTTTTTT:%s\n", m_curScanner->getToken()->strVal.c_str());
+    }
+    */
+    //string tmp = m_curScanner->getToken()->strVal;
     ExprASTPtr suite = parse_suite();
+    if (EXPR_STMT == suite->getType() && suite.cast<StmtAST>()->exprs){
+        printf("TTTTTTTTTTTTTTTT:%s,%d\n", tmp.c_str(), suite->getType());
+    }
+    
     if (!suite){
         THROW_ERROR("suite parse failed after class");
     }
