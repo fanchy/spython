@@ -75,7 +75,28 @@ ExprASTPtr Parser::parse_decorator(){
     ExprASTPtr ret = parse_test();
     if (m_curScanner->getToken()->strVal == "\n"){
         m_curScanner->seek(1);
+        return ret;
     }
+    /*
+    if (m_curScanner->getToken()->strVal != "."){
+        return ret;
+    }
+    
+    while (m_curScanner->getToken()->strVal == "."){
+        m_curScanner->seek(1);
+
+        //DMSG(("cur2:%s", m_curScanner->getToken()->strVal.c_str()));
+        ExprASTPtr name = parse_test();
+        //DMSG(("cur3:%s", m_curScanner->getToken()->strVal.c_str()));
+        if (!name){
+            return NULL;
+        }
+        ExprASTPtr pre = ret;
+        ret = ALLOC_EXPR<DotGetFieldExprAST>(name);
+        ret.cast<DotGetFieldExprAST>()->preExpr = pre;
+    }
+    */
+    
     /*
     vector<ExprASTPtr> expr_dotted_name;
     

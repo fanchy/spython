@@ -749,9 +749,11 @@ PyObjPtr& DotGetFieldExprAST::eval(PyContext& context){TRACE_EXPR();
     PyObjPtr obj = preExpr->eval(context);
     PyContextBackUp backup(context);
     context.curstack = obj;
-    //string strObj = PyObj::dump(obj);
-    //printf("%p %s:obj:\n %s", obj.get(), fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
-    return fieldName->eval(context);
+    //string strObj = PyObj::dump(context, obj);
+    //printf("%p %s %s:obj:\n %s", obj.get(), preExpr.cast<VariableExprAST>()->name.c_str(), fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
+    PyObjPtr& ret = fieldName->eval(context);
+
+    return ret;
 }
 
 PyObjPtr& DotGetFieldExprAST::assignVal(PyContext& context, PyObjPtr& v){
@@ -764,9 +766,10 @@ PyObjPtr& DotGetFieldExprAST::assignVal(PyContext& context, PyObjPtr& v){
     context.curstack = obj;
     //string strObj = PyObj::dump(obj);
     //printf("%s:obj:\n %s", fieldName.cast<VariableExprAST>()->name.c_str(), strObj.c_str());
-    PyObjPtr& ref = fieldName->eval(context);
-    ref = v;
-    return ref;
+    PyObjPtr& ret = fieldName->eval(context);
+
+    ret = v;
+    return ret;
 }
 string SliceExprAST::dump(int nDepth){
     string ret;
@@ -1168,20 +1171,29 @@ PyObjPtr& TryAst::eval(PyContext& context){TRACE_EXPR();
 }
 
 PyObjPtr& DecoratorAST::eval(PyContext& context){TRACE_EXPR();
-    PyObjPtr objFunc = funcDef->eval(context);
-
+    vector<PyObjPtr> funcDecorators;
     for (size_t i = 0; i < allDecorators.size(); ++i){
-        PyObjPtr funcObj = allDecorators[allDecorators.size() - 1 - i]->eval(context);
+        ExprASTPtr& tmpExpr = allDecorators[allDecorators.size() - 1 - i];
+        PyObjPtr funcObj = tmpExpr->eval(context);
         if (!funcObj || !PyCheckCallable(funcObj)){
             PY_RAISE_STR(context, PyCppUtil::strFormat("Decorator must be a func given:%d", funcObj->getType()));
         }
+        funcDecorators.push_back(funcObj);
+        
+        
+    }
+    
+    PyObjPtr objFunc = funcDef->eval(context);
+
+    for (size_t i = 0; i < funcDecorators.size(); ++i){
+        PyObjPtr& funcD = funcDecorators[i];
         
         vector<PyObjPtr> allValue;
         allValue.push_back(objFunc);
         
-        objFunc = PyCppUtil::callPyfunc(context, funcObj, allValue);
-        funcDef.cast<FuncDefExprAST>()->funcname->assignVal(context, objFunc);
-    }
+        objFunc = PyCppUtil::callPyfunc(context, funcD, allValue);
+    }    
+    funcDef.cast<FuncDefExprAST>()->funcname->assignVal(context, objFunc);
     return context.cacheResult(PyObjTool::buildNone());
 }
 static PyObjPtr lambdaFunc(PyContext& context, std::vector<PyObjPtr>& argAssignVal, std::vector<ExprASTPtr>& data){

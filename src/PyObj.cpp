@@ -189,6 +189,22 @@ PyObjPtr& PyObjClassInstance::assignToField(PyContext& context, PyObjPtr& self, 
     }
     
     PyObjPtr& ret = m_objStack[nFieldIndex];
+    
+    if (!ret){ //!property check
+        PyObjPtr& ret2 = classDefPtr->getVar(context, classDefPtr, fieldName.get());
+        if (ret2 && IS_PROPERTY_OBJ(context, ret2) && PyCheckInstance(self)){//!special for property getter
+            PyObjPtr func = PyCppUtil::getAttr(context, ret2, "fset");
+            if (PyCheckFunc(func)){
+                PyObjPtr classFunc = func.cast<PyObjFuncDef>()->forkClassFunc(self);
+                vector<PyObjPtr> allValue;
+                allValue.push_back(v);
+                PyCppUtil::callPyfunc(context, classFunc, allValue);
+                return v;
+            }
+            return context.cacheResult(PyObjTool::buildNULL());
+        }
+    }
+
     ret = v;
     return ret;
 }

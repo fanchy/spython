@@ -57,12 +57,16 @@ class Foo(F):
     def A(self):
         print('property self:', self)
         return self.b
-
+    @A.setter
+    def A(self, v):
+        print('property set:', v)
+        self.b = v
 f = Foo()
-f2 = Foo()
 print('lenf', len(f))
+f.A = 9966
 property1 = f.A
 
+f2 = Foo()
 f2.c = 10
 if f == f2:
     print('equal2')

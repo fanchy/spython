@@ -534,6 +534,7 @@ struct PyCppUtil{
 #define PyCheckDict(x) (x->getType() == PY_DICT)
 #define PyAssertDict(x) PyCppUtil::pyAssert(x, PY_DICT)
 
+#define PyCheckClass(x) (x->getType() == PY_CLASS_DEF)
 #define PyCheckInstance(x) (x->getType() == PY_CLASS_INST)
 #define PyAssertInstance(x) PyCppUtil::pyAssert(x, PY_CLASS_INST)
 
