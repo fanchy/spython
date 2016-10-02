@@ -321,7 +321,7 @@ public:
     ReturnAST(ExprASTPtr& v):testlist(v){
     }
     virtual int getType() {
-        return EXPR_DEL_STMT;
+        return EXPR_RETURN_STMT;
     }
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
@@ -620,6 +620,7 @@ public:
         values.push_back(v);
         return *this;
     }
+    void delVal(PyContext& context);
 };
 
 class FuncArglist : public ExprAST {
@@ -684,6 +685,7 @@ public:
     virtual PyObjPtr& eval(PyContext& context);
     
     PyObjPtr& assignVal(PyContext& context, PyObjPtr& v);
+    virtual void delVal(PyContext& context);
 public:
     ExprASTPtr fieldName;
 };
@@ -703,6 +705,7 @@ public:
     virtual PyObjPtr& eval(PyContext& context);
     
     PyObjPtr& assignVal(PyContext& context, PyObjPtr& v);
+    void delVal(PyContext& context);
 public:
     ExprASTPtr start;
     ExprASTPtr stop;

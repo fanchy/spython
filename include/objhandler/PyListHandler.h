@@ -33,6 +33,7 @@ public:
     virtual long handleLen(PyContext& context, PyObjPtr& self);
     virtual bool handleContains(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const;
     virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step);
+    virtual void handleSliceDel(PyContext& context, PyObjPtr& self, PyObjPtr& k);
 };
 
 

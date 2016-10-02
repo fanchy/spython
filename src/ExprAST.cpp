@@ -116,8 +116,9 @@ string PrintAST::dump(int nDepth){
 }
 
 PyObjPtr& DelAST::eval(PyContext& context){TRACE_EXPR();
-    PyObjPtr& ret = exprlist->eval(context);
-    return ret;
+    exprlist->delVal(context);
+
+    return context.cacheResult(PyObjTool::buildNone());
 }
 string DelAST::dump(int nDepth){
     string ret;
@@ -131,7 +132,8 @@ string DelAST::dump(int nDepth){
 
 PyObjPtr& ReturnAST::eval(PyContext& context){TRACE_EXPR();
     if (!testlist){
-        return context.cacheResult(PyObjTool::buildNone());
+        PY_RAISE_STR(context, 
+            PyCppUtil::strFormat("NameError: global name '%s' is not defined %d", this->name.c_str(), context.curstack->getType()));
     }
     PyObjPtr& ret = testlist->eval(context);
     context.cacheResult(ret);
@@ -715,7 +717,11 @@ PyObjPtr& TupleExprAST::eval(PyContext& context){TRACE_EXPR();
     }
     return context.cacheResult(ret);
 }
-
+void TupleExprAST::delVal(PyContext& context){
+    for (unsigned int i = 0; i < values.size(); ++i){
+        values[i]->delVal(context);
+    }
+}
 PyObjPtr& TupleExprAST::assignVal(PyContext& context, PyObjPtr& v){
     if (values.size() != (size_t)v->getHandler()->handleLen(context, v)){
         PY_RAISE_STR(context, "value size not equal");
@@ -770,6 +776,12 @@ PyObjPtr& DotGetFieldExprAST::assignVal(PyContext& context, PyObjPtr& v){
 
     ret = v;
     return ret;
+}
+void DotGetFieldExprAST::delVal(PyContext& context){
+   PyObjPtr obj = preExpr->eval(context);
+    if (obj->getType() == PY_CLASS_INST){
+        return obj.cast<PyObjClassInstance>()->delField(context, obj, fieldName);
+    } 
 }
 string SliceExprAST::dump(int nDepth){
     string ret;
@@ -826,6 +838,11 @@ PyObjPtr& SliceExprAST::assignVal(PyContext& context, PyObjPtr& v){
     PyObjPtr lval = preExpr->eval(context);
     PyObjPtr startVal = start->eval(context);
     return lval->getHandler()->handleSliceAssign(context, lval, startVal, v);
+}
+void SliceExprAST::delVal(PyContext& context){
+    PyObjPtr lval = preExpr->eval(context);
+    PyObjPtr startVal = start->eval(context);
+    return lval->getHandler()->handleSliceDel(context, lval, startVal);
 }
 
 std::string CallExprAST::dump(int nDepth){

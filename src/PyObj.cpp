@@ -37,6 +37,19 @@ PyObjPtr PyObjDict::get(PyContext& context, const PyObjPtr &k){
     }
     return NULL;
 }
+bool PyObjDict::delByKey(PyContext& context, PyObjPtr &k){
+    PyObjDict::Key keyInfo;
+    keyInfo.key = k;
+    keyInfo.context = &context;
+    keyInfo.hash= k->getHandler()->handleHash(context, k);
+    
+    DictMap::iterator it = value.find(keyInfo);
+    if (it != value.end()){
+        value.erase(it);
+        return true;
+    }
+    return false;
+}
 PyObjPtr PyObjDict::pop(PyContext& context, const PyObjPtr &k){
     PyObjDict::Key keyInfo;
     keyInfo.key = k;
@@ -248,6 +261,13 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, ExprAST
     ret = m_objStack[nFieldIndex];
 
     return ret;
+}
+void PyObjClassInstance::delField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName){
+    unsigned int nFieldIndex = fieldName->getFieldIndex(context, self);
+
+    if (nFieldIndex < m_objStack.size()){
+        m_objStack[nFieldIndex] = NULL;
+    }
 }
 void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
     ParametersExprAST* pParametersExprAST = parameters.cast<ParametersExprAST>();

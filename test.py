@@ -208,4 +208,9 @@ def closure1():
     
     mm = 101
     return closure2
+print('f.b1', f.b)
+del testdict11
+del f.b
+del testdict2[1]
 
+del listb[1]

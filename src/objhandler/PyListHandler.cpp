@@ -170,4 +170,11 @@ PyObjPtr& PyListHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPt
     }
     return context.cacheResult(newVal);
 }
-
+void PyListHandler::handleSliceDel(PyContext& context, PyObjPtr& self, PyObjPtr& startVal){
+    PyAssertInt(startVal);
+    int start = startVal.cast<PyObjInt>()->value;
+    if (start < 0 || start > self.cast<PyObjList>()->value.size()){
+        THROW_EVAL_ERROR("IndexError: list assignment index out of range");
+    }
+    self.cast<PyObjList>()->value.erase(self.cast<PyObjList>()->value.begin() + start);
+}

@@ -138,4 +138,10 @@ PyObjPtr& PyDictHandler::handleSliceAssign(PyContext& context, PyObjPtr& self, P
     
     return v;
 }
-
+void PyDictHandler::handleSliceDel(PyContext& context, PyObjPtr& self, PyObjPtr& k){
+    PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
+    if (!self.cast<PyObjDict>()->delByKey(context, k)){
+        THROW_EVAL_ERROR("KeyError");
+    }
+    return;
+}

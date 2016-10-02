@@ -233,6 +233,7 @@ public:
     PyObjPtr popitem();
     PyObjPtr setdefault(PyContext& context, PyObjPtr &k, PyObjPtr &v);
     void update(PyContext& context, PyObjPtr& v);
+    bool delByKey(PyContext& context, PyObjPtr &k);
 public:
     typedef std::map<Key, PyObjPtr, cmp_key> DictMap;
     DictMap     value;
@@ -356,6 +357,7 @@ public:
     virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e);
     
     virtual PyObjPtr& assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v); //!special process field assign
+    void delField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName); //!special process field del
     
     
     PyObjPtr            classDefPtr;

@@ -202,6 +202,10 @@ public:
         lval = v;
         return lval;
     }
+    virtual void delVal(PyContext& context){
+        PyObjPtr& lval = this->eval(context);
+        lval = NULL;
+    }
     
     virtual int getType() {
         return 0;
@@ -281,6 +285,7 @@ public:
     }
     virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step);
     virtual PyObjPtr& handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v);
+    virtual void handleSliceDel(PyContext& context, PyObjPtr& self, PyObjPtr& k){}
 };
 
 class PyNoneHandler: public PyObjHandler{

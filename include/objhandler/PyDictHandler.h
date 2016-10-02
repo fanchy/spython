@@ -33,6 +33,7 @@ public:
     virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step);
     
     virtual PyObjPtr& handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v);
+    virtual void handleSliceDel(PyContext& context, PyObjPtr& self, PyObjPtr& k);
 };
 
 

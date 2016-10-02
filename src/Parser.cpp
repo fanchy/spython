@@ -473,12 +473,14 @@ ExprASTPtr Parser::parse_print_stmt(){
 ExprASTPtr Parser::parse_del_stmt(){
     if (m_curScanner->getToken()->strVal == "del"){
         m_curScanner->seek(1);
-        
-        ExprASTPtr exprlist = parse_exprlist();
+        ExprASTPtr exprlist;
+        ExprASTPtr ret = ALLOC_EXPR<DelAST>(exprlist);
+        exprlist = parse_exprlist();
         if (!exprlist){
             THROW_ERROR("exprlist needed when parse del");
         }
-        return ALLOC_EXPR<DelAST>(exprlist);
+        ret.cast<DelAST>()->exprlist = exprlist;
+        return ret;
     }
     return NULL;
 }
@@ -542,8 +544,10 @@ ExprASTPtr Parser::parse_return_stmt(){
         //DMSG(("curt:%s", m_curScanner->getToken()->strVal.c_str()));
         m_curScanner->seek(1);
         
-        ExprASTPtr testlist = parse_testlist();
-        return ALLOC_EXPR<ReturnAST>(testlist);
+        ExprASTPtr testlist;
+        ExprASTPtr ret = ALLOC_EXPR<ReturnAST>(testlist);
+        ret.cast<ReturnAST>()->testlist = parse_testlist();
+        return ret;
     }
     return NULL;
 }
