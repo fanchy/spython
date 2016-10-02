@@ -537,6 +537,7 @@ public:
     ExprASTPtr              funcname;
     ExprASTPtr              parameters;
     ExprASTPtr              suite;
+    std::string             doc;
 
 public:
     FuncDefExprAST(){

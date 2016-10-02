@@ -186,6 +186,14 @@ ExprASTPtr Parser::parse_funcdef(){
         THROW_ERROR("suite parse failed after def");
     }
     
+    if (EXPR_STMT == suite->getType() && suite.cast<StmtAST>()->exprs.size() >= 1){
+        ExprASTPtr doc = suite.cast<StmtAST>()->exprs[0];
+        if (doc->getType() == EXPR_STR){
+            f->doc = doc.cast<StrExprAST>()->val;
+            suite.cast<StmtAST>()->exprs.erase(suite.cast<StmtAST>()->exprs.begin());
+        }
+    }
+    
     f->funcname   = name;
     f->parameters = parameters;
     f->suite      = suite;
@@ -1844,19 +1852,15 @@ ExprASTPtr Parser::parse_classdef(){
         THROW_ERROR(": needed after class");
     }
     m_curScanner->seek(1);
-    /*
-    if (m_curScanner->getToken()->strVal == "\n"){
-        m_curScanner->seek(1);
-    }
-    
-    if (m_curScanner->getToken()->nTokenType == TOK_STR){
-        printf("TTTTTTTTTTTTTTTT:%s\n", m_curScanner->getToken()->strVal.c_str());
-    }
-    */
-    //string tmp = m_curScanner->getToken()->strVal;
+
     ExprASTPtr suite = parse_suite();
-    if (EXPR_STMT == suite->getType() && suite.cast<StmtAST>()->exprs){
-        printf("TTTTTTTTTTTTTTTT:%s,%d\n", tmp.c_str(), suite->getType());
+    if (EXPR_STMT == suite->getType() && suite.cast<StmtAST>()->exprs.size() >= 1){
+        ExprASTPtr doc = suite.cast<StmtAST>()->exprs[0];
+        if (doc->getType() == EXPR_STR){
+            ExprASTPtr docName = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__doc__");
+            suite.cast<StmtAST>()->exprs[0] = ALLOC_EXPR_2<BinaryExprAST>("=", docName, doc);
+        }
+        
     }
     
     if (!suite){

@@ -298,6 +298,7 @@ public:
         ret->pyCppfunc     = pyCppfunc;
         ret->closureStack  = closureStack;
         ret->hasCopyClosure= hasCopyClosure;
+        ret->m_objStack = this->m_objStack;
         return ret;
     }
     bool hasSelfParam();

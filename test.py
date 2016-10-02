@@ -1,3 +1,6 @@
+
+'test doc'
+
 cc = -1
 a = 10
 b = a + 1
@@ -200,6 +203,7 @@ for m, n in testdict7.iteritems():
     print('iter', m, n)
 
 def closure1():
+    'closure doc'
     def closure2():
         print('closure2', mm)
         def closure3():
@@ -215,3 +219,6 @@ del f.b
 del testdict2[1]
 
 del listb[1]
+foodoc = f.__doc__
+closuredoc = closure1.__doc__
+testdoc = __doc__

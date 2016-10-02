@@ -499,6 +499,8 @@ PyObjPtr& FuncDefExprAST::eval(PyContext& context){TRACE_EXPR();
     if (IsFuncCallStack(context.curstack)){ //!closure
        rval.cast<PyObjFuncDef>()->closureStack = context.curstack;
     }
+    
+    PyCppUtil::setAttr(context, rval, "__doc__", PyCppUtil::genStr(doc));
 
     PyObjPtr& lval = funcname->assignVal(context, rval);
     return lval;
@@ -1009,6 +1011,16 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, s
     
     PyContextBackUp backup(context);
     context.curstack = mod;
+    
+    if (EXPR_STMT == rootExpr->getType() && rootExpr.cast<StmtAST>()->exprs.size() >= 1){
+        ExprASTPtr doc = rootExpr.cast<StmtAST>()->exprs[0];
+        if (doc->getType() == EXPR_STR){
+            PyCppUtil::setAttr(context, mod, "__doc__", PyCppUtil::genStr(doc.cast<StrExprAST>()->val));
+            
+            rootExpr.cast<StmtAST>()->exprs.erase(rootExpr.cast<StmtAST>()->exprs.begin());
+        }
+    }
+    
     rootExpr->eval(context);
     mod.cast<PyObjModule>()->loadFlag = PyObjModule::MOD_LOADOK;
     backup.rollback();
