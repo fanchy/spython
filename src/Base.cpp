@@ -232,7 +232,11 @@ bool PyObjTool::handleBool(PyObjPtr b){
     }
     return false;
 }
-
+PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
+    PyObjPtr& obj = pycontext.curstack;
+    return obj->getVar(pycontext, obj, this);
+}
+/*
 unsigned int ExprAST::getFieldIndex(PyContext& context, PyObjPtr& obj){
     const ObjIdInfo& p = obj->getObjIdInfo();
     if (p.nModuleId >= module2objcet2fieldIndex.size()){
@@ -247,24 +251,54 @@ unsigned int ExprAST::getFieldIndex(PyContext& context, PyObjPtr& obj){
             //DMSG(("filedname5 %s %s [%d-%d]\n", obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[i], i));
         }
         
-        object2index[p.nObjectId] = obj->getFieldNum();
+        object2index[p.nObjectId] = context.allocFieldIndex(p.nModuleId, p.nObjectId);
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
         //DMSG(("filedname2 %s %s %d[%d-%d]\n", obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId], p.nModuleId, p.nObjectId));
     }
     
     int& nIndex = object2index[p.nObjectId];
     if (nIndex < 0){
-        nIndex = obj->getFieldNum();
+        nIndex = context.allocFieldIndex(p.nModuleId, p.nObjectId);
         singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
         //DMSG(("filedname3 [%d]%s %s %d[%d-%d]\n", obj->getType(), obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId], p.nModuleId, p.nObjectId));
     }
     //DMSG(("filedname4 [%d]%s %s %d[%d-%d] %d-%p\n", obj->getType(), obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId], p.nModuleId, p.nObjectId, nIndex, this));
     return (unsigned int)nIndex;
 }
-PyObjPtr& ExprAST::getFieldVal(PyContext& pycontext){
-    PyObjPtr& obj = pycontext.curstack;
-    return obj->getVar(pycontext, obj, this);
+*/
+unsigned int ExprAST::getFieldIndex(PyContext& context, PyObjPtr& obj){
+    const ObjIdInfo& p = obj->getObjIdInfo();
+    vector<int>& object2index = module2objcet2fieldIndex;
+    
+    if (p.nObjectId >= object2index.size()){
+        object2index.resize(p.nObjectId + 1, -1);
+        
+        object2index[p.nObjectId] = context.allocFieldIndex(p.nModuleId, p.nObjectId);
+        singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
+        //DMSG(("filedname2 %s %s %d[%d-%d]\n", obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId], p.nModuleId, p.nObjectId));
+    }
+    
+    int& nIndex = object2index[p.nObjectId];
+    if (nIndex < 0){
+        nIndex = context.allocFieldIndex(p.nModuleId, p.nObjectId);
+        singleton_t<ObjFieldMetaData>::instance_ptr()->module2object2fieldname[p.nModuleId][p.nObjectId][object2index[p.nObjectId]] = this->name;
+        //DMSG(("filedname3 [%d]%s %s %d[%d-%d]\n", obj->getType(), obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId], p.nModuleId, p.nObjectId));
+    }
+    //DMSG(("filedname4 [%d]%s %s %d[%d-%d] %d-%p\n", obj->getType(), obj->getHandler()->handleStr(context, obj).c_str(), this->name.c_str(), object2index[p.nObjectId], p.nModuleId, p.nObjectId, nIndex, this));
+    return (unsigned int)nIndex;
 }
+int PyContext::allocFieldIndex(int m, int o){
+    map<int, int>& v = recordAllFiledIndex[m];
+    map<int, int>::iterator it = v.find(o);
+    
+    int ret = 0;
+    if (it != v.end()){
+        it->second += 1;
+        ret = it->second;
+    }
+    else{
+        v[o] = ret;
+    }
 
-
-
+    return ret;
+}

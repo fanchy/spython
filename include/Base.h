@@ -217,7 +217,8 @@ public:
         ret += tmp;
         return ret;
     }
-    std::vector<std::vector<int> >  module2objcet2fieldIndex;
+    //std::vector<std::vector<int> >  module2objcet2fieldIndex;
+    std::vector<int>                  module2objcet2fieldIndex;
 };
 
 typedef SmartPtr<ExprAST> ExprASTPtr;
@@ -439,6 +440,7 @@ public:
         }
         return NULL;
     }
+    int allocFieldIndex(int m, int o);
 public:
     std::list<ExprAST*> exprTrace;//! for trace back
     std::map<int, FileInfo> fileId2Info;
@@ -448,6 +450,8 @@ public:
     
     std::map<std::string, PyObjPtr>  allBuiltin;
     
+    //!record obj field id num
+    std::map<int, std::map<int, int> >  recordAllFiledIndex;
 };
 #define TRACE_EXPR() context.setTraceExpr(this)
 #define TRACE_EXPR_PUSH() context.pushTraceExpr(this)

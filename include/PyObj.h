@@ -353,9 +353,6 @@ public:
     virtual const ObjIdInfo& getObjIdInfo(){
         return classDefPtr.cast<PyObjClassDef>()->getObjIdInfo();
     }
-    virtual int getFieldNum() const { 
-        return std::max(m_objStack.size(), classDefPtr->m_objStack.size()); 
-    }
     virtual PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e);
     
     virtual PyObjPtr& assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v); //!special process field assign
