@@ -262,9 +262,12 @@ public:
     }
     PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e);
     PyObjPtr copy();
+    bool isGlobalVar(ExprAST* e);
+    void addGlobalVar(ExprAST* e);
     ObjIdInfo       selfObjInfo;
     PyObjPtr        modBelong;
     PyObjPtr        closureStack;
+    std::set<ExprAST*>   globalVar;
 };
 #define IsFuncCallStack(o) (o->getType() == PY_NONE && o.cast<PyCallTmpStack>()->modBelong)
 

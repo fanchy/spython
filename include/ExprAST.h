@@ -56,11 +56,7 @@ public:
         this->name = n;
     }
     virtual PyObjPtr& eval(PyContext& context);
-    virtual PyObjPtr& assignVal(PyContext& context, PyObjPtr& v){
-        PyObjPtr& lval = this->getFieldVal(context);
-        lval = v;
-        return lval;
-    }
+    virtual PyObjPtr& assignVal(PyContext& context, PyObjPtr& v);
     
     virtual int getType() {
         return EXPR_VAR;

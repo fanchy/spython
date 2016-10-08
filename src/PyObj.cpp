@@ -184,6 +184,7 @@ PyObjPtr& PyObjFuncDef::getClosureStack(){
 PyObjPtr PyCallTmpStack::copy(){
     PyObjPtr ret = new PyCallTmpStack(selfObjInfo, modBelong, closureStack);
     ret->m_objStack = this->m_objStack;
+    ret.cast<PyCallTmpStack>()->globalVar  = this->globalVar;
     return ret;
 }
 PyObjPtr& PyCallTmpStack::getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
@@ -193,7 +194,12 @@ PyObjPtr& PyCallTmpStack::getVar(PyContext& context, PyObjPtr& self, ExprAST* e)
     }
     return ret;
 }
-
+bool PyCallTmpStack::isGlobalVar(ExprAST* e){
+    return globalVar.empty() == false && globalVar.find(e) != globalVar.end();
+}
+void PyCallTmpStack::addGlobalVar(ExprAST* e){
+    globalVar.insert(e);
+}
 PyObjPtr& PyObjClassInstance::assignToField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName, PyObjPtr& v){
     unsigned int nFieldIndex = fieldName->getFieldIndex(context, self);
 

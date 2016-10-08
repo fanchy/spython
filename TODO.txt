@@ -17,7 +17,7 @@
 17.eval
 18. \ 多行支持
 19. open close 文件操作 with
-20. global 的实现
+20. global 的实现	-- ok
 21.lambda		-- ok
 22. del			-- ok
 23.tuple list dict func -- ok

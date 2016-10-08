@@ -47,7 +47,18 @@ PyObjPtr& VariableExprAST::eval(PyContext& context) {
     }
     return ret;
 }
-
+PyObjPtr& VariableExprAST::assignVal(PyContext& context, PyObjPtr& v){
+    PyObjPtr& lval = this->getFieldVal(context);
+    if (IsFuncCallStack(context.curstack) && context.curstack.cast<PyCallTmpStack>()->isGlobalVar(this)){
+        PyContextBackUp backup(context);
+        context.curstack = context.curstack.cast<PyCallTmpStack>()->modBelong;
+        PyObjPtr& ret3 = this->getFieldVal(context);
+        ret3 = v;
+        return ret3;
+    }
+    lval = v;
+    return lval;
+}
 
 PyObjPtr& PowerAST::eval(PyContext& context){TRACE_EXPR();
     return merge->eval(context);
@@ -173,14 +184,13 @@ string RaiseAST::dump(int nDepth){
 }
 
 PyObjPtr& GlobalAST::eval(PyContext& context){TRACE_EXPR();
-    if (exprs.empty()){
-        return context.cacheResult(PyObjTool::buildNone());
+    if (IsFuncCallStack(context.curstack)){
+        for (unsigned int i = 0; i < exprs.size(); ++i){
+            context.curstack.cast<PyCallTmpStack>()->addGlobalVar(exprs[i].get());
+        }
     }
-    unsigned int i = 0;
-    for (; i < exprs.size(); ++i){
-        exprs[i]->eval(context);
-    }
-    return exprs[i]->eval(context);
+
+    return context.cacheResult(PyObjTool::buildNone());
 }
 string GlobalAST::dump(int nDepth){
     string ret;

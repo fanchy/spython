@@ -226,6 +226,7 @@ testdoc = __doc__
 def fglobal():
     global gX
     print('gX', gX)
+    gX = 1010
 
 gX = 1009
 fglobal()
