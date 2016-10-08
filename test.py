@@ -222,3 +222,10 @@ del listb[1]
 foodoc = f.__doc__
 closuredoc = closure1.__doc__
 testdoc = __doc__
+
+def fglobal():
+    global gX
+    print('gX', gX)
+
+gX = 1009
+fglobal()

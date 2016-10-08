@@ -195,14 +195,10 @@ string GlobalAST::dump(int nDepth){
 }
 
 PyObjPtr& ExecAST::eval(PyContext& context){TRACE_EXPR();
-    if (exprs.empty()){
-        return context.cacheResult(PyObjTool::buildNone());
-    }
-    unsigned int i = 0;
-    for (; i < exprs.size(); ++i){
+    for (unsigned int i = 0; i < exprs.size(); ++i){
         exprs[i]->eval(context);
     }
-    return exprs[i]->eval(context);
+    return context.cacheResult(PyObjTool::buildNone());
 }
 string ExecAST::dump(int nDepth){
     string ret;
