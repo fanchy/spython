@@ -15,7 +15,7 @@
 15.__module__		-- ok
 16.Slice 		-- ok
 17.eval exec
-18. \ 多行支持
+18. \ 多行支持		-- ok
 19. open close 文件操作 with
 20. global 的实现	-- ok
 21.lambda		-- ok
@@ -24,7 +24,7 @@
 24.linux
 25.range		-- ok
 26. 闭包		-- ok
-27. += 
-28. & |
+27. += 			-- ok
+28. & |			-- ok
 29. __main__
 30.set

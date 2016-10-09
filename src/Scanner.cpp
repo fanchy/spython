@@ -65,8 +65,15 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
     
     while (cLastOne == ' ') {
         // Comment until end of line.
-        if (cLastOne == ' '){
-            cLastOne = getCharNext(content, index);
+        cLastOne = getCharNext(content, index);
+        if (cLastOne == '\\'){
+            char nextOne = getCharNext(content, index);
+            if (nextOne == '\n'){
+                cLastOne = getCharNext(content, index);
+            }
+            else{
+                index--;//!pop last char \n
+            }
         }
     }
     while (cLastOne == '#') {
@@ -149,13 +156,46 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
     }
 
     if (cLastOne == '\'' || cLastOne == '\"') {
-        char tmpC = cLastOne;
+        string tmpC;
+        tmpC += cLastOne; //!check ''' or """
+        char nextC = getCharNext(content, index);
+        if (nextC == cLastOne){
+            char nextC2 = getCharNext(content, index);
+            if (nextC2 == cLastOne){
+                tmpC += cLastOne;
+                tmpC += cLastOne;
+            }
+            else{
+                index -= 2;
+            }
+        }
+        else{
+            index -= 1;
+        }
         retToken.strVal.clear();
         do {
             cLastOne = getCharNext(content, index);
-            if (cLastOne == tmpC){
-                //cLastOne = getCharNext(content, index);
-                break;
+            if (cLastOne == '\\'){
+                char nextOne = getCharNext(content, index);
+                if (nextOne == '\n'){
+                    cLastOne = getCharNext(content, index);
+                }
+                else{
+                    index--;//!pop last char \n
+                }
+            }
+            else if (cLastOne == tmpC[0]){
+                if (tmpC.size() == 1){
+                    break;
+                }
+                else {
+                    char nextOne = getCharNext(content, index);
+                    char nextOne2 = getCharNext(content, index);
+                    if (nextOne == tmpC[1] && nextOne2 == tmpC[2]){
+                        break;
+                    }
+                    index -= 2;
+                }
             }
             retToken.strVal += cLastOne;
         } while (cLastOne != TOK_EOF);
@@ -248,7 +288,6 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
     }
     // Otherwise, just return the character as its ascii value.
     
-    
     retToken.nTokenType    = TOK_CHAR;
     return retToken;
 }
@@ -276,6 +315,9 @@ void Scanner::calLineIndentInfo(const std::string& content){
     {
         char ret = content[i];
         if (ret != '\n'){
+            continue;
+        }
+        else if (i > 0 && content[i - 1] == '\\'){
             continue;
         }
         ++nLine;

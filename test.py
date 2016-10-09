@@ -240,8 +240,8 @@ iAdd1 %= 3
 n1 = 0X12
 n2 = -n1
 n3 = 1 << 4
-list21 = [
-    1,
-    2
-]
+list21 = '''ss'
+gg'''
+print(list21)
+
 
