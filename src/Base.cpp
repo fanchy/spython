@@ -76,6 +76,22 @@ PyObjPtr& PyObjHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& 
 PyObjPtr& PyObjHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     throw PyException::buildException("handleMod invalid");return self;
 }
+
+PyObjPtr& PyObjHandler::handleIAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    return self->getHandler()->handleAdd(context, self, val);
+}
+PyObjPtr& PyObjHandler::handleISub(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    return self->getHandler()->handleSub(context, self, val);
+}
+PyObjPtr& PyObjHandler::handleIMul(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    return self->getHandler()->handleMul(context, self, val);
+}
+PyObjPtr& PyObjHandler::handleIDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    return self->getHandler()->handleDiv(context, self, val);
+}
+PyObjPtr& PyObjHandler::handleIMod(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+    return self->getHandler()->handleMod(context, self, val);
+}
 PyObjPtr& PyObjHandler::handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
     throw PyException::buildException("handleCall invalid");return self;
 }
@@ -302,3 +318,12 @@ int PyContext::allocFieldIndex(int m, int o){
 
     return ret;
 }
+
+PyContext& PyContext::addBuiltin(const string& name, PyObjPtr v){
+    allBuiltin[name] = v;
+    return *this;
+}
+PyObjPtr&  PyContext::getBuiltin(const string& name){
+    return allBuiltin[name];
+}
+

@@ -206,7 +206,7 @@ struct PyListExt{
             PyCppUtil::setAttr(pycontext, objClass, "remove", PyCppUtil::genFunc(PyListExt::remove, "remove"));
             PyCppUtil::setAttr(pycontext, objClass, "reverse", PyCppUtil::genFunc(PyListExt::reverse, "reverse"));
             PyCppUtil::setAttr(pycontext, objClass, "sort", PyCppUtil::genFunc(PyListExt::sort, "sort"));
-            pycontext.allBuiltin["list"] = objClass;
+            pycontext.addBuiltin("list", objClass);
         }
         return true;
     }

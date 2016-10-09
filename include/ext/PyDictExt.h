@@ -156,7 +156,7 @@ struct PyDictExt{
         std::vector<PyObjPtr> constructArgs;
         constructArgs.push_back(self);
         
-        PyObjPtr ret = PyCppUtil::callPyfunc(context, context.allBuiltin["dict_iter"], constructArgs);
+        PyObjPtr ret = PyCppUtil::callPyfunc(context, context.getBuiltin("dict_iter"), constructArgs);
         return ret;
     }
     static PyObjPtr keys(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
@@ -233,7 +233,7 @@ struct PyDictExt{
             PyObjPtr objClass  = PyObjClassDef::build(pycontext, "dictionary-itemiterator");
             PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyDictIterExt::iter__init__, "__init__"));
             PyCppUtil::setAttr(pycontext, objClass, "next", PyCppUtil::genFunc(PyDictIterExt::next, "next"));
-            pycontext.allBuiltin["dict_iter"] = objClass;
+            pycontext.addBuiltin("dict_iter", objClass);
         }
         {            
             PyObjPtr objClass = PyObjClassDef::build(pycontext, "dict", &singleton_t<ObjIdTypeTraits<PyObjDict> >::instance_ptr()->objInfo);
@@ -251,7 +251,7 @@ struct PyDictExt{
             PyCppUtil::setAttr(pycontext, objClass, "setdefault", PyCppUtil::genFunc(PyDictExt::setdefault, "setdefault"));
             PyCppUtil::setAttr(pycontext, objClass, "update", PyCppUtil::genFunc(PyDictExt::update, "update"));
             PyCppUtil::setAttr(pycontext, objClass, "values", PyCppUtil::genFunc(PyDictExt::values, "values"));
-            pycontext.allBuiltin["dict"] = objClass;
+            pycontext.addBuiltin("dict", objClass);
         }
         return true;
     }

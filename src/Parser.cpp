@@ -434,9 +434,10 @@ ExprASTPtr Parser::parse_augassign(){
         m_curScanner->getToken()->strVal == "**=" ||
         m_curScanner->getToken()->strVal == "//=")
     {
+        string op = m_curScanner->getToken()->strVal;
         m_curScanner->seek(1);
         ExprASTPtr nullExpr;
-        return ALLOC_EXPR<AugassignAST>(m_curScanner->getToken()->strVal, nullExpr, nullExpr);
+        return ALLOC_EXPR<AugassignAST>(op, nullExpr, nullExpr);
     }
     return NULL;
 }

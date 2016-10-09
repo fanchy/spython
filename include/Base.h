@@ -275,6 +275,14 @@ public:
     virtual PyObjPtr& handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    
+    
+    virtual PyObjPtr& handleIAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleISub(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleIMul(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleIDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    virtual PyObjPtr& handleIMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
+    
     virtual PyObjPtr& handleCall(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, 
                                  std::vector<PyObjPtr>& argAssignVal);
     virtual size_t    handleHash(PyContext& context, const PyObjPtr& self) const;
@@ -438,14 +446,10 @@ public:
         return "";
     }
     
-    PyObjPtr getBuiltin(const std::string& s){
-        std::map<std::string, PyObjPtr>::iterator it = allBuiltin.find(s);
-        if (it != allBuiltin.end()){
-            return it->second;
-        }
-        return NULL;
-    }
     int allocFieldIndex(int m, int o);
+    
+    PyContext& addBuiltin(const std::string& name, PyObjPtr v);
+    PyObjPtr&  getBuiltin(const std::string& name);
 public:
     std::list<ExprAST*> exprTrace;//! for trace back
     std::map<int, FileInfo> fileId2Info;

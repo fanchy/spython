@@ -47,7 +47,7 @@ struct PyTupleExt{
             
             PyCppUtil::setAttr(pycontext, objClass, "count", PyCppUtil::genFunc(PyTupleExt::count, "count"));
             PyCppUtil::setAttr(pycontext, objClass, "index", PyCppUtil::genFunc(PyTupleExt::index, "index"));
-            pycontext.allBuiltin["tuple"] = objClass;
+            pycontext.addBuiltin("tuple", objClass);
         }
         return true;
     }

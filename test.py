@@ -230,3 +230,13 @@ def fglobal():
 
 gX = 1009
 fglobal()
+
+e1 = BaseException(1, 2, 'a')
+print('e1', e1)
+iAdd1 = 100
+iAdd1 += 10
+iAdd1 *= 2
+iAdd1 %= 3
+
+
+

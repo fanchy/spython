@@ -704,6 +704,56 @@ string BinaryExprAST::dump(int nDepth){
 }
 
 PyObjPtr& AugassignAST::eval(PyContext& context){TRACE_EXPR();
+    if (op == "+="){
+        PyObjPtr rval = right->eval(context);
+        PyObjPtr lval = left->eval(context);
+        PyObjPtr& ret = lval->getHandler()->handleIAdd(context, lval, rval);
+        if (ret.get() != lval.get()){
+            PyObjPtr& newret = left->assignVal(context, ret);
+            return newret;
+        }
+        return ret;
+    }
+    else if (op == "-="){
+        PyObjPtr rval = right->eval(context);
+        PyObjPtr lval = left->eval(context);
+        PyObjPtr& ret = lval->getHandler()->handleISub(context, lval, rval);
+        if (ret.get() != lval.get()){
+            PyObjPtr& newret = left->assignVal(context, ret);
+            return newret;
+        }
+        return ret;
+    }
+    else if (op == "*="){
+        PyObjPtr rval = right->eval(context);
+        PyObjPtr lval = left->eval(context);
+        PyObjPtr& ret = lval->getHandler()->handleIMul(context, lval, rval);
+        if (ret.get() != lval.get()){
+            PyObjPtr& newret = left->assignVal(context, ret);
+            return newret;
+        }
+        return ret;
+    }
+    else if (op == "/="){
+        PyObjPtr rval = right->eval(context);
+        PyObjPtr lval = left->eval(context);
+        PyObjPtr& ret = lval->getHandler()->handleIDiv(context, lval, rval);
+        if (ret.get() != lval.get()){
+            PyObjPtr& newret = left->assignVal(context, ret);
+            return newret;
+        }
+        return ret;
+    }
+    else if (op == "%="){
+        PyObjPtr rval = right->eval(context);
+        PyObjPtr lval = left->eval(context);
+        PyObjPtr& ret = lval->getHandler()->handleIMod(context, lval, rval);
+        if (ret.get() != lval.get()){
+            PyObjPtr& newret = left->assignVal(context, ret);
+            return newret;
+        }
+        return ret;
+    }
     return context.cacheResult(PyObjTool::buildNone());//!TODO
 }
 

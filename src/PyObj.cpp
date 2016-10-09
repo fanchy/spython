@@ -139,7 +139,7 @@ void PyObjDict::update(PyContext& context, PyObjPtr& v){
 
 PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, ExprAST* e, const string& strType)
 {
-    PyObjPtr& classObj = context.allBuiltin[strType];
+    PyObjPtr& classObj = context.getBuiltin(strType);
     if (!classObj){
         return context.cacheResult(classObj);
     }

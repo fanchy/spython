@@ -8,10 +8,10 @@
 #include "ext/PyTupleExt.h"
 #include "ext/PyListExt.h"
 #include "ext/PyDictExt.h"
-
+ 
 using namespace std;
 using namespace ff;
-  
+
 SPython::SPython(){
     pycontext.curstack = PyObjModule::BuildModule(pycontext, "__main__", "built-in");
     pycontext.curstack.cast<PyObjModule>()->loadFlag = PyObjModule::MOD_LOADOK;

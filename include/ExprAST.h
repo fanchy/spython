@@ -311,6 +311,24 @@ public:
     virtual PyObjPtr& eval(PyContext& context);
 };
 
+class AugassignAST : public ExprAST {
+public:
+    std::string op;
+    ExprASTPtr left, right;
+
+public:
+    AugassignAST(const std::string& o, ExprASTPtr l, ExprASTPtr r)
+        : op(o), left(l), right(r) {
+        
+        this->name = op;
+    }
+    virtual int getType() {
+        return EXPR_AUGASSIGN;
+    }
+    virtual std::string dump(int nDepth);
+    virtual PyObjPtr& eval(PyContext& context);
+};
+
 class ReturnAST : public ExprAST {
 
 public:
@@ -375,24 +393,6 @@ public:
     virtual PyObjPtr& eval(PyContext& context);
 public:
     std::vector<ExprASTPtr> exprs;
-};
-
-class AugassignAST : public ExprAST {
-public:
-    std::string op;
-    ExprASTPtr left, right;
-
-public:
-    AugassignAST(const std::string& o, ExprASTPtr l, ExprASTPtr r)
-        : op(o), left(l), right(r) {
-        
-        this->name = op;
-    }
-    virtual int getType() {
-        return EXPR_AUGASSIGN;
-    }
-    virtual std::string dump(int nDepth);
-    virtual PyObjPtr& eval(PyContext& context);
 };
 
 //! if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]

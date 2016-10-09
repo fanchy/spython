@@ -79,39 +79,70 @@ struct PyPropertExt{
     }
 };
 
+
+struct PyBaseExceptionExt{
+    static PyObjPtr BaseException__init__(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+        if (argAssignVal.size() < 1){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: BaseException__init__() takes exactly >=1 argument (%u given)", argAssignVal.size()));
+        }
+        PyObjPtr& propertySelf = argAssignVal[0];
+        PyAssertInstance(propertySelf);
+        PyObjPtr args = new PyObjTuple();
+        for (size_t i = 1; i < argAssignVal.size(); ++i){
+            args.cast<PyObjTuple>()->append(argAssignVal[i]);
+        }
+        PyCppUtil::setAttr(context, propertySelf, "args", args);
+        return PyObjTool::buildTrue();
+    }
+    static PyObjPtr BaseException__str__(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        PyAssertInstance(self);
+        PyObjPtr args = PyCppUtil::getAttr(context, self, "args");
+        PyObjPtr ret = PyCppUtil::genStr(args->getHandler()->handleStr(context, args));
+        return ret;
+    }
+};
+
 struct PyBaseExt{
     static bool init(PyContext& pycontext){
-        pycontext.allBuiltin["None"] = PyObjTool::buildNone();
-        pycontext.allBuiltin["True"] = PyObjTool::buildTrue();
-        pycontext.allBuiltin["False"] = PyObjTool::buildFalse();
-        pycontext.allBuiltin["float"] = new PyBuiltinTypeInfo(PY_FLOAT);
+        pycontext.addBuiltin("None", PyObjTool::buildNone());
+        pycontext.addBuiltin("True", PyObjTool::buildTrue());
+        pycontext.addBuiltin("False", PyObjTool::buildFalse());
         
-        std::vector<PyObjPtr> tmpParent;
-        pycontext.allBuiltin["Exception"] = PyObjClassDef::build(pycontext, "Exception");
-        
-        pycontext.allBuiltin["len"] = PyCppUtil::genFunc(PyBuiltinExt::len, "len");
-        pycontext.allBuiltin["isinstance"] = PyCppUtil::genFunc(PyBuiltinExt::isinstance, "isinstance");
+        pycontext.addBuiltin("len", PyCppUtil::genFunc(PyBuiltinExt::len, "len"));
+        pycontext.addBuiltin("isinstance", PyCppUtil::genFunc(PyBuiltinExt::isinstance, "isinstance"));
         
         {
             PyObjPtr strClass = PyObjClassDef::build(pycontext, "str", &singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo);
             
             PyCppUtil::setAttr(pycontext, strClass, "upper", PyCppUtil::genFunc(PyStrExt::upper, "upper"));
             PyCppUtil::setAttr(pycontext, strClass, "lower", PyCppUtil::genFunc(PyStrExt::lower, "lower"));
-            pycontext.allBuiltin["str"] = strClass;
+            pycontext.addBuiltin("str", strClass);
         }
         
         {
-            PyObjPtr strClass = PyObjClassDef::build(pycontext, "int", &singleton_t<ObjIdTypeTraits<PyObjInt> >::instance_ptr()->objInfo);
-    
-            //PyCppUtil::setAttr(pycontext, strClass, "__class__", strClass);
-            pycontext.allBuiltin["int"] = strClass;
+            PyObjPtr strClass = PyObjClassDef::build(pycontext, "int");
+            pycontext.addBuiltin("int", strClass);
+        }
+        {
+            PyObjPtr strClass = PyObjClassDef::build(pycontext, "float");
+            pycontext.addBuiltin("float", strClass);
         }
         {
             PyObjPtr objClass  = PyObjClassDef::build(pycontext, "property");
-            PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyPropertExt::property__init__, "property__init__"));
+            PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyPropertExt::property__init__, "__init__"));
             PyCppUtil::setAttr(pycontext, objClass, "setter", PyCppUtil::genFunc(PyPropertExt::setter, "setter"));
-            pycontext.allBuiltin["property"] = objClass;
+            pycontext.addBuiltin("property", objClass);
             pycontext.propertyClass = objClass;
+        }
+        
+        {
+            PyObjPtr objClass  = PyObjClassDef::build(pycontext, "BaseException");
+            PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyBaseExceptionExt::BaseException__init__, "__init__"));
+            PyCppUtil::setAttr(pycontext, objClass, "__str__", PyCppUtil::genFunc(PyBaseExceptionExt::BaseException__str__, "__str__"));
+            pycontext.addBuiltin("BaseException", objClass);
+            pycontext.propertyClass = objClass;
+            
+            pycontext.addBuiltin("Exception", objClass);
         }
         return true;
     }

@@ -33,7 +33,6 @@
 #include "objhandler/PyClassHandler.h"
 #include "objhandler/PyClassInstanceHandler.h"
 #include "objhandler/PyModHandler.h"
-#include "objhandler/PyBuiltinTypeHandler.h"
 
 namespace ff {
 
@@ -370,19 +369,6 @@ public:
 };
 
 #define IS_PROPERTY_OBJ(context, x) (x->getType() == PY_CLASS_INST && x.cast<PyObjClassInstance>()->classDefPtr.get() == context.propertyClass.get())
-
-class PyBuiltinTypeInfo:public PyObj {
-public:
-    PyBuiltinTypeInfo(int n):nType(n){
-        this->handler = singleton_t<PyBuiltinTypeHandler>::instance_ptr();
-    }
-
-    virtual const ObjIdInfo& getObjIdInfo(){
-        return singleton_t<ObjIdTypeTraits<PyBuiltinTypeInfo> >::instance_ptr()->objInfo;
-    }
-
-    int nType;
-};
 
 
 class PyCppFuncWrap: public PyCppFunc{
