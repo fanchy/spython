@@ -1368,25 +1368,84 @@ ExprASTPtr Parser::parse_comp_op(ExprASTPtr& expr){
 //! expr: xor_expr ('|' xor_expr)*
 ExprASTPtr Parser::parse_expr(){
     ExprASTPtr xor_expr = parse_xor_expr();
-    return xor_expr;
+    if (m_curScanner->getToken()->strVal != "|"){
+        return xor_expr;
+    }
+    
+    ExprASTPtr ret = xor_expr;
+    string op = "|";
+    while (m_curScanner->getToken()->strVal == "|"){
+        m_curScanner->seek(1);
+        xor_expr = parse_xor_expr();
+        if (!xor_expr){
+            THROW_ERROR("xor_expr needed after |");
+        }
+        ret = ALLOC_EXPR_2<BinaryExprAST>(op, ret, xor_expr);
+    }
+    return ret;
 }
 
 //! xor_expr: and_expr ('^' and_expr)*
 ExprASTPtr Parser::parse_xor_expr(){
     ExprASTPtr and_expr = parse_and_expr();
-    return and_expr;
+    if (m_curScanner->getToken()->strVal != "^"){
+        return and_expr;
+    }
+    
+    ExprASTPtr ret = and_expr;
+    string op = "^";
+    while (m_curScanner->getToken()->strVal == "^"){
+        m_curScanner->seek(1);
+        and_expr = parse_and_expr();
+        if (!and_expr){
+            THROW_ERROR("and_expr needed after ^");
+        }
+        ret = ALLOC_EXPR_2<BinaryExprAST>(op, ret, and_expr);
+    }
+    return ret;
 }
 
 //! and_expr: shift_expr ('&' shift_expr)*
 ExprASTPtr Parser::parse_and_expr(){
     ExprASTPtr shift_expr = parse_shift_expr();
-    return shift_expr;
+    if (m_curScanner->getToken()->strVal != "&"){
+        return shift_expr;
+    }
+    
+    ExprASTPtr ret = shift_expr;
+    string op = "&";
+    while (m_curScanner->getToken()->strVal == "&"){
+        m_curScanner->seek(1);
+        shift_expr = parse_shift_expr();
+        if (!shift_expr){
+            THROW_ERROR("shift_expr needed after &");
+        }
+        ret = ALLOC_EXPR_2<BinaryExprAST>(op, ret, shift_expr);
+    }
+    
+    return ret;
 }
 
 //! shift_expr: arith_expr (('<<'|'>>') arith_expr)*
 ExprASTPtr Parser::parse_shift_expr(){
     ExprASTPtr arith_expr = parse_arith_expr();
-    return arith_expr;
+    
+    if (m_curScanner->getToken()->strVal != "<<" && m_curScanner->getToken()->strVal != ">>"){
+        return arith_expr;
+    }
+    
+    ExprASTPtr ret = arith_expr;
+    
+    while (m_curScanner->getToken()->strVal == "<<" || m_curScanner->getToken()->strVal == ">>"){
+        string op = m_curScanner->getToken()->strVal;
+        m_curScanner->seek(1);
+        arith_expr = parse_arith_expr();
+        if (!arith_expr){
+            THROW_ERROR("arith_expr needed after << >>");
+        }
+        ret = ALLOC_EXPR_2<BinaryExprAST>(op, ret, arith_expr);
+    }
+    return ret;
 }
 
 //! arith_expr: term (('+'|'-') term)*
@@ -1426,8 +1485,27 @@ ExprASTPtr Parser::parse_term(){
 
 //! factor: ('+'|'-'|'~') factor | power
 ExprASTPtr Parser::parse_factor(){
-    ExprASTPtr power = parse_power();
-    return power;
+    ExprASTPtr ret;
+    if (m_curScanner->getToken()->strVal == "+"){
+        m_curScanner->seek(1);
+        ret = parse_factor();
+    }
+    else if (m_curScanner->getToken()->strVal == "-"){
+        m_curScanner->seek(1);
+        ExprASTPtr n = new NumberExprAST(-1);
+        ExprASTPtr power = parse_factor();
+        ret = ALLOC_EXPR_2<BinaryExprAST>("*", power, n);
+    }
+    else if (m_curScanner->getToken()->strVal == "~"){
+        m_curScanner->seek(1);
+        ExprASTPtr power = parse_factor();
+        ret = ALLOC_EXPR_2<BinaryExprAST>("~", power, power);
+    }
+    else{
+        ret = parse_power();
+    }
+    
+    return ret;
 }
 
 //! power: atom trailer* ['**' factor]

@@ -244,8 +244,15 @@ class BinaryExprAST : public ExprAST {
         OP_IN,
         OP_NOTIN,
         
-        OP_OR,
-        OP_AND,
+        OP_OR, //! or 
+        OP_AND, //! and
+        
+        OP_BIT_AND, //! &
+        OP_BIT_OR, //! |
+        OP_BIT_XOR, //! ^
+        OP_BIT_INVERT, //! ~
+        OP_BIT_SHIFT, //! <<
+        OP_BIT_RSHIFT, //! >>
     };
     std::string op;
     ExprASTPtr left, right;
@@ -302,6 +309,24 @@ public:
         }
         else if (op == "and"){
             optype = OP_AND;
+        }
+        else if (op == "&"){
+            optype = OP_BIT_AND;
+        }
+        else if (op == "|"){
+            optype = OP_BIT_OR;
+        }
+        else if (op == "^"){
+            optype = OP_BIT_XOR;
+        }
+        else if (op == "~"){
+            optype = OP_BIT_INVERT;
+        }
+        else if (op == "<<"){
+            optype = OP_BIT_SHIFT;
+        }
+        else if (op == ">>"){
+            optype = OP_BIT_RSHIFT;
         }
     }
     virtual int getType() {

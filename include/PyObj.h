@@ -463,45 +463,6 @@ public:
     PyCppFunc     cppFunc;
 };
 
-struct PyCppUtil{
-    static std::string strFormat(const char * format, ...);
-    static void pyAssert(PyObjPtr& v, int nType){
-        if (v->getType() != nType){
-            throw PyException::buildException("%d instance needed, given:%d", nType, v->getType());
-        }
-    }
-    static PyObjPtr genInt(long n){
-        return new PyObjInt(n);
-    }
-    static PyObjPtr genStr(const std::string& s){
-        return new PyObjStr(s);
-    }
-    static PyObjPtr genFunc(PyCppFuncWrapWithData::PyCppFunc f, std::vector<ExprASTPtr>& data, std::string n = ""){
-        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrapWithData(f, data));
-    }
-    static PyObjPtr genFunc(PyCppFuncWrap::PyCppFunc f, std::string n = ""){
-        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrap(f));
-    }
-    static PyObjPtr genFunc(PyCppFuncWrapArgName::PyCppFunc f, std::string n = ""){
-        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrapArgName(f));
-    }
-    static PyObjPtr genFunc(PyCppClassFuncWrap::PyCppFunc f, std::string n = ""){
-        return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrap(f));
-    }
-    static PyObjPtr genFunc(PyCppClassFuncWrapArgName::PyCppFunc f, std::string n = ""){
-        return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrapArgName(f));
-    }
-    
-    static PyObjPtr getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname);
-    static bool hasAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname);
-    static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v);
-    
-    static std::map<std::string, PyObjPtr> getAllFieldData(PyObjPtr obj);
-    static PyObjPtr& callPyfunc(PyContext& context, PyObjPtr& func, std::vector<PyObjPtr>& args);
-    
-    static PyObjPtr getArgVal(std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal, size_t index,
-                              const std::string& argName);
-};
 #define PyCheckNone(x) (x->getType() == PY_NONE)
 #define PyCheckInt(x) (x->getType() == PY_INT)
 #define PyAssertInt(x) PyCppUtil::pyAssert(x, PY_INT)
@@ -538,6 +499,49 @@ struct PyCppUtil{
     }while(0)
 
 
+struct PyCppUtil{
+    static std::string strFormat(const char * format, ...);
+    static void pyAssert(PyObjPtr& v, int nType){
+        if (v->getType() != nType){
+            throw PyException::buildException("%d instance needed, given:%d", nType, v->getType());
+        }
+    }
+    static long toInt(PyObjPtr& v){
+        PyAssertInt(v);
+        return v.cast<PyObjInt>()->value;
+    }
+    static PyObjPtr genInt(long n){
+        return new PyObjInt(n);
+    }
+    static PyObjPtr genStr(const std::string& s){
+        return new PyObjStr(s);
+    }
+    static PyObjPtr genFunc(PyCppFuncWrapWithData::PyCppFunc f, std::vector<ExprASTPtr>& data, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrapWithData(f, data));
+    }
+    static PyObjPtr genFunc(PyCppFuncWrap::PyCppFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrap(f));
+    }
+    static PyObjPtr genFunc(PyCppFuncWrapArgName::PyCppFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrapArgName(f));
+    }
+    static PyObjPtr genFunc(PyCppClassFuncWrap::PyCppFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrap(f));
+    }
+    static PyObjPtr genFunc(PyCppClassFuncWrapArgName::PyCppFunc f, std::string n = ""){
+        return new PyObjFuncDef(n, NULL, NULL, new PyCppClassFuncWrapArgName(f));
+    }
+    
+    static PyObjPtr getAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname);
+    static bool hasAttr(PyContext& context, PyObjPtr& obj, const std::string& filedname);
+    static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v);
+    
+    static std::map<std::string, PyObjPtr> getAllFieldData(PyObjPtr obj);
+    static PyObjPtr& callPyfunc(PyContext& context, PyObjPtr& func, std::vector<PyObjPtr>& args);
+    
+    static PyObjPtr getArgVal(std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal, size_t index,
+                              const std::string& argName);
+};
 struct IterUtil{
     IterUtil(PyContext& context, PyObjPtr v);
     PyObjPtr next();

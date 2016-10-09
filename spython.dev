@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
 CompilerSettings=0000000000000000101000000
-UnitCount=48
+UnitCount=47
 
 [VersionInfo]
 Major=1
@@ -431,26 +431,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit40]
-FileName=include\objhandler\PyBuiltinTypeHandler.h
-CompileCpp=1
-Folder=include/objhandler
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit42]
-FileName=include\Ext\PyTupleExt.h
-CompileCpp=1
-Folder=include/ext
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit41]
 FileName=include\ext\PyBaseExt.h
 CompileCpp=1
 Folder=include/ext
@@ -460,7 +440,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit43]
+[Unit42]
 FileName=include\objhandler\PyCommonHandler.h
 CompileCpp=1
 Folder=include/objhandler
@@ -470,7 +450,17 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit44]
+[Unit41]
+FileName=include\Ext\PyTupleExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit43]
 FileName=src\objhandler\PyCommonHandler.cpp
 CompileCpp=1
 Folder=src/objhandler
@@ -480,7 +470,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit45]
+[Unit44]
 FileName=src\objhandler\PyListHandler.cpp
 CompileCpp=1
 Folder=src/objhandler
@@ -490,7 +480,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit46]
+[Unit45]
 FileName=include\objhandler\PyListHandler.h
 CompileCpp=1
 Folder=include/objhandler
@@ -500,8 +490,18 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit47]
+[Unit46]
 FileName=include\ext\PyListExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit47]
+FileName=include\ext\PyDictExt.h
 CompileCpp=1
 Folder=include/ext
 Compile=1

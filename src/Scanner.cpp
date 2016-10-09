@@ -102,8 +102,22 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
            index--;//! back push one char
        }
     }
+    //!check 0x prefix
+    bool bit16Flag = false;
+    if (cLastOne == '0'){//! check plus symbol
+       char nextOne = getCharNext(content, index);
+       if (nextOne == 'x' || nextOne == 'X'){
+           bit16Flag = true;
+       }
+       else{
+           index--;//! back push one char
+       }
+    }
     if (::isdigit(cLastOne)) { // Number: [0-9.]+
         string strNum;
+        if (bit16Flag){
+            strNum = "0x";
+        }
         bool isFloat = false;
         do {
             if (cLastOne == '.'){
@@ -114,7 +128,14 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
         } while (::isdigit(cLastOne) || cLastOne == '.');
 
         if (false == isFloat){
-            retToken.nVal = nPlusMinus * ::atol(strNum.c_str());
+            if (bit16Flag){
+                long nTmp = 0;
+                ::sscanf(strNum.c_str(), "%lx", &nTmp);
+                retToken.nVal = nPlusMinus * nTmp;
+            }
+            else{
+                retToken.nVal = nPlusMinus * ::atol(strNum.c_str());
+            }
             retToken.nTokenType = TOK_INT;
         }
         else{
@@ -175,6 +196,10 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
             char cLastOne2 = getCharNext(content, index);
             char cLastOne3 = getCharNext(content, index);
             if (cLastOne2 == '='){
+                retToken.strVal += cLastOne2;
+                index -= 1;
+            }
+            else if (cLastOne == cLastOne2 && cLastOne3 != '='){
                 retToken.strVal += cLastOne2;
                 index -= 1;
             }

@@ -673,12 +673,55 @@ PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
             return context.cacheResult(PyObjTool::buildFalse());
         }break;
         case OP_AND:{
-            PyObjPtr& lval = left->eval(context);
-            PyObjPtr& rval = right->eval(context);
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr rval = right->eval(context);
             if (lval->getHandler()->handleBool(context, lval) && rval->getHandler()->handleBool(context, rval)){
                 return context.cacheResult(PyObjTool::buildTrue());
             }
             return context.cacheResult(PyObjTool::buildFalse());
+        }break;
+        //! bit operation
+        /*
+        , //! |
+        , //! ^
+        , //! ~
+        , //! <<
+        , //! >>
+        */
+        case OP_BIT_AND:{
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr rval = right->eval(context);
+            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) & PyCppUtil::toInt(rval));
+            return context.cacheResult(ret);
+        }break;
+        case OP_BIT_OR:{
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr rval = right->eval(context);
+            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) | PyCppUtil::toInt(rval));
+            return context.cacheResult(ret);
+        }break;
+        case OP_BIT_XOR:{
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr rval = right->eval(context);
+            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) ^ PyCppUtil::toInt(rval));
+            return context.cacheResult(ret);
+        }break;
+        case OP_BIT_INVERT:{
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr ret = PyCppUtil::genInt(~PyCppUtil::toInt(lval));
+            return context.cacheResult(ret);
+        }break;
+        case OP_BIT_SHIFT:{
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr rval = right->eval(context);
+            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) << PyCppUtil::toInt(rval));
+            return context.cacheResult(ret);
+        }break;
+        case OP_BIT_RSHIFT:{
+            PyObjPtr lval = left->eval(context);
+            PyObjPtr rval = right->eval(context);
+            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) >> PyCppUtil::toInt(rval));
+            return context.cacheResult(ret);
         }break;
         default:
             return context.cacheResult(PyObjTool::buildNone());

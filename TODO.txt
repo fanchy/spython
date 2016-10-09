@@ -14,7 +14,7 @@
 14.assert
 15.__module__		-- ok
 16.Slice 		-- ok
-17.eval
+17.eval exec
 18. \ 多行支持
 19. open close 文件操作 with
 20. global 的实现	-- ok
@@ -26,3 +26,5 @@
 26. 闭包		-- ok
 27. += 
 28. & |
+29. __main__
+30.set
