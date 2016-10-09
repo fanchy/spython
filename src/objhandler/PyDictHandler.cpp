@@ -126,20 +126,20 @@ long PyDictHandler::handleLen(PyContext& context, PyObjPtr& self){
 
 PyObjPtr& PyDictHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step){
     
-    PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
+    //PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
 
     PyObjPtr ret = self.cast<PyObjDict>()->get(context, startVal);
     return context.cacheResult(ret);
 }
 PyObjPtr& PyDictHandler::handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v){
-    PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
+    //PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
 
     self.cast<PyObjDict>()->set(context, k, v);
     
     return v;
 }
 void PyDictHandler::handleSliceDel(PyContext& context, PyObjPtr& self, PyObjPtr& k){
-    PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
+    //PyObjDict::DictMap& s = self.cast<PyObjDict>()->value;
     if (!self.cast<PyObjDict>()->delByKey(context, k)){
         THROW_EVAL_ERROR("KeyError");
     }

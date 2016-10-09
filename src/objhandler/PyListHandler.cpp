@@ -151,7 +151,7 @@ PyObjPtr& PyListHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPt
             THROW_EVAL_ERROR("IndexError: tuple index out of range");
         }
         newVal = new PyObjList();
-        for (int i = start; i < *stop && i < s.size(); i += step){
+        for (int i = start; i < *stop && i < (int)s.size(); i += step){
             newVal.cast<PyObjList>()->value.push_back(s[i]);
         }
     }
@@ -172,8 +172,8 @@ PyObjPtr& PyListHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPt
 }
 void PyListHandler::handleSliceDel(PyContext& context, PyObjPtr& self, PyObjPtr& startVal){
     PyAssertInt(startVal);
-    int start = startVal.cast<PyObjInt>()->value;
-    if (start < 0 || start > self.cast<PyObjList>()->value.size()){
+    long start = startVal.cast<PyObjInt>()->value;
+    if (start < 0 || start > (long)self.cast<PyObjList>()->value.size()){
         THROW_EVAL_ERROR("IndexError: list assignment index out of range");
     }
     self.cast<PyObjList>()->value.erase(self.cast<PyObjList>()->value.begin() + start);

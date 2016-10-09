@@ -17,11 +17,11 @@ ARCH=
 BIN=spython
 
 #源文件目录
-SrcDir= . 
+SrcDir= . src src/objhandler
 #头文件目录
-IncDir=  ./
+IncDir=  ./ include
 #连接库目录
-LibDir= /usr/local/lib /usr/lib/mysql /usr/lib64/mysql
+LibDir= /usr/local/lib 
 SRCS=$(foreach dir,$(SrcDir),$(wildcard $(dir)/*.cpp))
 #INCS=$(foreach dir,$(IncDir),$(wildcard $(dir)/*.h))
 INCS=$(foreach dir,$(IncDir),$(addprefix -I,$(dir)))

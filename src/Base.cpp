@@ -10,7 +10,7 @@ string PyObj::dump(PyContext& context, PyObjPtr& self, int preBlank) {
     if (ret.empty() == false)
         return ret;
     string blank;
-    for (size_t j = 0; j < preBlank; ++j){
+    for (int j = 0; j < preBlank; ++j){
         blank += "  ";
     }
     char msg[256] = {0};

@@ -59,7 +59,7 @@ struct PyDictIterExt{
             }
             instanceData->version = dictself.cast<PyObjDict>()->version;
             instanceData->it = dictself.cast<PyObjDict>()->value.begin();
-            for (size_t i = 0; i < instanceData->nValue; ++i){
+            for (int i = 0; i < instanceData->nValue; ++i){
                 ++instanceData->it;
             }
         }

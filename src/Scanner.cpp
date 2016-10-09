@@ -43,14 +43,14 @@ string Token::dump() const{
 char Scanner::getCharNext(const string& content, int& index) {
     char ret = 0;
     do{
-        if (index < content.size()){
+        if (index < (int)content.size()){
             ret = content[index++];
         }else{
             ret = 0;
         }
     }while(ret == '\r');
     
-    if (ret == '\n' & index > m_hasSearchMaxIndex){
+    if (ret == '\n' && index > (int)m_hasSearchMaxIndex){
         m_hasSearchMaxIndex = index;
         m_nCurLine++;
     }
@@ -384,7 +384,7 @@ bool Scanner::tokenize(const std::string& content){
 const Token* Scanner::getToken(int nOffset){
     
     int nIndex = m_nSeekIndex + nOffset;
-    if (nIndex >= 0 && nIndex < m_allTokens.size()){
+    if (nIndex >= 0 && nIndex < (int)m_allTokens.size()){
         return &(m_allTokens[nIndex]);
     }
     

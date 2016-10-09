@@ -123,7 +123,7 @@ struct PyListExt{
         if (index < 0){
             index = 0;
         }
-        else if (index > self.cast<PyObjList>()->value.size()){
+        else if ((size_t)index > self.cast<PyObjList>()->value.size()){
             index = self.cast<PyObjList>()->value.size();
         }
         self.cast<PyObjList>()->value.insert(self.cast<PyObjList>()->value.begin() + index, val);
@@ -147,7 +147,7 @@ struct PyListExt{
             if (index < 0){
                 PY_RAISE_STR(context, "IndexError: pop index out of range");
             }
-            else if (index >= self.cast<PyObjList>()->value.size()){
+            else if ((size_t)index >= self.cast<PyObjList>()->value.size()){
                 PY_RAISE_STR(context, "IndexError: pop index out of range");
             }
             self.cast<PyObjList>()->value.erase(self.cast<PyObjList>()->value.begin() + index);

@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 #include "Base.h"
-#include "singleton.h"
+#include "Singleton.h"
 #include "objhandler/PyCommonHandler.h"
 
 namespace ff {

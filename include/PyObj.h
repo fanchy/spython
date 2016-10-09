@@ -20,7 +20,7 @@
 */
 
 #include "Base.h"
-#include "singleton.h"
+#include "Singleton.h"
 
 #include "objhandler/PyIntHandler.h"
 #include "objhandler/PyFloatHandler.h"

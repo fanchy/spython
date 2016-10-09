@@ -296,7 +296,7 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
         unsigned int j = hasAssignArgNum;
         ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[j];
         
-        const string& strVarName = paramInfo.paramKey.cast<VariableExprAST>()->name;
+        //const string& strVarName = paramInfo.paramKey.cast<VariableExprAST>()->name;
         if (paramInfo.paramType.empty() == false){ //!非普通参数, *a, **b  在后边统一处理 
             break;
         }
@@ -385,7 +385,7 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
         unsigned int j = hasAssignArgNum;
         ParametersExprAST::ParameterInfo& paramInfo = pParametersExprAST->allParam[j];
         
-        const string& strVarName = paramInfo.paramKey.cast<VariableExprAST>()->name;
+        //const string& strVarName = paramInfo.paramKey.cast<VariableExprAST>()->name;
         if (paramInfo.paramType == "*"){
             PyObjPtr pVal = new PyObjTuple();
             paramInfo.paramKey->assignVal(context, pVal);
@@ -591,13 +591,13 @@ IterUtil::IterUtil(PyContext& c, PyObjPtr v):context(c), obj(v), index(0){
 }
 PyObjPtr IterUtil::next(){
     if (PyCheckTuple(obj)){
-        if (index >= obj.cast<PyObjTuple>()->value.size()){
+        if ((size_t)index >= obj.cast<PyObjTuple>()->value.size()){
             return NULL;
         }
         return obj.cast<PyObjTuple>()->value[index++];
     }
     else if (PyCheckList(obj)){
-        if (index >= obj.cast<PyObjList>()->value.size()){
+        if ((size_t)index >= obj.cast<PyObjList>()->value.size()){
             return NULL;
         }
         return obj.cast<PyObjList>()->value[index++];
@@ -606,7 +606,7 @@ PyObjPtr IterUtil::next(){
         PyObjPtr listCache = obj.cast<PyObjDict>()->getValueAsList();
         PyAssertList(listCache);
         
-        if (index >= listCache.cast<PyObjList>()->size()){
+        if ((size_t)index >= listCache.cast<PyObjList>()->size()){
             return NULL;
         }
         PyObjPtr ret = listCache.cast<PyObjList>()->value[index++];

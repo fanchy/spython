@@ -152,7 +152,7 @@ PyObjPtr& PyTupleHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjP
             THROW_EVAL_ERROR("IndexError: tuple index out of range");
         }
         newVal = new PyObjTuple();
-        for (int i = start; i < *stop && i < s.size(); i += step){
+        for (int i = start; i < *stop && i < (int)s.size(); i += step){
             newVal.cast<PyObjTuple>()->value.push_back(s[i]);
         }
     }

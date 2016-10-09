@@ -108,7 +108,7 @@ PyObjPtr& PyStrHandler::handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr
             newVal = s.substr(start, *stop - start);
         }
         else{
-            for (int i = start; i < *stop && i < s.size(); i += step){
+            for (int i = start; i < *stop && i < (int)s.size(); i += step){
                 newVal += s[i];
             }
         }

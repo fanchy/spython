@@ -9,7 +9,7 @@
 #include "Parser.h"
 #include "StrTool.h"
 #include "Util.h"
-
+#include <limits.h> 
 using namespace std;
 using namespace ff;
 

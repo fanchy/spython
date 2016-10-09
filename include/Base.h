@@ -481,8 +481,8 @@ struct PyContextBackUp{
         }
     }
     bool       bRollback;
-    PyObjPtr   curstack;
     PyContext& context;
+    PyObjPtr   curstack;
 };
 
 class FlowCtrlSignal: public std::exception{
