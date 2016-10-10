@@ -562,174 +562,233 @@ string ImportAST::dump(int nDepth){
     //ret += "\n" + param->dump(nDepth+1);
     return ret;
 }
+BinaryExprAST::BinaryExprAST(const std::string& o, ExprASTPtr& l, ExprASTPtr& r) : op(o), left(l), right(r),funcImpl(NULL) {
+    this->name = op;
 
-PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
-    switch (optype){
-        case OP_ASSIGN:{
-            PyObjPtr rval = right->eval(context);
-            if (!rval){
-                PY_RAISE_STR(context, "var is not defined");
-            }
-            PyObjPtr& lval = left->assignVal(context, rval);
-            return lval;
-        }break;
-        case OP_ADD:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            return lval->getHandler()->handleAdd(context, lval, rval);
-        }break;
-        case OP_SUB:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            return lval->getHandler()->handleSub(context, lval, rval);
-        }break;
-        case OP_MUL:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            return lval->getHandler()->handleMul(context, lval, rval);
-        }break;
-        case OP_DIV:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            return lval->getHandler()->handleDiv(context, lval, rval);
-        }break;
-        case OP_MOD:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            return lval->getHandler()->handleMod(context, lval, rval);
-        }break;
-        case OP_EQ:{
-            PyObjPtr& rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleEqual(context, lval, rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case OP_NOTEQ:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleEqual(context, lval, rval)){
-                return context.cacheResult(PyObjTool::buildFalse());
-            }
-            return context.cacheResult(PyObjTool::buildTrue());
-        }break;
-        case OP_LESS:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleLess(context, lval, rval)){
-                return context.cacheResult(PyObjTool::buildFalse());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case OP_GREAT:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleGreat(context, lval, rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case OP_LESSEQ:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleLessEqual(context, lval, rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case OP_GREATEQ:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleGreatEqual(context, lval, rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case OP_IN:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleContains(context, lval, rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case OP_NOTIN:{
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleContains(context, lval, rval)){
-                return context.cacheResult(PyObjTool::buildFalse());
-            }
-            return context.cacheResult(PyObjTool::buildTrue());
-        }break;
-        case OP_OR:{
-            PyObjPtr& lval = left->eval(context);
-            if (lval->getHandler()->handleBool(context, lval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            
-            PyObjPtr& rval = right->eval(context);
-            if (rval->getHandler()->handleBool(context, rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        case OP_AND:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr rval = right->eval(context);
-            if (lval->getHandler()->handleBool(context, lval) && rval->getHandler()->handleBool(context, rval)){
-                return context.cacheResult(PyObjTool::buildTrue());
-            }
-            return context.cacheResult(PyObjTool::buildFalse());
-        }break;
-        //! bit operation
-        /*
-        , //! |
-        , //! ^
-        , //! ~
-        , //! <<
-        , //! >>
-        */
-        case OP_BIT_AND:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) & PyCppUtil::toInt(rval));
-            return context.cacheResult(ret);
-        }break;
-        case OP_BIT_OR:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) | PyCppUtil::toInt(rval));
-            return context.cacheResult(ret);
-        }break;
-        case OP_BIT_XOR:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) ^ PyCppUtil::toInt(rval));
-            return context.cacheResult(ret);
-        }break;
-        case OP_BIT_INVERT:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr ret = PyCppUtil::genInt(~PyCppUtil::toInt(lval));
-            return context.cacheResult(ret);
-        }break;
-        case OP_BIT_SHIFT:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) << PyCppUtil::toInt(rval));
-            return context.cacheResult(ret);
-        }break;
-        case OP_BIT_RSHIFT:{
-            PyObjPtr lval = left->eval(context);
-            PyObjPtr rval = right->eval(context);
-            PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) >> PyCppUtil::toInt(rval));
-            return context.cacheResult(ret);
-        }break;
-        default:
-            return context.cacheResult(PyObjTool::buildNone());
+    if (op == "="){
+        funcImpl = &eval_OP_ASSIGN;
+    }
+    else if (op == "+"){
+        funcImpl = &eval_OP_ADD;
+    }
+    else if (op == "-"){
+        funcImpl = &eval_OP_SUB;
+    }
+    else if (op == "*"){
+        funcImpl = &eval_OP_MUL;
+    }
+    else if (op == "/"){
+        funcImpl = &eval_OP_DIV;
+    }
+    else if (op == "%"){
+        funcImpl = &eval_OP_MOD;
+    }
+    else if (op == "==" || op == "is"){
+        funcImpl = &eval_OP_EQ;
+    }
+    else if (op == "!=" or op == "not" or op == "<>"){
+        funcImpl = &eval_OP_NOTEQ;
+    }
+    else if (op == "<"){
+        funcImpl = &eval_OP_LESS;
+    }
+    else if (op == ">"){
+        funcImpl = &eval_OP_GREAT;
+    }
+    else if (op == "<="){
+        funcImpl = &eval_OP_LESSEQ;
+    }
+    else if (op == ">="){
+        funcImpl = &eval_OP_GREATEQ;
+    }
+    else if (op == "in" || op == "is in"){
+        funcImpl = &eval_OP_IN;
+    }
+    else if (op == "not in"){
+        funcImpl = &eval_OP_NOTIN;
+    }
+    else if (op == "or"){
+        funcImpl = &eval_OP_OR;
+    }
+    else if (op == "and"){
+        funcImpl = &eval_OP_AND;
+    }
+    else if (op == "&"){
+        funcImpl = &eval_OP_BIT_AND;
+    }
+    else if (op == "|"){
+        funcImpl = &eval_OP_BIT_OR;
+    }
+    else if (op == "^"){
+        funcImpl = &eval_OP_BIT_XOR;
+    }
+    else if (op == "~"){
+        funcImpl = &eval_OP_BIT_INVERT;
+    }
+    else if (op == "<<"){
+        funcImpl = &eval_OP_BIT_SHIFT;
+    }
+    else if (op == ">>"){
+        funcImpl = &eval_OP_BIT_RSHIFT;
+    }
+}
+PyObjPtr& BinaryExprAST::eval_OP_ASSIGN(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    if (!rval){
+        PY_RAISE_STR(context, "var is not defined");
+    }
+    PyObjPtr& lval = left->assignVal(context, rval);
+    return lval;
+}
+PyObjPtr& BinaryExprAST::eval_OP_ADD(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    return lval->getHandler()->handleAdd(context, lval, rval);
+}
+PyObjPtr& BinaryExprAST::eval_OP_SUB(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    return lval->getHandler()->handleSub(context, lval, rval);
+}
+PyObjPtr& BinaryExprAST::eval_OP_MUL(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    return lval->getHandler()->handleMul(context, lval, rval);
+}
+PyObjPtr& BinaryExprAST::eval_OP_DIV(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    return lval->getHandler()->handleDiv(context, lval, rval);
+}
+PyObjPtr& BinaryExprAST::eval_OP_MOD(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr& lval = left->eval(context);
+    return lval->getHandler()->handleMod(context, lval, rval);
+}
+PyObjPtr& BinaryExprAST::eval_OP_EQ(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    if (lval->getHandler()->handleEqual(context, lval, rval)){
+        return context.cacheResult(PyObjTool::buildTrue());
+    }
+    return context.cacheResult(PyObjTool::buildFalse());
+}
+PyObjPtr& BinaryExprAST::eval_OP_NOTEQ(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    if (lval->getHandler()->handleEqual(context, lval, rval)){
+        return context.cacheResult(PyObjTool::buildFalse());
+    }
+    return context.cacheResult(PyObjTool::buildTrue());
+} //!= not
+PyObjPtr& BinaryExprAST::eval_OP_LESS(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    if (lval->getHandler()->handleLess(context, lval, rval)){
+        return context.cacheResult(PyObjTool::buildFalse());
+    }
+    return context.cacheResult(PyObjTool::buildFalse());
+}//<
+PyObjPtr& BinaryExprAST::eval_OP_GREAT(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    if (lval->getHandler()->handleGreat(context, lval, rval)){
+        return context.cacheResult(PyObjTool::buildTrue());
+    }
+    return context.cacheResult(PyObjTool::buildFalse());
+}//>
+PyObjPtr& BinaryExprAST::eval_OP_LESSEQ(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    if (lval->getHandler()->handleLessEqual(context, lval, rval)){
+        return context.cacheResult(PyObjTool::buildTrue());
+    }
+    return context.cacheResult(PyObjTool::buildFalse());
+} //<=
+PyObjPtr& BinaryExprAST::eval_OP_GREATEQ(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    if (lval->getHandler()->handleGreatEqual(context, lval, rval)){
+        return context.cacheResult(PyObjTool::buildTrue());
+    }
+    return context.cacheResult(PyObjTool::buildFalse());
+} //>=
+PyObjPtr& BinaryExprAST::eval_OP_IN(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    if (lval->getHandler()->handleContains(context, lval, rval)){
+        return context.cacheResult(PyObjTool::buildTrue());
+    }
+    return context.cacheResult(PyObjTool::buildFalse());
+}
+PyObjPtr& BinaryExprAST::eval_OP_NOTIN(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    if (lval->getHandler()->handleContains(context, lval, rval)){
+        return context.cacheResult(PyObjTool::buildFalse());
+    }
+    return context.cacheResult(PyObjTool::buildTrue());
+}
+PyObjPtr& BinaryExprAST::eval_OP_OR(PyContext& context){
+    PyObjPtr lval = left->eval(context);
+    if (lval->getHandler()->handleBool(context, lval)){
+        return context.cacheResult(PyObjTool::buildTrue());
     }
     
-    return context.curstack;
+    PyObjPtr rval = right->eval(context);
+    if (rval->getHandler()->handleBool(context, rval)){
+        return context.cacheResult(PyObjTool::buildTrue());
+    }
+    return context.cacheResult(PyObjTool::buildFalse());
+} //! or 
+PyObjPtr& BinaryExprAST::eval_OP_AND(PyContext& context){
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr rval = right->eval(context);
+    if (lval->getHandler()->handleBool(context, lval) && rval->getHandler()->handleBool(context, rval)){
+        return context.cacheResult(PyObjTool::buildTrue());
+    }
+    return context.cacheResult(PyObjTool::buildFalse());
+} //! and
+PyObjPtr& BinaryExprAST::eval_OP_BIT_AND(PyContext& context){
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) & PyCppUtil::toInt(rval));
+    return context.cacheResult(ret);
+} //! &
+PyObjPtr& BinaryExprAST::eval_OP_BIT_OR(PyContext& context){
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) | PyCppUtil::toInt(rval));
+    return context.cacheResult(ret);
+} //! |
+PyObjPtr& BinaryExprAST::eval_OP_BIT_XOR(PyContext& context){
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) ^ PyCppUtil::toInt(rval));
+    return context.cacheResult(ret);
+} //! ^
+PyObjPtr& BinaryExprAST::eval_OP_BIT_INVERT(PyContext& context){
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr ret = PyCppUtil::genInt(~PyCppUtil::toInt(lval));
+    return context.cacheResult(ret);
+} //! ~
+PyObjPtr& BinaryExprAST::eval_OP_BIT_SHIFT(PyContext& context){
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) << PyCppUtil::toInt(rval));
+    return context.cacheResult(ret);
+} //! <<
+PyObjPtr& BinaryExprAST::eval_OP_BIT_RSHIFT(PyContext& context){
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) >> PyCppUtil::toInt(rval));
+    return context.cacheResult(ret);
+} //! >>
+PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();
+    if (funcImpl){
+        return (this->*funcImpl)(context);
+    }
+    return context.cacheResult(PyObjTool::buildNone());
 }
 
 string BinaryExprAST::dump(int nDepth){
@@ -748,58 +807,80 @@ string BinaryExprAST::dump(int nDepth){
     return ret;
 }
 
-PyObjPtr& AugassignAST::eval(PyContext& context){TRACE_EXPR();
+AugassignAST::AugassignAST(const std::string& o, ExprASTPtr l, ExprASTPtr r): op(o), left(l), right(r), funcImpl(NULL) {
+    this->name = op;
+    
     if (op == "+="){
-        PyObjPtr rval = right->eval(context);
-        PyObjPtr lval = left->eval(context);
-        PyObjPtr& ret = lval->getHandler()->handleIAdd(context, lval, rval);
-        if (ret.get() != lval.get()){
-            PyObjPtr& newret = left->assignVal(context, ret);
-            return newret;
-        }
-        return ret;
+        funcImpl = &eval_IAdd;
     }
     else if (op == "-="){
-        PyObjPtr rval = right->eval(context);
-        PyObjPtr lval = left->eval(context);
-        PyObjPtr& ret = lval->getHandler()->handleISub(context, lval, rval);
-        if (ret.get() != lval.get()){
-            PyObjPtr& newret = left->assignVal(context, ret);
-            return newret;
-        }
-        return ret;
+        funcImpl = &eval_ISub;
     }
     else if (op == "*="){
-        PyObjPtr rval = right->eval(context);
-        PyObjPtr lval = left->eval(context);
-        PyObjPtr& ret = lval->getHandler()->handleIMul(context, lval, rval);
-        if (ret.get() != lval.get()){
-            PyObjPtr& newret = left->assignVal(context, ret);
-            return newret;
-        }
-        return ret;
+        funcImpl = &eval_IMul;
     }
     else if (op == "/="){
-        PyObjPtr rval = right->eval(context);
-        PyObjPtr lval = left->eval(context);
-        PyObjPtr& ret = lval->getHandler()->handleIDiv(context, lval, rval);
-        if (ret.get() != lval.get()){
-            PyObjPtr& newret = left->assignVal(context, ret);
-            return newret;
-        }
-        return ret;
+        funcImpl = &eval_IDiv;
     }
     else if (op == "%="){
-        PyObjPtr rval = right->eval(context);
-        PyObjPtr lval = left->eval(context);
-        PyObjPtr& ret = lval->getHandler()->handleIMod(context, lval, rval);
-        if (ret.get() != lval.get()){
-            PyObjPtr& newret = left->assignVal(context, ret);
-            return newret;
-        }
-        return ret;
+        funcImpl = &eval_IMod;
     }
-    return context.cacheResult(PyObjTool::buildNone());//!TODO
+}
+PyObjPtr& AugassignAST::eval_IAdd(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr& ret = lval->getHandler()->handleIAdd(context, lval, rval);
+    if (ret.get() != lval.get()){
+        PyObjPtr& newret = left->assignVal(context, ret);
+        return newret;
+    }
+    return ret;
+}
+PyObjPtr& AugassignAST::eval_ISub(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr& ret = lval->getHandler()->handleISub(context, lval, rval);
+    if (ret.get() != lval.get()){
+        PyObjPtr& newret = left->assignVal(context, ret);
+        return newret;
+    }
+    return ret;
+}
+PyObjPtr& AugassignAST::eval_IMul(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr& ret = lval->getHandler()->handleIMul(context, lval, rval);
+    if (ret.get() != lval.get()){
+        PyObjPtr& newret = left->assignVal(context, ret);
+        return newret;
+    }
+    return ret;
+}
+PyObjPtr& AugassignAST::eval_IDiv(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr& ret = lval->getHandler()->handleIDiv(context, lval, rval);
+    if (ret.get() != lval.get()){
+        PyObjPtr& newret = left->assignVal(context, ret);
+        return newret;
+    }
+    return ret;
+}
+PyObjPtr& AugassignAST::eval_IMod(PyContext& context){
+    PyObjPtr rval = right->eval(context);
+    PyObjPtr lval = left->eval(context);
+    PyObjPtr& ret = lval->getHandler()->handleIMod(context, lval, rval);
+    if (ret.get() != lval.get()){
+        PyObjPtr& newret = left->assignVal(context, ret);
+        return newret;
+    }
+    return ret;
+}
+PyObjPtr& AugassignAST::eval(PyContext& context){TRACE_EXPR();
+    if (funcImpl){
+        return (this->*funcImpl)(context);
+    }
+    return context.cacheResult(PyObjTool::buildNone());
 }
 
 string AugassignAST::dump(int nDepth){

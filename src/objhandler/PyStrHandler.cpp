@@ -136,7 +136,7 @@ static size_t hashStr(const string& s){
 }
 
 size_t PyStrHandler::handleHash(PyContext& context, const PyObjPtr& self) const{
-    return hashStr(self.cast<PyObjStr>()->value);
+    return size_t(-1 * hashStr(self.cast<PyObjStr>()->value));
 }
 
 

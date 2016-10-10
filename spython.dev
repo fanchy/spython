@@ -28,7 +28,7 @@ Folders=include,include/ext,include/objhandler,src,src/objhandler
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
-CompilerSettings=0000000000000000101000000
+CompilerSettings=0000000000100000101000000
 UnitCount=47
 
 [VersionInfo]

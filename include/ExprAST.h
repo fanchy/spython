@@ -227,6 +227,7 @@ public:
 };
 /// BinaryExprAST - Expression class for a binary operator.
 class BinaryExprAST : public ExprAST {
+    typedef PyObjPtr& (BinaryExprAST::*ExprAstEvalFunc)(PyContext&);
     enum {
         OP_ASSIGN = 0,
         OP_ADD,
@@ -236,11 +237,11 @@ class BinaryExprAST : public ExprAST {
         OP_MOD,
         
         OP_EQ,
+        OP_NOTEQ, //!= not
         OP_LESS,//<
         OP_GREAT,//>
         OP_LESSEQ, //<=
         OP_GREATEQ, //>=
-        OP_NOTEQ, //!= not
         OP_IN,
         OP_NOTIN,
         
@@ -254,104 +255,66 @@ class BinaryExprAST : public ExprAST {
         OP_BIT_SHIFT, //! <<
         OP_BIT_RSHIFT, //! >>
     };
-    std::string op;
-    ExprASTPtr left, right;
-    int optype;
 public:
-    BinaryExprAST(const std::string& o, ExprASTPtr& l, ExprASTPtr& r)
-        : op(o), left(l), right(r),optype(-1) {
-        this->name = op;
-
-        if (op == "="){
-            optype = OP_ASSIGN;
-        }
-        else if (op == "+"){
-            optype = OP_ADD;
-        }
-        else if (op == "-"){
-            optype = OP_SUB;
-        }
-        else if (op == "*"){
-            optype = OP_MUL;
-        }
-        else if (op == "/"){
-            optype = OP_DIV;
-        }
-        else if (op == "%"){
-            optype = OP_MOD;
-        }
-        else if (op == "==" || op == "is"){
-            optype = OP_EQ;
-        }
-        else if (op == "!=" or op == "not" or op == "<>"){
-            optype = OP_NOTEQ;
-        }
-        else if (op == "<"){
-            optype = OP_LESS;
-        }
-        else if (op == ">"){
-            optype = OP_GREAT;
-        }
-        else if (op == "<="){
-            optype = OP_LESSEQ;
-        }
-        else if (op == ">="){
-            optype = OP_GREATEQ;
-        }
-        else if (op == "in" || op == "is in"){
-            optype = OP_IN;
-        }
-        else if (op == "not in"){
-            optype = OP_NOTIN;
-        }
-        else if (op == "or"){
-            optype = OP_OR;
-        }
-        else if (op == "and"){
-            optype = OP_AND;
-        }
-        else if (op == "&"){
-            optype = OP_BIT_AND;
-        }
-        else if (op == "|"){
-            optype = OP_BIT_OR;
-        }
-        else if (op == "^"){
-            optype = OP_BIT_XOR;
-        }
-        else if (op == "~"){
-            optype = OP_BIT_INVERT;
-        }
-        else if (op == "<<"){
-            optype = OP_BIT_SHIFT;
-        }
-        else if (op == ">>"){
-            optype = OP_BIT_RSHIFT;
-        }
-    }
+    BinaryExprAST(const std::string& o, ExprASTPtr& l, ExprASTPtr& r);
     virtual int getType() {
         return EXPR_BIN;
     }
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
-};
-
-class AugassignAST : public ExprAST {
+public://!implement
+    PyObjPtr& eval_OP_ASSIGN(PyContext& context);
+    PyObjPtr& eval_OP_ADD(PyContext& context);
+    PyObjPtr& eval_OP_SUB(PyContext& context);
+    PyObjPtr& eval_OP_MUL(PyContext& context);
+    PyObjPtr& eval_OP_DIV(PyContext& context);
+    PyObjPtr& eval_OP_MOD(PyContext& context);
+    
+    PyObjPtr& eval_OP_EQ(PyContext& context);
+    PyObjPtr& eval_OP_NOTEQ(PyContext& context); //!= not
+    PyObjPtr& eval_OP_LESS(PyContext& context);//<
+    PyObjPtr& eval_OP_GREAT(PyContext& context);//>
+    PyObjPtr& eval_OP_LESSEQ(PyContext& context); //<=
+    PyObjPtr& eval_OP_GREATEQ(PyContext& context); //>=
+    PyObjPtr& eval_OP_IN(PyContext& context);
+    PyObjPtr& eval_OP_NOTIN(PyContext& context);
+    
+    PyObjPtr& eval_OP_OR(PyContext& context); //! or 
+    PyObjPtr& eval_OP_AND(PyContext& context); //! and
+    
+    PyObjPtr& eval_OP_BIT_AND(PyContext& context); //! &
+    PyObjPtr& eval_OP_BIT_OR(PyContext& context); //! |
+    PyObjPtr& eval_OP_BIT_XOR(PyContext& context); //! ^
+    PyObjPtr& eval_OP_BIT_INVERT(PyContext& context); //! ~
+    PyObjPtr& eval_OP_BIT_SHIFT(PyContext& context); //! <<
+    PyObjPtr& eval_OP_BIT_RSHIFT(PyContext& context); //! >>
+    
 public:
     std::string op;
     ExprASTPtr left, right;
+    //int optype;
+    ExprAstEvalFunc funcImpl;
+};
 
+class AugassignAST : public ExprAST {
+    typedef PyObjPtr& (AugassignAST::*ExprAstEvalFunc)(PyContext&);
 public:
-    AugassignAST(const std::string& o, ExprASTPtr l, ExprASTPtr r)
-        : op(o), left(l), right(r) {
-        
-        this->name = op;
-    }
+    std::string op;
+    ExprASTPtr left, right;
+    ExprAstEvalFunc funcImpl;
+public:
+    AugassignAST(const std::string& o, ExprASTPtr l, ExprASTPtr r);
     virtual int getType() {
         return EXPR_AUGASSIGN;
     }
     virtual std::string dump(int nDepth);
     virtual PyObjPtr& eval(PyContext& context);
+public:
+    PyObjPtr& eval_IAdd(PyContext& context);
+    PyObjPtr& eval_ISub(PyContext& context);
+    PyObjPtr& eval_IMul(PyContext& context);
+    PyObjPtr& eval_IDiv(PyContext& context);
+    PyObjPtr& eval_IMod(PyContext& context);
 };
 
 class ReturnAST : public ExprAST {
