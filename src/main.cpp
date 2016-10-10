@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
             printf("eval Ê§°Ü£¡\n");
             return 0;
         }
-        if (argc >= 1){
+        if (argc >= 2 && string(argv[1]) == "dump"){
             string strObj = PyObj::dump(spython.getPyContext(), spython.getPyContext().curstack);
             printf("%s", strObj.c_str());
         }
