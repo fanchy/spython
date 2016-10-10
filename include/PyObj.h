@@ -206,12 +206,7 @@ public:
     //map的比较函数
     struct cmp_key
     {
-        bool operator()(const Key &k1, const Key &k2)const
-        {
-            std::size_t a = (size_t)k1.hash;
-            std::size_t b = (size_t)k2.hash;
-            return a < b;
-        }
+        bool operator()(const Key &k1, const Key &k2)const;
     };
     PyObjDict();
     static PyObjPtr build();

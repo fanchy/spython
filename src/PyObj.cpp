@@ -7,6 +7,16 @@
 
 using namespace std;
 using namespace ff;
+bool PyObjDict::cmp_key::operator()(const PyObjDict::Key &k1, const PyObjDict::Key &k2)const
+{
+    /*
+    if (k1.key && PyCheckStr(k1.key) && k2.key && PyCheckInt(k2.key)){
+        return true;
+    }*/
+    std::size_t a = (size_t)k1.hash;
+    std::size_t b = (size_t)k2.hash;
+    return a < b;
+}
 PyObjPtr PyObjDict::build(){
     return new PyObjDict();
 }
