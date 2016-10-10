@@ -449,13 +449,13 @@ PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<
     
     return context.cacheResult(PyObjTool::buildNone());
 }
-PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, ObjIdInfo* p)
+PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, ObjIdInfo* p, int nFileIdBelong)
 {
-    PyObjPtr ret = new PyObjClassDef(s, p);
+    PyObjPtr ret = new PyObjClassDef(s, p, nFileIdBelong);
     return ret;
 }
-PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, std::vector<PyObjPtr>& parentClass){
-    PyObjPtr ret = PyObjClassDef::build(context, s);
+PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, std::vector<PyObjPtr>& parentClass, int nFileIdBelong){
+    PyObjPtr ret = PyObjClassDef::build(context, s, NULL, nFileIdBelong);
     ret.cast<PyObjClassDef>()->parentClass = parentClass;
     ret.cast<PyObjClassDef>()->processInheritInfo(context, ret);
     PyCppUtil::setAttr(context, ret, "__module__", context.curstack);
@@ -463,7 +463,7 @@ PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, std::vec
     return ret;
 }
 
-PyObjClassDef::PyObjClassDef(const std::string& s, ObjIdInfo* p):name(s){
+PyObjClassDef::PyObjClassDef(const std::string& s, ObjIdInfo* p, int n):name(s), nFileId(n){
     if (p){
         selfObjInfo = *p;
     }
@@ -512,6 +512,18 @@ void PyObjClassDef::processInheritInfo(PyContext& context, PyObjPtr& self){
         }
     }
 }
+std::string PyObjClassDef::getModName(PyContext& context) const{
+    PyObjPtr mod = context.getFileIdModCache(nFileId);
+    if (!mod){
+        return "built-in";
+    }
+    
+    PyAsserModule(mod);
+    PyObjPtr ret = PyCppUtil::getAttr(context, mod, "__name__");//mod.cast<PyObjModule>()->moduleName;
+    PyAssertStr(ret);
+    return ret.cast<PyObjStr>()->value;
+}
+
 string PyCppUtil::strFormat(const char * format, ...) {
     char msg[512];
       

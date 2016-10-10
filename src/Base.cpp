@@ -326,4 +326,13 @@ PyContext& PyContext::addBuiltin(const string& name, PyObjPtr v){
 PyObjPtr&  PyContext::getBuiltin(const string& name){
     return allBuiltin[name];
 }
+PyContext& PyContext::addModule(const std::string& name, PyObjPtr v){
+    int nFileId = allocFileIdByPath(name);
+    setFileIdModCache(nFileId, v);
+    return *this;
+}
+PyObjPtr PyContext::getModule(const std::string& name){
+    int nFileId = allocFileIdByPath(name);
+    return getFileIdModCache(nFileId);
+}
 

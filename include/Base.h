@@ -438,6 +438,15 @@ public:
         }
         return NULL;
     }
+    int getFileIdByMod(PyObjPtr mod){
+        std::map<int, FileInfo>::iterator it = fileId2Info.begin();
+        for (; it != fileId2Info.end(); ++it){
+            if (it->second.modCache == mod){
+                return it->first;
+            }
+        }
+        return 0;
+    }
     std::string getLine2Code(int nFiledId, int n){
         std::map<int, FileInfo>::iterator it = fileId2Info.find(nFiledId);
         if (it != fileId2Info.end()){
@@ -450,6 +459,8 @@ public:
     
     PyContext& addBuiltin(const std::string& name, PyObjPtr v);
     PyObjPtr&  getBuiltin(const std::string& name);
+    PyContext& addModule(const std::string& name, PyObjPtr v);
+    PyObjPtr   getModule(const std::string& name);
 public:
     std::list<ExprAST*> exprTrace;//! for trace back
     std::map<int, FileInfo> fileId2Info;

@@ -314,16 +314,18 @@ public:
 
 class PyObjClassDef:public PyObj {
 public:
-    static PyObjPtr build(PyContext& context, const std::string& s, ObjIdInfo* p = NULL);
-    static PyObjPtr build(PyContext& context, const std::string& s, std::vector<PyObjPtr>& parentClass);
-    PyObjClassDef(const std::string& s, ObjIdInfo* p = NULL);
+    static PyObjPtr build(PyContext& context, const std::string& s, ObjIdInfo* p = NULL, int nFileIdBelong = 0);
+    static PyObjPtr build(PyContext& context, const std::string& s, std::vector<PyObjPtr>& parentClass, int nFileIdBelong = 0);
+    PyObjClassDef(const std::string& s, ObjIdInfo* p = NULL, int n = 0);
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
     }
     void processInheritInfo(PyContext& context, PyObjPtr& self);
     PyObjPtr& getVar(PyContext& pc, PyObjPtr& self2, ExprAST* e);
+    std::string getModName(PyContext& context) const;
     
     std::string             name;
+    int                     nFileId;
     std::vector<PyObjPtr>   parentClass;
     ObjIdInfo               selfObjInfo;
     ExprAST*                expr__class__;

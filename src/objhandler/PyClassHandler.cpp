@@ -11,7 +11,9 @@ PyClassHandler::PyClassHandler(){
 string PyClassHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     string ret;
     char msg[128] = {0};
-    snprintf(msg, sizeof(msg), "__main__.%s", self.cast<PyObjClassDef>()->name.c_str());
+    snprintf(msg, sizeof(msg), "%s.%s", 
+                               self.cast<PyObjClassDef>()->getModName(context).c_str(), 
+                               self.cast<PyObjClassDef>()->name.c_str());
     ret = msg;
     return ret;
 }

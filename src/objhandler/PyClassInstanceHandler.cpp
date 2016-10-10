@@ -6,7 +6,7 @@
 using namespace std;
 using namespace ff;
 PyClassInstanceHandler::PyClassInstanceHandler(){
-    __init__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__init__");
+    __call__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__call__");
 }
 string PyClassInstanceHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
     string ret = this->PyCommonHandler::handleStr(context, self);
@@ -15,7 +15,10 @@ string PyClassInstanceHandler::handleStr(PyContext& context, const PyObjPtr& sel
     }
     
     char msg[128] = {0};
-    snprintf(msg, sizeof(msg), "<__main__.%s instance at %p>", self.cast<PyObjClassInstance>()->classDefPtr.cast<PyObjClassDef>()->name.c_str(), self.get());
+    snprintf(msg, sizeof(msg), "<%s.%s instance at %p>", 
+                               self.cast<PyObjClassInstance>()->classDefPtr.cast<PyObjClassDef>()->getModName(context).c_str(), 
+                               self.cast<PyObjClassInstance>()->classDefPtr.cast<PyObjClassDef>()->name.c_str(), 
+                               self.get());
     return string(msg);
 }
 bool PyClassInstanceHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
@@ -28,20 +31,10 @@ PyObjPtr& PyClassInstanceHandler::handleCall(PyContext& context, PyObjPtr& self,
     PyObjPtr tmp = context.curstack;
     context.curstack = self;
 
-    PyObjPtr __init__func = __init__->getFieldVal(context);
+    PyObjPtr obj__call__ = __call__->getFieldVal(context);
     context.curstack      = tmp;
 
-    PyObjPtr ret = new PyObjClassInstance(self);
-
-    if (__init__func && PyCheckFunc(__init__func)){
-        //DMSG(("__init__func =%d", __init__func->getType()));
-        vector<ArgTypeInfo>  allArgsVal2 = allArgsVal;
-        ArgTypeInfo tmp;
-        allArgsVal2.insert(allArgsVal2.begin(), tmp);
-        argAssignVal.insert(argAssignVal.begin(), self);
-        __init__func->getHandler()->handleCall(context, __init__func, allArgsVal, argAssignVal);
-    }
-    
+    PyObjPtr ret = PyCppUtil::callPyfunc(context, obj__call__, argAssignVal);
     return context.cacheResult(ret);
 }
 

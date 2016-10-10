@@ -244,4 +244,8 @@ list21 = '''ss'
 gg'''
 print(list21)
 
-
+import weakref
+ref1 = weakref.ref(foo)
+del foo
+ref2 = ref1()
+#ref3 = foo.c

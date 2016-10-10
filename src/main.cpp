@@ -17,10 +17,10 @@ int main(int argc, char** argv) {
             printf("eval Ê§°Ü£¡\n");
             return 0;
         }
-	if (argc >= 2){
-        	string strObj = PyObj::dump(spython.getPyContext(), spython.getPyContext().curstack);
-        	printf("%s", strObj.c_str());
-	}
+        if (argc >= 1){
+            string strObj = PyObj::dump(spython.getPyContext(), spython.getPyContext().curstack);
+            printf("%s", strObj.c_str());
+        }
     }
     catch(PyExceptionSignal& e){
         printf("Traceback (most recent call last):\n");

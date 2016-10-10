@@ -8,6 +8,7 @@
 #include "ext/PyTupleExt.h"
 #include "ext/PyListExt.h"
 #include "ext/PyDictExt.h"
+#include "ext/PyWeakExt.h"
  
 using namespace std;
 using namespace ff;
@@ -19,6 +20,7 @@ SPython::SPython(){
     PyTupleExt::init(pycontext);
     PyListExt::init(pycontext);
     PyDictExt::init(pycontext);
+    PyWeakExt::init(pycontext);
 }
 
 PyObjPtr SPython::importFile(const std::string& modname){

@@ -540,7 +540,8 @@ PyObjPtr& ClassDefExprAST::eval(PyContext& context){TRACE_EXPR();
             parentClass.push_back(inheritClass);
         }
     }
-    PyObjPtr rval = PyObjClassDef::build(context, classname.cast<VariableExprAST>()->name, parentClass);
+    int modFileid = context.getFileIdByMod(context.curstack);
+    PyObjPtr rval = PyObjClassDef::build(context, classname.cast<VariableExprAST>()->name, parentClass, modFileid);
 
     PyObjPtr& lval = classname->assignVal(context, rval);
 
@@ -1136,6 +1137,14 @@ struct TmpImportCacheGuard{
     int nFileId;
 };
 PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, std::string asName, bool assignFlag){
+    PyObjPtr cacheMod = context.getModule(modpath);
+    if (cacheMod){
+        if (assignFlag){
+            ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(modpath);
+            asExpr->assignVal(context, cacheMod);
+        }
+        return cacheMod;
+    }
     string realpath;
     if (modpath.find(".py") != string::npos){
         realpath = modpath;
@@ -1238,11 +1247,11 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
     
     for (size_t i = 0; i < importArgs.size(); ++i){
         ImportAST::ImportInfo& info = importArgs[i];
-
+        
         string realpath;
         string path;
         if (sysdir.empty()){
-            sysdir.push_back("./");
+            sysdir.push_back("");
         }
         string importChildProp; //! from a import b
         vector<string> allPyInDir; //!each file in dir
@@ -1266,6 +1275,13 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
                 else{
                     path += "/" + info.pathinfo[j];
                 }
+                
+                if (context.getModule(path)){
+                    realpath = path;
+                    hit = true;
+                    break;
+                }
+                
                 if (Util::isDir(path)){
                     continue;
                 }
