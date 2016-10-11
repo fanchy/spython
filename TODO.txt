@@ -32,3 +32,20 @@
 32.weakref		-- ok
 33.__import__		-- ok
 34.__file__		-- ok
+35.time
+36.datetime
+37.StringIO
+38.string.format %
+39.copy deepcopy
+40.math
+41.random
+42.os
+43.sys
+44.file open close
+45.json
+46.xml
+47.unittest
+48.atexit
+
+
+
