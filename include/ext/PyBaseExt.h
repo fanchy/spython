@@ -105,7 +105,7 @@ struct PyBaseExceptionExt{
     static PyObjPtr BaseException__str__(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
         PyAssertInstance(self);
         PyObjPtr args = PyCppUtil::getAttr(context, self, "args");
-        PyObjPtr ret = PyCppUtil::genStr(args->getHandler()->handleStr(context, args));
+        PyObjPtr ret = PyCppUtil::genStr(std::string("BaseException")+args->getHandler()->handleStr(context, args));
         return ret;
     }
 };
