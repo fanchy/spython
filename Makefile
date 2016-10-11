@@ -36,11 +36,11 @@ OBJS = $(SRCS:%.cpp=%.o)
 all:$(BIN)
 $(BIN):$(OBJS)
 	g++ -o $(BIN) $(OBJS) $(LDFLAGS)  
-	@echo  " OK! Compile $@ "
+	@echo  " OK! Build $@ "
 # @$(LN) $(shell pwd)/$(LIB_NAME).$(LIB_VER) /lib/$(LIB_NAME)
 
 %.o:%.cpp
-	@echo  "Compile $@..."
+	@echo  "Build $@..."
 	@$(CC) $(CFLAGS)  -c $< -o $@
 
 .PHONY: clean
