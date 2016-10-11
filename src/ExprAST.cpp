@@ -567,70 +567,70 @@ BinaryExprAST::BinaryExprAST(const std::string& o, ExprASTPtr& l, ExprASTPtr& r)
     this->name = op;
 
     if (op == "="){
-        funcImpl = &eval_OP_ASSIGN;
+        funcImpl = &BinaryExprAST::eval_OP_ASSIGN;
     }
     else if (op == "+"){
-        funcImpl = &eval_OP_ADD;
+        funcImpl = &BinaryExprAST::eval_OP_ADD;
     }
     else if (op == "-"){
-        funcImpl = &eval_OP_SUB;
+        funcImpl = &BinaryExprAST::eval_OP_SUB;
     }
     else if (op == "*"){
-        funcImpl = &eval_OP_MUL;
+        funcImpl = &BinaryExprAST::eval_OP_MUL;
     }
     else if (op == "/"){
-        funcImpl = &eval_OP_DIV;
+        funcImpl = &BinaryExprAST::eval_OP_DIV;
     }
     else if (op == "%"){
-        funcImpl = &eval_OP_MOD;
+        funcImpl = &BinaryExprAST::eval_OP_MOD;
     }
     else if (op == "==" || op == "is"){
-        funcImpl = &eval_OP_EQ;
+        funcImpl = &BinaryExprAST::eval_OP_EQ;
     }
     else if (op == "!=" or op == "not" or op == "<>"){
-        funcImpl = &eval_OP_NOTEQ;
+        funcImpl = &BinaryExprAST::eval_OP_NOTEQ;
     }
     else if (op == "<"){
-        funcImpl = &eval_OP_LESS;
+        funcImpl = &BinaryExprAST::eval_OP_LESS;
     }
     else if (op == ">"){
-        funcImpl = &eval_OP_GREAT;
+        funcImpl = &BinaryExprAST::eval_OP_GREAT;
     }
     else if (op == "<="){
-        funcImpl = &eval_OP_LESSEQ;
+        funcImpl = &BinaryExprAST::eval_OP_LESSEQ;
     }
     else if (op == ">="){
-        funcImpl = &eval_OP_GREATEQ;
+        funcImpl = &BinaryExprAST::eval_OP_GREATEQ;
     }
     else if (op == "in" || op == "is in"){
-        funcImpl = &eval_OP_IN;
+        funcImpl = &BinaryExprAST::eval_OP_IN;
     }
     else if (op == "not in"){
-        funcImpl = &eval_OP_NOTIN;
+        funcImpl = &BinaryExprAST::eval_OP_NOTIN;
     }
     else if (op == "or"){
-        funcImpl = &eval_OP_OR;
+        funcImpl = &BinaryExprAST::eval_OP_OR;
     }
     else if (op == "and"){
-        funcImpl = &eval_OP_AND;
+        funcImpl = &BinaryExprAST::eval_OP_AND;
     }
     else if (op == "&"){
-        funcImpl = &eval_OP_BIT_AND;
+        funcImpl = &BinaryExprAST::eval_OP_BIT_AND;
     }
     else if (op == "|"){
-        funcImpl = &eval_OP_BIT_OR;
+        funcImpl = &BinaryExprAST::eval_OP_BIT_OR;
     }
     else if (op == "^"){
-        funcImpl = &eval_OP_BIT_XOR;
+        funcImpl = &BinaryExprAST::eval_OP_BIT_XOR;
     }
     else if (op == "~"){
-        funcImpl = &eval_OP_BIT_INVERT;
+        funcImpl = &BinaryExprAST::eval_OP_BIT_INVERT;
     }
     else if (op == "<<"){
-        funcImpl = &eval_OP_BIT_SHIFT;
+        funcImpl = &BinaryExprAST::eval_OP_BIT_SHIFT;
     }
     else if (op == ">>"){
-        funcImpl = &eval_OP_BIT_RSHIFT;
+        funcImpl = &BinaryExprAST::eval_OP_BIT_RSHIFT;
     }
 }
 PyObjPtr& BinaryExprAST::eval_OP_ASSIGN(PyContext& context){
@@ -812,19 +812,19 @@ AugassignAST::AugassignAST(const std::string& o, ExprASTPtr l, ExprASTPtr r): op
     this->name = op;
     
     if (op == "+="){
-        funcImpl = &eval_IAdd;
+        funcImpl = &AugassignAST::eval_IAdd;
     }
     else if (op == "-="){
-        funcImpl = &eval_ISub;
+        funcImpl = &AugassignAST::eval_ISub;
     }
     else if (op == "*="){
-        funcImpl = &eval_IMul;
+        funcImpl = &AugassignAST::eval_IMul;
     }
     else if (op == "/="){
-        funcImpl = &eval_IDiv;
+        funcImpl = &AugassignAST::eval_IDiv;
     }
     else if (op == "%="){
-        funcImpl = &eval_IMod;
+        funcImpl = &AugassignAST::eval_IMod;
     }
 }
 PyObjPtr& AugassignAST::eval_IAdd(PyContext& context){
