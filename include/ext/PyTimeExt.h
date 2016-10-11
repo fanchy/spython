@@ -30,16 +30,27 @@ struct PyTimeExt{
         PyAssertInstance(self);
         
         time_t rawtime = 0;
-
+        bool useLocalTime = true;
+        
         if (argAssignVal.size() >= 2){
             PyObjPtr& destself = argAssignVal[1];
             rawtime = PyCppUtil::toInt(destself);
+            
+            if (argAssignVal.size() >= 3 && PyCppUtil::toInt(argAssignVal[2]) != 0){
+                useLocalTime = false;
+            }
         }
         else{
             ::time(&rawtime);
         }
         
-        struct tm *info = localtime(&rawtime);
+        struct tm *info = NULL;
+        if (useLocalTime){
+            info = ::localtime(&rawtime);
+        }
+        else{
+            info = ::gmtime(&rawtime);
+        }
         
 	    PyCppUtil::setAttr(context, self, "tm_sec", PyCppUtil::genInt(info->tm_sec));         /* seconds,  range 0 to 59          */
         PyCppUtil::setAttr(context, self, "tm_min", PyCppUtil::genInt(info->tm_min));         /* minutes, range 0 to 59           */
@@ -81,7 +92,38 @@ struct PyTimeExt{
 
         return PyCppUtil::callPyfunc(context, objClass, argAssignVal);
     }
-    
+    static PyObjPtr time_gmtime(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+        if (argAssignVal.size() != 0 && argAssignVal.size() != 1){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: localtime() takes exactly 0/1 argument (%u given)", argAssignVal.size()));
+        }
+        
+        PyObjPtr mod = context.getModule("time");
+        PyObjPtr objClass = PyCppUtil::getAttr(context, mod, "struct_time");
+        argAssignVal.push_back(PyCppUtil::genInt(1));
+        return PyCppUtil::callPyfunc(context, objClass, argAssignVal);
+    }
+    static PyObjPtr time_mktime(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+        if (argAssignVal.size() != 1){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: mktime() takes exactly 1 argument (%u given)", argAssignVal.size()));
+        }
+        
+        PyObjPtr& self = argAssignVal[0];
+        PyAssertInstance(self);
+        
+        struct tm info;
+        info.tm_year = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_year"));
+        info.tm_mon  = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_mon")) ;
+        info.tm_mday =  PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_mday"));
+        info.tm_hour = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_hour"));
+        info.tm_min = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_min"));
+        info.tm_sec = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_sec"));
+        info.tm_wday = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_wday"));
+        info.tm_yday = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_yday"));
+        info.tm_isdst = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_isdst"));
+
+        time_t ret = ::mktime(&info);
+        return PyCppUtil::genFloat(double(ret));
+    }
     static bool init(PyContext& pycontext){
         {
             PyObjPtr mod = PyObjModule::BuildModule(pycontext, "time", "built-in");
@@ -95,6 +137,8 @@ struct PyTimeExt{
                         
             PyCppUtil::setAttr(pycontext, mod, "time", PyCppUtil::genFunc(PyTimeExt::time_impl, "time"));
             PyCppUtil::setAttr(pycontext, mod, "localtime", PyCppUtil::genFunc(PyTimeExt::time_localtime, "localtime"));
+            PyCppUtil::setAttr(pycontext, mod, "gmtime", PyCppUtil::genFunc(PyTimeExt::time_gmtime, "gmtime"));
+            PyCppUtil::setAttr(pycontext, mod, "mktime", PyCppUtil::genFunc(PyTimeExt::time_mktime, "mktime"));
             pycontext.addModule("time", mod);
         }
         return true;

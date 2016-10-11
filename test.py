@@ -254,3 +254,5 @@ import time
 time1 = time.time() - 3600
 time2 = time.localtime(time1 )
 print(time2)
+time3 = time.mktime(time2)
+print(time1, time3)
