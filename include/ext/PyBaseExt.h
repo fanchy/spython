@@ -30,7 +30,15 @@ struct PyBuiltinExt{
         bool ret = paramClass->getHandler()->handleIsInstance(context, paramClass, paramObj);
         return PyObjTool::buildBool(ret);
     }
-
+    static PyObjPtr __import__(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+        if (argAssignVal.size() != 1){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: __import__() takes exactly 1 argument (%u given)", argAssignVal.size()));
+        }
+        PyObjPtr& param = argAssignVal[0];
+        PyAssertStr(param);
+        std::string& modname = param.cast<PyObjStr>()->value;
+        return PyOpsUtil::importFile(context, modname, modname);
+    }
 };
 struct PyStrExt{
     static PyObjPtr upper(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
@@ -110,6 +118,7 @@ struct PyBaseExt{
         
         pycontext.addBuiltin("len", PyCppUtil::genFunc(PyBuiltinExt::len, "len"));
         pycontext.addBuiltin("isinstance", PyCppUtil::genFunc(PyBuiltinExt::isinstance, "isinstance"));
+        pycontext.addBuiltin("__import__", PyCppUtil::genFunc(PyBuiltinExt::__import__, "__import__"));
         
         {
             PyObjPtr strClass = PyObjClassDef::build(pycontext, "str", &singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo);

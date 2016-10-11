@@ -26,8 +26,8 @@
 26. 闭包		-- ok
 27. += 			-- ok
 28. & |			-- ok
-29. __main__
+29. __main__		-- ok
 30.set
 31.+-二元操作优化	-- ok
 32.weakref		-- ok
-33.__import__
+33.__import__		-- ok

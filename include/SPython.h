@@ -12,7 +12,7 @@ public:
         return pycontext;
     }
     
-    PyObjPtr importFile(const std::string& modname);
+    PyObjPtr importFile(const std::string& modname, std::string __module__ = "");
 public:
     PyContext     pycontext;
 };

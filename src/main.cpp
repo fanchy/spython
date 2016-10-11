@@ -12,12 +12,16 @@ int main(int argc, char** argv) {
     SPython spython;
     
     try{
-        PyObjPtr ret = spython.importFile("test");
+        if (argc <= 1){
+            printf("usage spython xx.py\n");
+            return 0;
+        }
+        PyObjPtr ret = spython.importFile(argv[1], "__main__");
         if (!ret){
             printf("eval Ê§°Ü£¡\n");
             return 0;
         }
-        if (argc >= 2 && string(argv[1]) == "dump"){
+        if (argc >= 3 && string(argv[2]) == "-dump"){
             string strObj = PyObj::dump(spython.getPyContext(), spython.getPyContext().curstack);
             printf("%s", strObj.c_str());
         }

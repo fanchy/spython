@@ -23,7 +23,10 @@ SPython::SPython(){
     PyWeakExt::init(pycontext);
 }
 
-PyObjPtr SPython::importFile(const std::string& modname){
-    return PyOpsUtil::importFile(pycontext, modname, modname);
+PyObjPtr SPython::importFile(const std::string& modname, string __module__){
+    if (__module__.empty()){
+        __module__ = modname;
+    }
+    return PyOpsUtil::importFile(pycontext, modname, __module__);
 }
 
