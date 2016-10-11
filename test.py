@@ -250,3 +250,6 @@ ref1 = weakref.ref(foo)
 del foo
 ref2 = ref1()
 #ref3 = foo.c
+import time
+time1 = time.time()
+

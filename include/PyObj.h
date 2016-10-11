@@ -510,6 +510,9 @@ struct PyCppUtil{
     static PyObjPtr genInt(long n){
         return new PyObjInt(n);
     }
+    static PyObjPtr genFloat(double n){
+        return new PyObjFloat(n);
+    }
     static PyObjPtr genStr(const std::string& s){
         return new PyObjStr(s);
     }

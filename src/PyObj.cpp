@@ -487,6 +487,7 @@ PyObjPtr& PyObjClassDef::getVar(PyContext& context, PyObjPtr& self, ExprAST* e) 
 PyObjPtr PyObjModule::BuildModule(PyContext& context, const std::string& s, const std::string& p){
     PyObjPtr ret = new PyObjModule(s, p);
     PyCppUtil::setAttr(context, ret, "__name__", PyCppUtil::genStr(s));
+    PyCppUtil::setAttr(context, ret, "__file__", PyCppUtil::genStr(p));//!real path
     return ret;
 }
 

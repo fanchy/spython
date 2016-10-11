@@ -6,7 +6,7 @@
 6 __dict__属性
 7. import 		-- ok
 8. traceback		-- ok
-9. exception
+9. exception		-- ok
 10.字典完善		-- ok
 11.单元测试
 12.builtin-type int float str tuple dict exception -- ok
@@ -21,7 +21,7 @@
 21.lambda		-- ok
 22. del			-- ok
 23.tuple list dict func -- ok
-24.linux
+24.linux		-- ok
 25.range		-- ok
 26. 闭包		-- ok
 27. += 			-- ok
@@ -31,3 +31,4 @@
 31.+-二元操作优化	-- ok
 32.weakref		-- ok
 33.__import__		-- ok
+34.__file__		-- ok

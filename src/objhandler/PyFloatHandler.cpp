@@ -11,7 +11,12 @@ using namespace ff;
 string PyFloatHandler::handleStr(PyContext& context, const PyObjPtr& self)  const{
     char msg[64] = {0};
     snprintf(msg, sizeof(msg), "%g", self.cast<PyObjFloat>()->value);
-    return string(msg);
+    string ret = msg;
+    if (ret.find("e") != string::npos){
+        snprintf(msg, sizeof(msg), "%f", self.cast<PyObjFloat>()->value);
+        ret = msg;
+    }
+    return ret;
 }
 
 bool PyFloatHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
