@@ -41,9 +41,8 @@ struct PyWeakExt{
 
         PyObjPtr mod = context.getModule("weakref");
         PyObjPtr objClass = PyCppUtil::getAttr(context, mod, "weakref");
-        
-        std::vector<PyObjPtr> args = argAssignVal;
-        return PyCppUtil::callPyfunc(context, objClass, args);
+
+        return PyCppUtil::callPyfunc(context, objClass, argAssignVal);
     }
     static PyObjPtr weak__call__(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
         PyAssertInstance(self);

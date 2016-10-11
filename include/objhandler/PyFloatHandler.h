@@ -16,7 +16,7 @@ namespace ff {
 class PyFloatHandler: public PyObjHandler{
 public:
     virtual int getType() const {
-        return PY_INT;
+        return PY_FLOAT;
     }
     virtual std::string handleStr(PyContext& context, const PyObjPtr& self) const;
     virtual bool handleBool(PyContext& context, const PyObjPtr& self) const;

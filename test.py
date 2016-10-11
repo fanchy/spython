@@ -251,5 +251,6 @@ del foo
 ref2 = ref1()
 #ref3 = foo.c
 import time
-time1 = time.time()
-
+time1 = time.time() - 3600
+time2 = time.localtime(time1 )
+print(time2)

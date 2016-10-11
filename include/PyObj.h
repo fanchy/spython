@@ -503,9 +503,15 @@ struct PyCppUtil{
             throw PyException::buildException("%d instance needed, given:%d", nType, v->getType());
         }
     }
-    static long toInt(PyObjPtr& v){
+    static long toInt(PyObjPtr v){
+        if (PyCheckInt(v)){
+            return v.cast<PyObjInt>()->value;
+        }
+        else if (PyCheckFloat(v)){
+            return long(v.cast<PyObjFloat>()->value);
+        }
         PyAssertInt(v);
-        return v.cast<PyObjInt>()->value;
+        return 0;
     }
     static PyObjPtr genInt(long n){
         return new PyObjInt(n);
