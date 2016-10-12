@@ -1140,7 +1140,7 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, s
     PyObjPtr cacheMod = context.getModule(modpath);
     if (cacheMod){
         if (assignFlag){
-            ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(modpath);
+            ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asName);
             asExpr->assignVal(context, cacheMod);
         }
         return cacheMod;
@@ -1279,6 +1279,9 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
                 if (context.getModule(path)){
                     realpath = path;
                     hit = true;
+                    if (j < info.pathinfo.size() - 1){
+                        importChildProp = info.pathinfo[info.pathinfo.size() - 1];
+                    }
                     break;
                 }
                 
@@ -1330,13 +1333,13 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
         if (!mod){
             PY_RAISE_STR(context, PyCppUtil::strFormat("ImportError: No module named %s", info.pathinfo[info.pathinfo.size() - 1].c_str()));
         }
-        
+
         if (!importChildProp.empty() && mod){
             map<string, PyObjPtr> ret = PyCppUtil::getAllFieldData(mod);
             if (importChildProp == "*"){
                 map<string, PyObjPtr>::iterator it = ret.begin();
                 for (; it != ret.end(); ++it){
-                    ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(it->first);
+                    ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asMod);
                     asExpr->assignVal(context, it->second);
                 }
             }
@@ -1345,7 +1348,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
                 if (it == ret.end()){
                     PY_RAISE_STR(context, PyCppUtil::strFormat("ImportError: No module named %s", importChildProp.c_str()));
                 }
-                ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(it->first);
+                ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asMod);
                 asExpr->assignVal(context, it->second);
             }
             

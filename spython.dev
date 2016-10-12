@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
 CompilerSettings=0000000000100000101000000
-UnitCount=48
+UnitCount=49
 
 [VersionInfo]
 Major=1
@@ -521,7 +521,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit49]
-FileName=include\ext\PyTimeExt.h
+FileName=include\ext\PyDatetimeExt.h
 CompileCpp=1
 Folder=include/ext
 Compile=1

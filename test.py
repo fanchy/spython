@@ -256,3 +256,13 @@ time2 = time.localtime(time1 )
 print(time2)
 time3 = time.mktime(time2)
 print(time1, time3)
+
+from time import time as time4
+
+
+import datetime
+dt1 = datetime.datetime(2016, 9, 12, 7, 8, 12)
+print(dt1)
+
+
+
