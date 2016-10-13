@@ -22,6 +22,25 @@ struct PyDatetimeExt{
 	    double ret = curtm.tv_sec + double(curtm.tv_usec) / (1000 * 1000);
 	    return PyCppUtil::genFloat(ret);
     }
+    static PyObjPtr datetime_now(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+        if (argAssignVal.size() != 0){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: now() takes exactly 0 argument (%u given)", argAssignVal.size()));
+        }
+        
+        time_t rawtime  = ::time(NULL);
+        struct tm *info = ::localtime(&rawtime);
+        
+        argAssignVal.push_back(PyCppUtil::genInt(1900 + info->tm_year));
+        argAssignVal.push_back(PyCppUtil::genInt(info->tm_mon));
+        argAssignVal.push_back(PyCppUtil::genInt(info->tm_mday));
+        argAssignVal.push_back(PyCppUtil::genInt(info->tm_hour));
+        argAssignVal.push_back(PyCppUtil::genInt(info->tm_min));
+        argAssignVal.push_back(PyCppUtil::genInt(info->tm_sec));
+        
+        PyObjPtr mod = context.getModule("datetime");
+        PyObjPtr objClass = PyCppUtil::getAttr(context, mod, "datetime");
+        return PyCppUtil::callPyfunc(context, objClass, argAssignVal);
+    }
     static PyObjPtr datetime__init__(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
         if (argAssignVal.size() < 4){
             PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: datetime() takes exactly 4-6 argument (%u given)", argAssignVal.size()));
@@ -32,6 +51,7 @@ struct PyDatetimeExt{
         PyCppUtil::setAttr(context, self, "year", argAssignVal[1]);
         PyCppUtil::setAttr(context, self, "month", argAssignVal[2]);
         PyCppUtil::setAttr(context, self, "day", argAssignVal[3]);
+        
         int hour = 0;
         int minute = 0;
         int second = 0;
@@ -62,32 +82,31 @@ struct PyDatetimeExt{
                         PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "minute")),
                         PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "second")));
         ret = buff;
-        /*
-        snprintf(buff, sizeof(buff), "datetime.datetime(%ld, %ld, %ld",
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "year")),
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "month")),
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "day"))
-                       );
-        ret += buff;
-        long hour = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "hour"));
-        long minute = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "minute"));
-        long second = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "second"));
-        if (second != 0){
-            snprintf(buff, sizeof(buff), "%ld, %ld, %ld)", hour, minute, second);
-        }
-        else if (minute != 0){
-            snprintf(buff, sizeof(buff), "%ld, %ld)", hour, minute);
-        }
-        else if (hour != 0){
-            snprintf(buff, sizeof(buff), "%ld)", hour);
-        }
-        else{
-            snprintf(buff, sizeof(buff), ")");
-        }
-        ret += buff;
-        */
         return PyCppUtil::genStr(ret);
     }
+    static PyObjPtr datetime_strftime(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        PyAssertInstance(self);
+        if (argAssignVal.size() != 1){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: strftime() takes exactly 1 argument (%u given)", argAssignVal.size()));
+        }
+        PyObjPtr& fmt = argAssignVal[0];
+        
+        struct tm info;
+        info.tm_year = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "year"))-1900;
+        info.tm_mon  = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "month")) - 1;
+        info.tm_mday =  PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "day"));
+        info.tm_hour = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "hour"));
+        info.tm_min = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "minute"));
+        info.tm_sec = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "second"));
+        info.tm_isdst = 0;
+        
+        std::string ret;
+        char buff[512] = {0};
+        ::strftime(buff, sizeof(buff), PyCppUtil::toStr(fmt).c_str(), &info);
+        ret = buff;
+        return PyCppUtil::genStr(ret);
+    }
+     
     /*
     static PyObjPtr time_localtime(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
         if (argAssignVal.size() != 0 && argAssignVal.size() != 1){
@@ -140,6 +159,8 @@ struct PyDatetimeExt{
                 PyObjPtr objClass = PyObjClassDef::build(pycontext, "datetime");
                 PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyDatetimeExt::datetime__init__, "__init__"));
                 PyCppUtil::setAttr(pycontext, objClass, "__str__", PyCppUtil::genFunc(PyDatetimeExt::datetime__str__, "__str__"));
+                PyCppUtil::setAttr(pycontext, objClass, "strftime", PyCppUtil::genFunc(PyDatetimeExt::datetime_strftime, "strftime"));
+                PyCppUtil::setAttr(pycontext, objClass, "now", PyCppUtil::genFunc(PyDatetimeExt::datetime_now, "now"));
                 PyCppUtil::setAttr(pycontext, mod, "datetime", objClass);
             }
             /*            

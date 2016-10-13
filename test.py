@@ -261,8 +261,15 @@ from time import time as time4
 
 
 import datetime
+
 dt1 = datetime.datetime(2016, 9, 12, 7, 8, 12)
+dt2 = dt1.strftime("%Y-%m-%d %H:%M:%S")
+
+dt3 = datetime.datetime.now()
 print(dt1)
+print(dt2)
+print(dt3.strftime("%Y-%m-%d %H:%M:%S"))
+
 
 
 

@@ -163,9 +163,7 @@ PyObjPtr& PyObjBuiltinTool::getVar(PyContext& context, PyObjPtr& self, ExprAST* 
         m_objStack.push_back(PyObjTool::buildNULL());
     }
     
-    ret = m_objStack[nFieldIndex];
-
-    return ret;
+    return m_objStack[nFieldIndex];
 }
 
 
@@ -270,9 +268,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, ExprAST
         m_objStack.push_back(PyObjTool::buildNULL());
     }
     
-    ret = m_objStack[nFieldIndex];
-
-    return ret;
+    return m_objStack[nFieldIndex];
 }
 void PyObjClassInstance::delField(PyContext& context, PyObjPtr& self, ExprASTPtr& fieldName){
     unsigned int nFieldIndex = fieldName->getFieldIndex(context, self);

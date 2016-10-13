@@ -513,6 +513,13 @@ struct PyCppUtil{
         PyAssertInt(v);
         return 0;
     }
+    static std::string toStr(PyObjPtr v){
+        if (PyCheckStr(v)){
+            return v.cast<PyObjStr>()->value;
+        }
+        PyAssertStr(v);
+        return "";
+    }
     static PyObjPtr genInt(long n){
         return new PyObjInt(n);
     }

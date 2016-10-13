@@ -32,7 +32,7 @@ string PyObj::dump(PyContext& context, PyObjPtr& self, int preBlank) {
         }else{
             ret += blank + msg;
         }
-        if (PyCheckModule(self->m_objStack[i]) && preBlank < 3){
+        if (PyCheckModule(self->m_objStack[i]) && preBlank < 4){
             ret += PyObj::dump(context, self->m_objStack[i], preBlank + 1);
             continue;
         }
