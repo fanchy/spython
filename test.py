@@ -274,9 +274,11 @@ dt4 = dt3.date()
 print(dt4)
 dt5 = datetime.date.today()
 print(dt5)
-dt6 = datetime.datetime.strptime("2014-12-31 18:20:10", "%Y-%m-%d %H:%M:%S")
+dt6 = datetime.datetime.strptime("2014-10-14 18:20:10", "%Y-%m-%d %H:%M:%S")
 print(dt6)
 dt7 = datetime.timedelta(3)
+print(dt7)
+dt8 = dt6 + dt7
 
 
 

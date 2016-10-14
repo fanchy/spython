@@ -7,9 +7,10 @@ using namespace std;
 using namespace ff;
 
 string PyIntHandler::handleStr(PyContext& context, const PyObjPtr& self) const {
-    char msg[64] = {0};
-    snprintf(msg, sizeof(msg), "%ld", self.cast<PyObjInt>()->value);
-    return string(msg);
+    std::ostringstream  ostr;
+    ostr << self.cast<PyObjInt>()->value;
+    
+    return ostr.str();
 }
 bool PyIntHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return self.cast<PyObjInt>()->value != 0;

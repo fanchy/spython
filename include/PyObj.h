@@ -7,6 +7,9 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
+
+#include <iostream> 
+#include <sstream> 
 /*
 #if __cplusplus < 201103L
     #ifdef __GNUC__
@@ -42,12 +45,14 @@ struct PyObjBuiltinTool{
 };
 class PyObjInt:public PyObj {
 public:
-    long value;
-    PyObjInt(long n = 0):value(n) {
+    PyInt value;
+    PyObjInt(PyInt n = 0):value(n) {
         this->handler = singleton_t<PyIntHandler>::instance_ptr();
     }
     virtual void dump() {
-        DMSG(("%ld(int)", value));
+        std::ostringstream  ostr;
+        ostr << value;
+        DMSG(("%s", ostr.str().c_str()));
     }
     
     virtual const ObjIdInfo& getObjIdInfo(){

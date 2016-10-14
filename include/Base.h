@@ -12,6 +12,9 @@
 #include "Singleton.h"
 
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
+
 #define DTRACE(x) {}//printf x ; printf("\n")
 #define DMSG(x) printf x ; printf("\n")
 
@@ -54,6 +57,7 @@ enum PyObjType{
 };
 
 typedef  int TokenType;
+typedef  int64_t PyInt;
 
 enum ETokenType {
     TOK_EOF = 0,
