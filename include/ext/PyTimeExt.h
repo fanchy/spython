@@ -68,15 +68,15 @@ struct PyTimeExt{
         PyAssertInstance(self);
         char buff[512] = {0};
         snprintf(buff, sizeof(buff), "time.struct_time(tm_year=%ld, tm_mon=%ld, tm_mday=%ld, tm_hour=%ld, tm_min=%ld, tm_sec=%ld, tm_wday=%ld, tm_yday=%ld, tm_isdst=%ld)",
-                       1900 + PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_year")),
-                       1 + PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_mon")),
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_mday")),
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_hour")),
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_min")),
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_sec")),
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_wday")) - 1,
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_yday")) + 1,
-                       PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_isdst"))
+                       1900 + long(PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_year"))),
+                       1 + long(PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_mon"))),
+                       long(PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_mday"))),
+                       long(PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_hour"))),
+                       long(PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_min"))),
+                       long(PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_sec"))),
+                       long(PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_wday"))) - 1,
+                       long(PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_yday"))) + 1,
+                       long(PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_isdst")))
                        );
 
         PyObjPtr ret = PyCppUtil::genStr(std::string(buff));

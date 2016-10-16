@@ -270,15 +270,34 @@ print(dt1)
 print(dt2)
 print(dt3.strftime("%Y-%m-%d %H:%M:%S"))
 
-dt4 = dt3.date()
+dt4 = dt1.date()
 print(dt4)
 dt5 = datetime.date.today()
 print(dt5)
-dt6 = datetime.datetime.strptime("2014-10-14 18:20:10", "%Y-%m-%d %H:%M:%S")
+dt6 = datetime.datetime.strptime("2016-10-17 18:20:10", "%Y-%m-%d %H:%M:%S")
 print(dt6)
 dt7 = datetime.timedelta(3)
 print(dt7)
-dt8 = dt6 + dt7
-
-
-
+dt8 = dt6 - dt7
+dt9 = dt8 - dt6
+print(dt9)
+dt10 = dt8.timetuple()
+print(dt10)
+dt11 = datetime.datetime.fromtimestamp(1421077403.0)
+print(dt11)
+dt12 = dt6.weekday()
+print(dt12)
+dt13 = dt6.isoweekday()
+print(dt13)
+dt14 = dt3.isoformat()
+print(dt14)
+dt15 = dt5 - dt4
+print(dt15)
+dt16 = dt4 + dt15
+print(dt16)
+dt17 = dt16.weekday()
+print(dt17)
+dt18 = dt16.isoweekday()
+print(dt18)
+dt19 = dt16.isoformat()
+print(dt19)

@@ -508,15 +508,25 @@ struct PyCppUtil{
             throw PyException::buildException("%d instance needed, given:%d", nType, v->getType());
         }
     }
-    static long toInt(PyObjPtr v){
+    static PyInt toInt(PyObjPtr v){
         if (PyCheckInt(v)){
             return v.cast<PyObjInt>()->value;
         }
         else if (PyCheckFloat(v)){
-            return long(v.cast<PyObjFloat>()->value);
+            return PyInt(v.cast<PyObjFloat>()->value);
         }
         PyAssertInt(v);
         return 0;
+    }
+    static double toFloat(PyObjPtr v){
+        if (PyCheckInt(v)){
+            return double(v.cast<PyObjInt>()->value);
+        }
+        else if (PyCheckFloat(v)){
+            return double(v.cast<PyObjFloat>()->value);
+        }
+        PyAssertFloat(v);
+        return 0.0;
     }
     static std::string toStr(PyObjPtr v){
         if (PyCheckStr(v)){
@@ -525,7 +535,7 @@ struct PyCppUtil{
         PyAssertStr(v);
         return "";
     }
-    static PyObjPtr genInt(long n){
+    static PyObjPtr genInt(PyInt n){
         return new PyObjInt(n);
     }
     static PyObjPtr genFloat(double n){
