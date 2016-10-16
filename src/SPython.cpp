@@ -11,10 +11,11 @@
 #include "ext/PyWeakExt.h"
 #include "ext/PyTimeExt.h"
 #include "ext/PyDatetimeExt.h"
+#include "ext/PyJsonExt.h"
    
 using namespace std;
 using namespace ff;
-                 
+                  
 SPython::SPython(){
     pycontext.curstack = PyObjModule::BuildModule(pycontext, "__main__", "built-in");
     pycontext.curstack.cast<PyObjModule>()->loadFlag = PyObjModule::MOD_LOADOK;
@@ -25,6 +26,7 @@ SPython::SPython(){
     PyWeakExt::init(pycontext);
     PyTimeExt::init(pycontext);
     PyDatetimeExt::init(pycontext);
+    PyJsonExt::init(pycontext);
 }
 
 PyObjPtr SPython::importFile(const std::string& modname, string __module__){
