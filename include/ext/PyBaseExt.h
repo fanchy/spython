@@ -39,6 +39,10 @@ struct PyBuiltinExt{
         std::string& modname = param.cast<PyObjStr>()->value;
         return PyOpsUtil::importFile(context, modname, modname);
     }
+    static PyObjPtr range(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+        //!TODO
+        return new PyObjList();
+    }
 };
 struct PyStrExt{
     static PyObjPtr upper(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
@@ -119,6 +123,7 @@ struct PyBaseExt{
         pycontext.addBuiltin("len", PyCppUtil::genFunc(PyBuiltinExt::len, "len"));
         pycontext.addBuiltin("isinstance", PyCppUtil::genFunc(PyBuiltinExt::isinstance, "isinstance"));
         pycontext.addBuiltin("__import__", PyCppUtil::genFunc(PyBuiltinExt::__import__, "__import__"));
+        pycontext.addBuiltin("range", PyCppUtil::genFunc(PyBuiltinExt::range, "range"));
         
         {
             PyObjPtr strClass = PyObjClassDef::build(pycontext, "str", &singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo);
@@ -131,6 +136,10 @@ struct PyBaseExt{
         {
             PyObjPtr strClass = PyObjClassDef::build(pycontext, "int");
             pycontext.addBuiltin("int", strClass);
+        }
+        {
+            PyObjPtr strClass = PyObjClassDef::build(pycontext, "object");
+            pycontext.addBuiltin("object", strClass);
         }
         {
             PyObjPtr strClass = PyObjClassDef::build(pycontext, "float");

@@ -13,9 +13,9 @@
 using namespace std;
 using namespace ff;
 
-NumberExprAST::NumberExprAST(long v) : Val(v) {
+NumberExprAST::NumberExprAST(PyInt v) : Val(v) {
     char msg[64];
-    snprintf(msg, sizeof(msg), "%ld(int)", Val);
+    snprintf(msg, sizeof(msg), "%ld(int)", long(Val));
     this->name = msg;
     obj = new PyObjInt(Val);
 }
@@ -42,13 +42,31 @@ PyObjPtr& VariableExprAST::eval(PyContext& context) {
                 return ret3;
             }
         }
+        else if (PyCheckClass(context.curstack)){ //!get global var
+            PyObjPtr mod = context.curstack.cast<PyObjClassDef>()->getMod(context);
+            if (mod){
+                PyObjPtr& ret4 = mod->getVar(context, mod, this);
+                if (ret4){
+                    return ret4;
+                }
+            }
+        }
+//        if (IsFuncCallStack(context.curstack)){
+//            printf("!!!!!!!!\n");
+//            string strObj = PyObj::dump(context, context.curstack);
+//            printf("%s\n", strObj.c_str());
+//        }
+//        else{
+//            string strObj = PyObj::dump(context, context.curstack);
+//            printf("##%s\n", strObj.c_str());
+//        }
         PY_RAISE_STR(context, 
             PyCppUtil::strFormat("NameError: global name '%s' is not defined %d", this->name.c_str(), context.curstack->getType()));
     }
     return ret;
 }
 PyObjPtr& VariableExprAST::assignVal(PyContext& context, PyObjPtr& v){
-    PyObjPtr& lval = this->getFieldVal(context);
+    
     if (IsFuncCallStack(context.curstack) && context.curstack.cast<PyCallTmpStack>()->isGlobalVar(this)){
         PyContextBackUp backup(context);
         context.curstack = context.curstack.cast<PyCallTmpStack>()->modBelong;
@@ -56,6 +74,8 @@ PyObjPtr& VariableExprAST::assignVal(PyContext& context, PyObjPtr& v){
         ret3 = v;
         return ret3;
     }
+    
+    PyObjPtr& lval = this->getFieldVal(context);
     lval = v;
     return lval;
 }
@@ -1244,15 +1264,14 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
     TRACE_EXPR_PUSH();
     vector<string> sysdir;
     StrTool::split(context.syspath, sysdir, ";");
+    sysdir.push_back("");
     
     for (size_t i = 0; i < importArgs.size(); ++i){
         ImportAST::ImportInfo& info = importArgs[i];
         
         string realpath;
         string path;
-        if (sysdir.empty()){
-            sysdir.push_back("");
-        }
+        
         string importChildProp; //! from a import b
         vector<string> allPyInDir; //!each file in dir
         
@@ -1324,6 +1343,9 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
         string asMod; 
         if (info.asinfo.empty() || info.asinfo == "*"){
             asMod = info.pathinfo[info.pathinfo.size() - 1];
+            if (importChildProp.empty() && info.asinfo == "*"){
+                importChildProp = info.asinfo;
+            }
         }
         else{
             asMod = info.asinfo;
@@ -1339,7 +1361,7 @@ PyObjPtr& ImportAST::eval(PyContext& context) {
             if (importChildProp == "*"){
                 map<string, PyObjPtr>::iterator it = ret.begin();
                 for (; it != ret.end(); ++it){
-                    ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(asMod);
+                    ExprASTPtr asExpr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(it->first);
                     asExpr->assignVal(context, it->second);
                 }
             }
@@ -1450,5 +1472,13 @@ PyObjPtr& LambdaAST::eval(PyContext& context){
     args.push_back(test);
     PyObjPtr func = PyCppUtil::genFunc(lambdaFunc, args, "lambda");
     return context.cacheResult(func);
+}
+
+PyObjPtr& RetAfterIfAST::eval(PyContext& context){
+    PyObjPtr iftestVal = if_test->eval(context);
+    if (iftestVal->getHandler()->handleBool(context, iftestVal)){
+        return ret->eval(context);
+    }
+    return else_test->eval(context);
 }
 

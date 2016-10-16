@@ -23,13 +23,13 @@ OverrideOutputName=spython.exe
 HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
-CommandLine=test.py -dump
+CommandLine=pysrc/main.py -dump
 Folders=include,include/ext,include/objhandler,src,src/objhandler
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
 CompilerSettings=0000000000100000101000000
-UnitCount=49
+UnitCount=52
 
 [VersionInfo]
 Major=1
@@ -532,6 +532,36 @@ BuildCmd=
 
 [Unit39]
 FileName=include\ext\PyBaseExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit50]
+FileName=include\ext\PyJsonExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit51]
+FileName=include\ext\PyOsExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit52]
+FileName=include\ext\PySysExt.h
 CompileCpp=1
 Folder=include/ext
 Compile=1

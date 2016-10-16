@@ -50,6 +50,9 @@ bool PyTupleHandler::handleLessEqual(PyContext& context, const PyObjPtr& self, c
     const PyObjTuple* pV = val.cast<PyObjTuple>();
 
     for (size_t i = 0; i < pT->value.size(); ++i){
+        if (i >= pV->value.size()){
+            return false;
+        }
         if (pT->value[i]->getHandler()->handleLessEqual(context, pT->value[i], pV->value[i])){
             return true;
         }
@@ -64,6 +67,9 @@ bool PyTupleHandler::handleGreatEqual(PyContext& context, const PyObjPtr& self, 
     const PyObjTuple* pV = val.cast<PyObjTuple>();
 
     for (size_t i = 0; i < pT->value.size(); ++i){
+        if (i >= pV->value.size()){
+            return true;
+        }
         if (pT->value[i]->getHandler()->handleGreatEqual(context, pT->value[i], pV->value[i])){
             return true;
         }

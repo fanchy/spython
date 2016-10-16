@@ -14,9 +14,9 @@ namespace ff {
 /// NumberExprAST - Expression class for numeric literals like "1.0".
 class NumberExprAST : public ExprAST {
 public:
-    long Val;
+    PyInt Val;
     PyObjPtr obj;
-    NumberExprAST(long v);
+    NumberExprAST(PyInt v);
     virtual PyObjPtr& eval(PyContext& context) {
         return obj;
     }
@@ -760,6 +760,17 @@ public:
 public:
     ExprASTPtr                  varargslist;
     ExprASTPtr                  test;
+};
+class RetAfterIfAST : public ExprAST {
+public:
+    virtual PyObjPtr& eval(PyContext& context);
+    virtual int getType() {
+        return EXPR_RET_AFTER_IF;
+    }
+public:
+    ExprASTPtr                  ret;
+    ExprASTPtr                  if_test;
+    ExprASTPtr                  else_test;
 };
 
 }

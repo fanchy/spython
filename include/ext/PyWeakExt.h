@@ -36,7 +36,7 @@ struct PyWeakExt{
     static PyObjPtr ref(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
 
         if (argAssignVal.size() != 1){
-            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: iter__init__() takes exactly 1 argument (%u given)", argAssignVal.size()));
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: ref() takes exactly 1 argument (%u given)", argAssignVal.size()));
         }
 
         PyObjPtr mod = context.getModule("weakref");

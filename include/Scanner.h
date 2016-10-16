@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <stdint.h>
 
 namespace ff {
 
@@ -13,7 +14,7 @@ struct Token{
     
     std::string dump() const;
     int             nTokenType;
-    long            nVal;
+    int64_t         nVal;
     double          fVal;
     std::string     strVal;
     int             nLine;
@@ -36,10 +37,12 @@ public:
 
     //!get cur token obj
     const Token* getToken(int nOffset = 0);
+    const Token* getTokenIgnoreBlank(int nOffset = 0);
     int seek(int nOffset);
     int resetTo(int nOffset);
     int skipEnterChar();
-    int curIndentWidth();
+    int skipBlankChar();
+    int curIndentWidth(int nOffset = 0);
     int calLineIndentWidth(int nLine);
     int getCurFileId(){
         return m_nCurFileId;
@@ -47,6 +50,7 @@ public:
     std::string getLineCode(int n);
     
     std::map<int, std::string> getAllLineCode();
+    void dump();
 private:
     char getCharNext(const std::string& content, int& index);
     Token getOneToken(const std::string& content, int& index);

@@ -478,8 +478,25 @@ PyObjPtr& PyObjClassDef::getVar(PyContext& context, PyObjPtr& self, ExprAST* e) 
         return context.cacheResult(self);
     }
     PyObjPtr& ret = PyObj::getVar(context, self, e);
+    
+    if (!ret){ //!check global var
+        PyObjPtr mod = context.getFileIdModCache(nFileId);
+        if (!mod){
+            return ret;
+        }
+        PyObjPtr& ret2 = mod->getVar(context, mod, e);
+        if (ret2){
+            return context.cacheResult(ret2);
+        }
+    }
     return ret;
 }
+/*
+PyObjPtr& PyObjClassDef::setVar(PyContext& context, PyObjPtr& self, ExprAST* e, PyObjPtr& v){
+    PyObjPtr& ret = PyObj::getVar(context, self, e);
+    ret = v;
+    return ret;
+}*/
 PyObjPtr PyObjModule::BuildModule(PyContext& context, const std::string& s, const std::string& p){
     PyObjPtr ret = new PyObjModule(s, p);
     PyCppUtil::setAttr(context, ret, "__name__", PyCppUtil::genStr(s));
@@ -509,8 +526,11 @@ void PyObjClassDef::processInheritInfo(PyContext& context, PyObjPtr& self){
         }
     }
 }
+PyObjPtr  PyObjClassDef::getMod(PyContext& context) const{
+    return context.getFileIdModCache(nFileId);
+}
 std::string PyObjClassDef::getModName(PyContext& context) const{
-    PyObjPtr mod = context.getFileIdModCache(nFileId);
+    PyObjPtr mod = getMod(context);
     if (!mod){
         return "built-in";
     }

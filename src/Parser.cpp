@@ -53,7 +53,9 @@ ExprASTPtr Parser::parse_file_input(){
                     continue;
                 }
                 
-                printf("this->parse_stmt Ê§°Ü£¡%d %s\n", m_curScanner->seek(0), m_curScanner->getToken()->dump().c_str());
+                printf("this->parse_stmt Ê§°Ü£¡%d %s %d\n", m_curScanner->seek(0), 
+                            m_curScanner->getToken()->dump().c_str(),
+                            m_curScanner->getToken()->nLine);
                 m_curScanner->seek(1);
             }
         }
@@ -197,6 +199,7 @@ ExprASTPtr Parser::parse_funcdef(){
     f->funcname   = name;
     f->parameters = parameters;
     f->suite      = suite;
+    //printf("def end [%s]line:%d\n", name->name.c_str(), m_curScanner->getToken()->nLine);
     return ret;
 }
 
@@ -230,6 +233,34 @@ ExprASTPtr Parser::parse_varargslist(){
     ParametersExprAST* p = ALLOC_EXPR<ParametersExprAST>();
     ExprASTPtr ret = p;
     do{
+        if (m_curScanner->getToken()->strVal == "*"){
+            m_curScanner->seek(1);
+            if (m_curScanner->getToken()->strVal == "*"){
+                m_curScanner->seek(1);
+                ExprASTPtr name = parse_name();
+                if (!name){
+                    THROW_ERROR("name needed when parse parameters after **");
+                }
+                p->addParam(name, NULL, "**");
+                
+                if (m_curScanner->getToken()->strVal != ","){
+                    break;
+                }
+                m_curScanner->seek(1);
+            }
+            else{
+                ExprASTPtr name = parse_name();
+                if (!name){
+                    THROW_ERROR("name needed when parse parameters after *");
+                }
+                p->addParam(name, NULL, "*");
+                
+                if (m_curScanner->getToken()->strVal != ","){
+                    break;
+                }
+                m_curScanner->seek(1);
+            }
+        }
         ExprASTPtr fpdef = parse_fpdef();
         if (!fpdef){
             break;
@@ -653,7 +684,7 @@ ExprASTPtr Parser::parse_import_from(){
         m_curScanner->seek(1);
         
         if (m_curScanner->getToken()->strVal == "*"){
-            importAst.cast<ImportAST>()->importArgs.back().pathinfo.push_back("*");
+            importAst.cast<ImportAST>()->importArgs.back().asinfo = "*";
             m_curScanner->seek(1);
         }
         else if (m_curScanner->getToken()->strVal == "("){
@@ -951,7 +982,7 @@ ExprASTPtr Parser::parse_if_stmt(){
     ifexpr->ifSuite.push_back(suite);
     
     m_curScanner->skipEnterChar();
-    //DMSG(("parse_if_stmt %s", m_curScanner->getToken()->strVal.c_str()));
+    //DMSG(("parse_if_stmt1[%s %d]", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine));
     while (m_curScanner->getToken()->strVal == "elif"){
         m_curScanner->seek(1);
         test = parse_test();
@@ -972,6 +1003,7 @@ ExprASTPtr Parser::parse_if_stmt(){
         ifexpr->ifSuite.push_back(suite);
     }
     m_curScanner->skipEnterChar();
+    //DMSG(("parse_if_stmt2[%s]", m_curScanner->getToken()->strVal.c_str()));
     if (m_curScanner->getToken()->strVal == "else"){
         m_curScanner->seek(1);
         if (m_curScanner->getToken()->strVal != ":"){
@@ -1205,19 +1237,21 @@ ExprASTPtr Parser::parse_suite(){
         
         int nIndent = m_curScanner->curIndentWidth();
         
-        //DMSG(("parse_suite %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
+        //DMSG(("parse_suite1 %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, nIndent));
         while (ExprASTPtr stmt = parse_stmt()){
             
             if (!stmt){
                 break;
             }
             allStmt->exprs.push_back(stmt);
+            //DMSG(("parse_suite1.5 %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
+        
             m_curScanner->skipEnterChar();
             if (nIndent != m_curScanner->curIndentWidth()){
                 break;
             }
-            
-            //DMSG(("parse_suite %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
+            //m_curScanner->dump();
+            //DMSG(("parse_suite2 %s %d %d", m_curScanner->getToken()->strVal.c_str(), m_curScanner->getToken()->nLine, m_curScanner->curIndentWidth()));
         }
         
         return ret;
@@ -1261,7 +1295,29 @@ ExprASTPtr Parser::parse_old_lambdef(){
 
 //! test: or_test ['if' or_test 'else' test] | lambdef
 ExprASTPtr Parser::parse_test(){
+    int nLine = m_curScanner->getToken()->nLine;
     ExprASTPtr or_test = parse_or_test();
+    if (or_test && m_curScanner->getToken()->strVal == "if" && nLine == m_curScanner->getToken()->nLine){
+        ExprASTPtr ret = ALLOC_EXPR<RetAfterIfAST>();
+        m_curScanner->seek(1);
+        ret.cast<RetAfterIfAST>()->ret = or_test;
+        
+        or_test = parse_or_test();
+        if (!or_test){
+            THROW_ERROR("or_test needed after if");
+        }
+        ret.cast<RetAfterIfAST>()->if_test = or_test;
+        if (m_curScanner->getToken()->strVal != "else"){
+            THROW_ERROR("else needed after if");
+        }
+        m_curScanner->seek(1);
+        ret.cast<RetAfterIfAST>()->else_test = parse_test();
+        if (!ret.cast<RetAfterIfAST>()->else_test){
+            THROW_ERROR("test needed after if else");
+        }
+        return ret;
+    }
+    
     if (!or_test){
         or_test = parse_lambdef();
     }
@@ -1289,7 +1345,7 @@ ExprASTPtr Parser::parse_and_test(){
     ExprASTPtr ret = parse_not_test();
     while (m_curScanner->getToken()->strVal == "and"){
         m_curScanner->seek(1);
-        
+        m_curScanner->skipEnterChar();
         ExprASTPtr not_test = parse_not_test();
         if (!not_test){
             THROW_ERROR("test expr needed after or");
@@ -1331,6 +1387,15 @@ ExprASTPtr Parser::parse_comp_op(ExprASTPtr& expr){
         ExprASTPtr expr2 = parse_expr();
         if (!expr2){
             THROW_ERROR("expr needed after comp_op");
+        }
+        string op2 = m_curScanner->getToken()->strVal;
+        if (op2 == "<" || op2 == ">" || op2 == ">=" || op2 == "<="){
+            ExprASTPtr left = ALLOC_EXPR_2<BinaryExprAST>(op, expr, expr2);
+            
+            m_curScanner->seek(1);
+            ExprASTPtr expr3 = parse_expr();
+            ExprASTPtr right = ALLOC_EXPR_2<BinaryExprAST>(op2, expr2, expr3);
+            return ALLOC_EXPR_2<BinaryExprAST>("and", left, expr2);
         }
         return ALLOC_EXPR_2<BinaryExprAST>(op, expr, expr2);
     }
@@ -1376,6 +1441,7 @@ ExprASTPtr Parser::parse_expr(){
     string op = "|";
     while (m_curScanner->getToken()->strVal == "|"){
         m_curScanner->seek(1);
+        m_curScanner->skipEnterChar();
         xor_expr = parse_xor_expr();
         if (!xor_expr){
             THROW_ERROR("xor_expr needed after |");
@@ -1451,11 +1517,26 @@ ExprASTPtr Parser::parse_shift_expr(){
 //! arith_expr: term (('+'|'-') term)*
 ExprASTPtr Parser::parse_arith_expr(){
     ExprASTPtr ret = parse_term();
-    while (m_curScanner->getToken()->strVal == "+" || m_curScanner->getToken()->strVal == "-"){
+    
+    bool isSub = false;
+    if (m_curScanner->getToken()->nTokenType == TOK_INT && m_curScanner->getToken()->nVal < 0){
+        isSub = true;
+    }
+    while (m_curScanner->getToken()->strVal == "+" || m_curScanner->getToken()->strVal == "-" || isSub){
         string op = m_curScanner->getToken()->strVal;
-        m_curScanner->seek(1);
+        ExprASTPtr term;
+        if (!isSub){
+            m_curScanner->seek(1);
+            term = parse_term();
+        }
+        else{
+            op = "-";
+            PyInt n = m_curScanner->getToken()->nVal * -1;
+            term = ALLOC_EXPR<NumberExprAST>(n);
+            m_curScanner->seek(1);
+        }
         
-        ExprASTPtr term = parse_term();
+        
         if (!term){
             THROW_ERROR("term need after +/-");
         }
@@ -1473,7 +1554,7 @@ ExprASTPtr Parser::parse_term(){
 
         string op = m_curScanner->getToken()->strVal;
         m_curScanner->seek(1);
-        
+        m_curScanner->skipEnterChar();
         ExprASTPtr term = parse_factor();
         if (!term){
             THROW_ERROR("term need after * / %");
@@ -1560,20 +1641,22 @@ ExprASTPtr Parser::parse_atom(){
     }
     else if (m_curScanner->getToken()->strVal == "["){
         m_curScanner->seek(1);
+        m_curScanner->skipEnterChar();
         if (m_curScanner->getToken()->strVal == "]"){
             m_curScanner->seek(1);
             retExpr = ALLOC_EXPR<ListMakerExprAST>();
+            return retExpr;
         }
         else{
             retExpr = parse_listmaker();
             if (!retExpr){
                 THROW_ERROR("listmake needed when parse list");
             }
-            m_curScanner->skipEnterChar();
             if (m_curScanner->getToken()->strVal != "]"){
                 THROW_ERROR("] needed when parse listmake");
             }
             m_curScanner->seek(1);
+            return retExpr;
         }
     }
     else if (m_curScanner->getToken()->strVal == "("){
@@ -1584,13 +1667,13 @@ ExprASTPtr Parser::parse_atom(){
         }
         else{
             //parse_testlist_comp: test ( comp_for | (',' test)* [','] )
+            m_curScanner->skipEnterChar();
             ExprASTPtr test = parse_test();
             
             if (m_curScanner->getToken()->strVal == ")"){
                m_curScanner->seek(1);
                return test;
             }
-            
             if (m_curScanner->getToken()->strVal != ","){
                 THROW_ERROR(", needed when define tuple value");
             }
@@ -1600,6 +1683,7 @@ ExprASTPtr Parser::parse_atom(){
             
             while (m_curScanner->getToken()->strVal == ","){
                 m_curScanner->seek(1);
+                m_curScanner->skipEnterChar();
                 test = parse_test();
                 if (!test){
                     break;
@@ -1607,6 +1691,7 @@ ExprASTPtr Parser::parse_atom(){
                 p->values.push_back(test);
             }
             
+            m_curScanner->skipEnterChar();
             if (m_curScanner->getToken()->strVal != ")"){
                 THROW_ERROR(") needed after (");
             }
@@ -1618,9 +1703,11 @@ ExprASTPtr Parser::parse_atom(){
     }
     else if (m_curScanner->getToken()->strVal == "{"){
         m_curScanner->seek(1);
+        m_curScanner->skipEnterChar();
         if (m_curScanner->getToken()->strVal == "}"){
             m_curScanner->seek(1);
             retExpr = ALLOC_EXPR<DictorsetMakerExprAST>();
+            return retExpr;
         }
         else{
             retExpr = parse_dictorsetmaker();
@@ -1632,6 +1719,7 @@ ExprASTPtr Parser::parse_atom(){
                 THROW_ERROR("} needed when parse dictorsetmaker");
             }
             m_curScanner->seek(1);
+            return retExpr;
         }
     }
     else{
@@ -1656,7 +1744,7 @@ ExprASTPtr Parser::parse_listmaker(){
     
     listMaker->test.push_back(test);
     
-    if (m_curScanner->getToken()->strVal != ","){
+    if (m_curScanner->getToken()->strVal == "for"){
         ExprASTPtr list_for = parse_list_for(ret);
         if (!list_for){
             THROW_ERROR("list_for needed when parse_listmaker");
@@ -1723,7 +1811,8 @@ ExprASTPtr Parser::parse_trailer(){
         //!parse slice operation
         ExprASTPtr opStart = parse_test();
         if (!opStart){
-            THROW_ERROR("slice parse failed when parse trailer after [");
+            PyInt n = 0;
+            opStart = ALLOC_EXPR<NumberExprAST>(n);//THROW_ERROR("slice parse failed when parse trailer after [");
         }
         ExprASTPtr ret = ALLOC_EXPR<SliceExprAST>();
         ret.cast<SliceExprAST>()->start = opStart;
@@ -1863,8 +1952,12 @@ ExprASTPtr Parser::parse_dictorsetmaker(){
         
         dict->testKey.push_back(testKey);
         dict->testVal.push_back(testVal);
-    
-        if (m_curScanner->getToken()->strVal != ","){
+        
+        m_curScanner->skipEnterChar();
+        if (m_curScanner->getToken()->strVal == "}"){
+            return ret;
+        }
+        else if (m_curScanner->getToken()->strVal != ","){
             ExprASTPtr comp_for = parse_comp_for(ret);
             if (!comp_for){
                 THROW_ERROR("comp_for needed whern parse dict");
@@ -1892,6 +1985,8 @@ ExprASTPtr Parser::parse_dictorsetmaker(){
                 
                 dict->testKey.push_back(testKey);
                 dict->testVal.push_back(testVal);
+                m_curScanner->skipEnterChar();
+                //DMSG(("dict debug %s %d", m_curScanner->getToken()->strVal.c_str(), testVal->getType()));
             }
             
         }
@@ -1916,15 +2011,20 @@ ExprASTPtr Parser::parse_classdef(){
 
     if (m_curScanner->getToken()->strVal == "("){ //!inherit parent class
         m_curScanner->seek(1);
-        ExprASTPtr testlist = parse_testlist();
-        if (!testlist){
-            THROW_ERROR("name needed after class");
+        if (m_curScanner->getToken()->strVal == ")"){
+            m_curScanner->seek(1);
         }
-        if (m_curScanner->getToken()->strVal != ")"){
-            THROW_ERROR(") needed after class (");
+        else{
+            ExprASTPtr testlist = parse_testlist();
+            if (!testlist){
+                THROW_ERROR("name needed after class");
+            }
+            if (m_curScanner->getToken()->strVal != ")"){
+                THROW_ERROR(") needed after class (");
+            }
+            m_curScanner->seek(1);
+            f->testlist   = testlist;
         }
-        m_curScanner->seek(1);
-        f->testlist   = testlist;
     }
     
     if (m_curScanner->getToken()->strVal != ":"){
@@ -1949,6 +2049,7 @@ ExprASTPtr Parser::parse_classdef(){
     f->classname  = name;
     //f->testlist   = testlist;
     f->suite      = suite;
+    DMSG(("class def end [%s] line:%d", name->name.c_str(), m_curScanner->getToken()->nLine));
     return ret;
 }
 
@@ -1958,44 +2059,52 @@ ExprASTPtr Parser::parse_classdef(){
 ExprASTPtr Parser::parse_arglist(){
     ExprASTPtr ret = ALLOC_EXPR<FuncArglist>();
     ExprASTPtr argument;
+    m_curScanner->skipEnterChar();
     if (m_curScanner->getToken()->strVal != "*"){
         argument = parse_argument(ret);
     }
-
+    //DMSG(("parse_arglist [%s]\n",  m_curScanner->getToken()->strVal.c_str()));
     while (argument && m_curScanner->getToken()->strVal == ","){
         m_curScanner->seek(1);
+        m_curScanner->skipEnterChar();
+        //DMSG(("parse_arglist [%s]\n",  m_curScanner->getToken()->strVal.c_str()));
+        if (m_curScanner->getToken()->strVal == "*"){
+            if (m_curScanner->getToken()->strVal == "*"){
+                if (m_curScanner->getToken(1)->strVal != "*"){
+                    m_curScanner->seek(1);
+                    ExprASTPtr test = parse_test();
+                    if (!test){
+                        THROW_ERROR("test needed after *");
+                    }
+                    ret.cast<FuncArglist>()->addArg(NULL, test, "*");
+                }
+                else{
+                    m_curScanner->seek(2);
+                    ExprASTPtr test = parse_test();
+                    if (!test){
+                        THROW_ERROR("test needed after **");
+                    }
+                    ret.cast<FuncArglist>()->addArg(NULL, test, "**");
+                }
+            }
+            continue;
+        }
         argument = parse_argument(ret);
     }
 
-    if (m_curScanner->getToken()->strVal == "*"){
-        if (m_curScanner->getToken(1)->strVal != "*"){
-            m_curScanner->seek(1);
-            ExprASTPtr test = parse_test();
-            if (!test){
-                THROW_ERROR("test needed after *");
-            }
-            ret.cast<FuncArglist>()->addArg(NULL, test, "*");
-        }
-        else{
-            m_curScanner->seek(2);
-            ExprASTPtr test = parse_test();
-            if (!test){
-                THROW_ERROR("test needed after **");
-            }
-            ret.cast<FuncArglist>()->addArg(NULL, test, "**");
-        }
-    }
+    
     return ret;
 }
 
 //! argument: test [comp_for] | test '=' test
 ExprASTPtr Parser::parse_argument(ExprASTPtr& pFuncArglist){
     int nIndex = m_curScanner->seek(0);
-    //DMSG(("parse_argument %d %s", nIndex, m_curScanner->getToken()->strVal.c_str()));
+    //DMSG(("parse_argument1 %d %s", nIndex, m_curScanner->getToken()->strVal.c_str()));
     ExprASTPtr test = parse_test();
     if (!test){
         return NULL;
     }
+    //DMSG(("parse_argument2 %d %s", m_curScanner->seek(0), m_curScanner->getToken()->strVal.c_str()));
     if (m_curScanner->getToken()->strVal == "="){
         m_curScanner->seek(1);
         ExprASTPtr test2 = parse_test();
@@ -2146,7 +2255,11 @@ ExprASTPtr Parser::parse_name(bool throwFlag){
 
 void Parser::throwError(const string& err, int nLine){
     char msg[256] = {0};
-    snprintf(msg, sizeof(msg), "%s(%d) given:%s,indent=%d", err.c_str(), nLine, m_curScanner->getToken()->strVal.c_str(), m_curScanner->curIndentWidth());
+    snprintf(msg, sizeof(msg), "%s(%d) given:%s,L:%d,indent=%d", 
+                err.c_str(), nLine, 
+                m_curScanner->getToken()->strVal.c_str(), 
+                m_curScanner->getToken()->nLine,
+                m_curScanner->curIndentWidth());
     throw PyException::buildException(msg);
 }
 

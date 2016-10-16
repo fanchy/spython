@@ -327,8 +327,9 @@ public:
     }
     void processInheritInfo(PyContext& context, PyObjPtr& self);
     PyObjPtr& getVar(PyContext& pc, PyObjPtr& self2, ExprAST* e);
+    //virtual PyObjPtr& setVar(PyContext& c, PyObjPtr& self, ExprAST* e, PyObjPtr& v);
     std::string getModName(PyContext& context) const;
-    
+    PyObjPtr  getMod(PyContext& context) const ;
     std::string             name;
     int                     nFileId;
     std::vector<PyObjPtr>   parentClass;
