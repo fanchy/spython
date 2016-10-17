@@ -43,6 +43,10 @@ struct PyBuiltinExt{
         //!TODO
         return new PyObjList();
     }
+    static PyObjPtr pyopen(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+        //!TODO
+        return PyObjTool::buildNone();
+    }
 };
 struct PyStrExt{
     static PyObjPtr upper(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
@@ -124,6 +128,7 @@ struct PyBaseExt{
         pycontext.addBuiltin("isinstance", PyCppUtil::genFunc(PyBuiltinExt::isinstance, "isinstance"));
         pycontext.addBuiltin("__import__", PyCppUtil::genFunc(PyBuiltinExt::__import__, "__import__"));
         pycontext.addBuiltin("range", PyCppUtil::genFunc(PyBuiltinExt::range, "range"));
+        pycontext.addBuiltin("open", PyCppUtil::genFunc(PyBuiltinExt::pyopen, "open"));
         
         {
             PyObjPtr strClass = PyObjClassDef::build(pycontext, "str", &singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo);

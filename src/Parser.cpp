@@ -1541,6 +1541,11 @@ ExprASTPtr Parser::parse_arith_expr(){
             THROW_ERROR("term need after +/-");
         }
         ret = ALLOC_EXPR_2<BinaryExprAST>(op, ret, term);
+        if (m_curScanner->getToken()->nTokenType == TOK_INT && m_curScanner->getToken()->nVal < 0){
+            isSub = true;
+        }else{
+            isSub = false;
+        }
     }
     return ret;
 }
@@ -1743,7 +1748,8 @@ ExprASTPtr Parser::parse_listmaker(){
     ExprASTPtr ret = listMaker;
     
     listMaker->test.push_back(test);
-    
+    m_curScanner->skipEnterChar();
+    //DMSG(("listmaker dump [%s]", m_curScanner->getToken()->strVal.c_str()));
     if (m_curScanner->getToken()->strVal == "for"){
         ExprASTPtr list_for = parse_list_for(ret);
         if (!list_for){
@@ -2049,7 +2055,7 @@ ExprASTPtr Parser::parse_classdef(){
     f->classname  = name;
     //f->testlist   = testlist;
     f->suite      = suite;
-    DMSG(("class def end [%s] line:%d", name->name.c_str(), m_curScanner->getToken()->nLine));
+    //DMSG(("class def end [%s] line:%d", name->name.c_str(), m_curScanner->getToken()->nLine));
     return ret;
 }
 
