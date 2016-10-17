@@ -304,3 +304,9 @@ print(dt19)
 
 import json
 
+import StringIO
+output = StringIO.StringIO()
+output.write('First line.')
+contents = output.getvalue()
+print(contents)
+testrange = range(0, 10)

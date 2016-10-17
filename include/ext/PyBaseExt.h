@@ -40,8 +40,31 @@ struct PyBuiltinExt{
         return PyOpsUtil::importFile(context, modname, modname);
     }
     static PyObjPtr range(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
-        //!TODO
-        return new PyObjList();
+        PyObjPtr ret = new PyObjList();
+        PyInt begin = 0, end = 0, step = 1;
+        if (argAssignVal.size() == 0){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: range() takes exactly 1-3 argument (%u given)", argAssignVal.size()));
+        }
+        else if (argAssignVal.size() == 1){
+            end = PyCppUtil::toInt(argAssignVal[0]);
+        }
+        else if (argAssignVal.size() == 2){
+            begin = PyCppUtil::toInt(argAssignVal[0]);
+            end   = PyCppUtil::toInt(argAssignVal[1]);
+            
+        }
+        else{
+            begin = PyCppUtil::toInt(argAssignVal[0]);
+            end   = PyCppUtil::toInt(argAssignVal[1]);
+            step  = PyCppUtil::toInt(argAssignVal[2]);
+            if (step <= 0){
+                PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: range() step can't be <zero'"));
+            }
+        }
+        for (PyInt i = begin; i < end; i += step){
+            ret.cast<PyObjList>()->append(PyCppUtil::genInt(i));
+        }
+        return ret;
     }
     static PyObjPtr pyopen(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
         //!TODO
@@ -166,6 +189,10 @@ struct PyBaseExt{
             pycontext.propertyClass = objClass;
             
             pycontext.addBuiltin("Exception", objClass);
+        }
+        {
+            PyObjPtr mod = PyObjModule::BuildModule(pycontext, "platform", "built-in");
+            pycontext.addModule("platform", mod);
         }
         return true;
     }

@@ -14,10 +14,11 @@
 #include "ext/PyJsonExt.h"
 #include "ext/PySysExt.h"
 #include "ext/PyOsExt.h"
+#include "ext/PyStringIOExt.h"
    
 using namespace std;
 using namespace ff;
-                             
+            
 SPython::SPython(){
     pycontext.curstack = PyObjModule::BuildModule(pycontext, "__main__", "built-in");
     pycontext.curstack.cast<PyObjModule>()->loadFlag = PyObjModule::MOD_LOADOK;
@@ -31,6 +32,7 @@ SPython::SPython(){
     PyJsonExt::init(pycontext);
     PyOsExt::init(pycontext);
     PySysExt::init(pycontext);
+    PyStringIOExt::init(pycontext);
     
     pycontext.syspath += "pysrc;;pylib;justfortest;thrift;pylib/thrift/protocol;pylib/thrift/transport";
 }

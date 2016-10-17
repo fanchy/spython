@@ -9,7 +9,7 @@
 namespace ff {
 typedef weak_ptr_t<PyObj> PyObjWeakRef;
 
-class PyWeakData:public PyInstanceData{
+class PyWeakData:public SafeTypeHelper<PyWeakData, PyInstanceData>{
 public:
     PyWeakData(PyObjPtr& v):ref(v){
     }

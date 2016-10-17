@@ -10,6 +10,7 @@
 
 #include "SmartPtr.h"
 #include "Singleton.h"
+#include "TypeInfo.h"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -19,26 +20,7 @@
 #define DMSG(x) printf x ; printf("\n")
 
 namespace ff {
-/*
-enum ExprType{
-    EXPR_CALL = 1,
-    EXPR_FUNC = 2,
-    EXPR_IF   = 3,
-    EXPR_INT  = 4,
-    EXPR_FLOAT  = 5,
-    EXPR_STR,
-    EXPR_VAR,
-    EXPR_STMT,
-    EXPR_TUPLE,
-    EXPR_FOR,
-    EXPR_CLASS,
-    EXPR_BREAK,
-    EXPR_CONTINUE,
-    EXPR_ASSIGN,
-    EXPR_AUGASSIGN,
-    EXPR_PRINT,
-};
-*/
+
 enum PyObjType{
     PY_NONE = 1,
     PY_INT,

@@ -10,7 +10,7 @@
 
 namespace ff {
     
-class PyDictIterData:public PyInstanceData{
+class PyDictIterData:public SafeTypeHelper<PyDictIterData, PyInstanceData> {
 public:
     PyDictIterData():version(0){
     }

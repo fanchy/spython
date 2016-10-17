@@ -23,13 +23,13 @@ OverrideOutputName=spython.exe
 HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
-CommandLine=pysrc/main.py  
+CommandLine=test.py -dump
 Folders=include,include/ext,include/objhandler,src,src/objhandler
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
 CompilerSettings=0000000000100000101000000
-UnitCount=52
+UnitCount=54
 
 [VersionInfo]
 Major=1
@@ -564,6 +564,26 @@ BuildCmd=
 FileName=include\ext\PySysExt.h
 CompileCpp=1
 Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit53]
+FileName=include\ext\PyStringIOExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit54]
+FileName=include\TypeInfo.h
+CompileCpp=1
+Folder=include
 Compile=1
 Link=1
 Priority=1000

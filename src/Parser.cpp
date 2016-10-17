@@ -2098,6 +2098,24 @@ ExprASTPtr Parser::parse_arglist(){
         argument = parse_argument(ret);
     }
 
+    if (m_curScanner->getToken()->strVal == "*"){
+        if (m_curScanner->getToken(1)->strVal != "*"){
+            m_curScanner->seek(1);
+            ExprASTPtr test = parse_test();
+            if (!test){
+                THROW_ERROR("test needed after *");
+            }
+            ret.cast<FuncArglist>()->addArg(NULL, test, "*");
+        }
+        else{
+            m_curScanner->seek(2);
+            ExprASTPtr test = parse_test();
+            if (!test){
+                THROW_ERROR("test needed after **");
+            }
+            ret.cast<FuncArglist>()->addArg(NULL, test, "**");
+        }
+    }
     
     return ret;
 }

@@ -337,7 +337,7 @@ public:
     ExprAST*                expr__class__;
 };
 
-class PyInstanceData{
+class PyInstanceData: public BaseTypeInfo{
 public:
     PyInstanceData():nValue(0){
     }
