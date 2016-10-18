@@ -19,7 +19,7 @@ NumberExprAST::NumberExprAST(PyInt v) : Val(v) {
     this->name = msg;
     obj = new PyObjInt(Val);
 }
-FloatExprAST::FloatExprAST(double v) : Val(v) {
+FloatExprAST::FloatExprAST(PyFloat v) : Val(v) {
     char msg[64];
     snprintf(msg, sizeof(msg), "%g(float)", Val);
     this->name = msg;

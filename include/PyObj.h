@@ -65,8 +65,8 @@ public:
 
 class PyObjFloat:public PyObj {
 public:
-    double value;
-    PyObjFloat(double n = 0):value(n) {
+    PyFloat value;
+    PyObjFloat(PyFloat n = 0):value(n) {
         this->handler = singleton_t<PyFloatHandler>::instance_ptr();
     }
     virtual const ObjIdInfo& getObjIdInfo(){
@@ -519,12 +519,12 @@ struct PyCppUtil{
         PyAssertInt(v);
         return 0;
     }
-    static double toFloat(PyObjPtr v){
+    static PyFloat toFloat(PyObjPtr v){
         if (PyCheckInt(v)){
-            return double(v.cast<PyObjInt>()->value);
+            return PyFloat(v.cast<PyObjInt>()->value);
         }
         else if (PyCheckFloat(v)){
-            return double(v.cast<PyObjFloat>()->value);
+            return PyFloat(v.cast<PyObjFloat>()->value);
         }
         PyAssertFloat(v);
         return 0.0;
@@ -539,12 +539,18 @@ struct PyCppUtil{
     static PyObjPtr genInt(PyInt n){
         return new PyObjInt(n);
     }
-    static PyObjPtr genFloat(double n){
+    static PyObjPtr genFloat(PyFloat n){
         return new PyObjFloat(n);
     }
     static PyObjPtr genStr(const std::string& s){
         return new PyObjStr(s);
     }
+    static std::string int2str(PyInt value){
+        std::ostringstream  ostr;
+        ostr << value;
+        return ostr.str();
+    }
+    
     static PyObjPtr genFunc(PyCppFuncWrapWithData::PyCppFunc f, std::vector<ExprASTPtr>& data, std::string n = ""){
         return new PyObjFuncDef(n, NULL, NULL, new PyCppFuncWrapWithData(f, data));
     }

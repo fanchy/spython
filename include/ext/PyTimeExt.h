@@ -19,7 +19,7 @@ struct PyTimeExt{
         struct timeval curtm;
 	    ::gettimeofday(&curtm, NULL);
 	
-	    double ret = curtm.tv_sec + double(curtm.tv_usec) / (1000 * 1000);
+	    PyFloat ret = curtm.tv_sec + PyFloat(curtm.tv_usec) / (1000 * 1000);
 	    return PyCppUtil::genFloat(ret);
     }
     static PyObjPtr struct_time__init__(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
@@ -122,7 +122,7 @@ struct PyTimeExt{
         info.tm_isdst = PyCppUtil::toInt(PyCppUtil::getAttr(context, self, "tm_isdst"));
 
         time_t ret = ::mktime(&info);
-        return PyCppUtil::genFloat(double(ret));
+        return PyCppUtil::genFloat(PyFloat(ret));
     }
     static bool init(PyContext& pycontext){
         {

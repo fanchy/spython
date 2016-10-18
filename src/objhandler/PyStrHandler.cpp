@@ -74,8 +74,19 @@ PyObjPtr& PyStrHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& 
     return self;
 }
 PyObjPtr& PyStrHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val){
-    THROW_EVAL_ERROR("can't mod to str");
-    return self;
+    const string& selfval = self.cast<PyObjStr>()->value;
+    string ret;
+    for (size_t i = 0; i < selfval.size(); ++i){
+        if (selfval[i] != '%'){
+            ret += selfval[i];
+            continue;
+        }
+        char nextChar = selfval.at(i + 1);
+        if (nextChar == 'd'){
+            ret += PyCppUtil::int2str(PyCppUtil::toInt(val));
+        }
+    }
+    return context.cacheResult(PyCppUtil::genStr(ret));
 }
 long PyStrHandler::handleLen(PyContext& context, PyObjPtr& self){
     return self.cast<PyObjStr>()->value.size();

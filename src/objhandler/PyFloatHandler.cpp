@@ -34,11 +34,11 @@ PyObjPtr& PyFloatHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr
     int nType   = val->getType();
 
     if (nType == PY_INT){
-        double newVal = self.cast<PyObjFloat>()->value + val.cast<PyObjInt>()->value;
+        PyFloat newVal = self.cast<PyObjFloat>()->value + val.cast<PyObjInt>()->value;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else if (nType == PY_FLOAT){
-        double newVal = self.cast<PyObjFloat>()->value + val.cast<PyObjFloat>()->value;
+        PyFloat newVal = self.cast<PyObjFloat>()->value + val.cast<PyObjFloat>()->value;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
@@ -50,11 +50,11 @@ PyObjPtr& PyFloatHandler::handleSub(PyContext& context, PyObjPtr& self, PyObjPtr
     int nType   = val->getType();
 
     if (nType == PY_INT){
-        double newVal = self.cast<PyObjFloat>()->value - val.cast<PyObjInt>()->value;
+        PyFloat newVal = self.cast<PyObjFloat>()->value - val.cast<PyObjInt>()->value;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else if (nType == PY_FLOAT){
-        double newVal = self.cast<PyObjFloat>()->value - val.cast<PyObjFloat>()->value;
+        PyFloat newVal = self.cast<PyObjFloat>()->value - val.cast<PyObjFloat>()->value;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
@@ -66,11 +66,11 @@ PyObjPtr& PyFloatHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr
     int nType   = val->getType();
 
     if (nType == PY_INT){
-        double newVal = self.cast<PyObjFloat>()->value * val.cast<PyObjInt>()->value;
+        PyFloat newVal = self.cast<PyObjFloat>()->value * val.cast<PyObjInt>()->value;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else if (nType == PY_FLOAT){
-        double newVal = self.cast<PyObjFloat>()->value * val.cast<PyObjFloat>()->value;
+        PyFloat newVal = self.cast<PyObjFloat>()->value * val.cast<PyObjFloat>()->value;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
@@ -86,15 +86,15 @@ PyObjPtr& PyFloatHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr
         if (rval == 0){
             THROW_EVAL_ERROR("div by zero");
         }
-        double newVal = self.cast<PyObjFloat>()->value / rval;
+        PyFloat newVal = self.cast<PyObjFloat>()->value / rval;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else if (nType == PY_FLOAT){
-        double rval = val.cast<PyObjFloat>()->value;
+        PyFloat rval = val.cast<PyObjFloat>()->value;
         if (rval == 0.0){
             THROW_EVAL_ERROR("div by zero");
         }
-        double newVal = self.cast<PyObjFloat>()->value / rval;
+        PyFloat newVal = self.cast<PyObjFloat>()->value / rval;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
@@ -114,7 +114,7 @@ PyObjPtr& PyFloatHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr
         return context.cacheResult(new PyObjInt(newVal));
     }
     else if (nType == PY_FLOAT){
-        double rval = val.cast<PyObjFloat>()->value;
+        PyFloat rval = val.cast<PyObjFloat>()->value;
         if (rval == 0.0){
             THROW_EVAL_ERROR("div by zero");
         }

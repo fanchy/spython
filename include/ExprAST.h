@@ -26,9 +26,9 @@ public:
 };
 class FloatExprAST : public ExprAST {
 public:
-    double Val;
+    PyFloat Val;
     PyObjPtr obj;
-    FloatExprAST(double v);
+    FloatExprAST(PyFloat v);
     virtual PyObjPtr& eval(PyContext& context) {
         return obj;
     }

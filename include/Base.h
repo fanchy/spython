@@ -40,6 +40,7 @@ enum PyObjType{
 
 typedef  int TokenType;
 typedef  int64_t PyInt;
+typedef  double PyFloat;
 
 enum ETokenType {
     TOK_EOF = 0,

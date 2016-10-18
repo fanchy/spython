@@ -720,7 +720,7 @@ struct PyDatetimeExt{
         PyObjPtr hours    = PyCppUtil::getArgVal(allArgsVal, argAssignVal, 6, "hours");
         PyObjPtr weeks    = PyCppUtil::getArgVal(allArgsVal, argAssignVal, 7, "weeks");
         
-        double secTotal = toFloatCheckNull(days) * (3600*24) + toFloatCheckNull(seconds) + 
+        PyFloat secTotal = toFloatCheckNull(days) * (3600*24) + toFloatCheckNull(seconds) + 
                             toFloatCheckNull(microseconds) / 1000 +
                             toFloatCheckNull(milliseconds) / (1000*1000) +
                             toFloatCheckNull(minutes) * 60 +

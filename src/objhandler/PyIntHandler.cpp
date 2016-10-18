@@ -28,7 +28,7 @@ bool PyIntHandler::handleLessEqual(PyContext& context, const PyObjPtr& self, con
         return self.cast<PyObjInt>()->value <= val.cast<PyObjInt>()->value;
     }
     else if (nType == PY_FLOAT){
-        return double(self.cast<PyObjInt>()->value) <= val.cast<PyObjFloat>()->value;
+        return PyFloat(self.cast<PyObjInt>()->value) <= val.cast<PyObjFloat>()->value;
     }
     else{
         THROW_EVAL_ERROR("can't compare to int");
@@ -42,7 +42,7 @@ bool PyIntHandler::handleGreatEqual(PyContext& context, const PyObjPtr& self, co
         return self.cast<PyObjInt>()->value >= val.cast<PyObjInt>()->value;
     }
     else if (nType == PY_FLOAT){
-        return double(self.cast<PyObjInt>()->value) >= val.cast<PyObjFloat>()->value;
+        return PyFloat(self.cast<PyObjInt>()->value) >= val.cast<PyObjFloat>()->value;
     }
     else{
         THROW_EVAL_ERROR("can't compare to int");
@@ -58,7 +58,7 @@ PyObjPtr& PyIntHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& 
         return context.cacheResult(new PyObjInt(newVal));
     }
     else if (nType == PY_FLOAT){
-        double newVal = self.cast<PyObjInt>()->value + val.cast<PyObjFloat>()->value;
+        PyFloat newVal = self.cast<PyObjInt>()->value + val.cast<PyObjFloat>()->value;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
@@ -74,7 +74,7 @@ PyObjPtr& PyIntHandler::handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& 
         return context.cacheResult(new PyObjInt(newVal));
     }
     else if (nType == PY_FLOAT){
-        double newVal = self.cast<PyObjInt>()->value - val.cast<PyObjFloat>()->value;
+        PyFloat newVal = self.cast<PyObjInt>()->value - val.cast<PyObjFloat>()->value;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
@@ -90,7 +90,7 @@ PyObjPtr& PyIntHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& 
         return context.cacheResult(new PyObjInt(newVal));
     }
     else if (nType == PY_FLOAT){
-        double newVal = self.cast<PyObjInt>()->value * val.cast<PyObjFloat>()->value;
+        PyFloat newVal = self.cast<PyObjInt>()->value * val.cast<PyObjFloat>()->value;
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else{
@@ -110,11 +110,11 @@ PyObjPtr& PyIntHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& 
         return context.cacheResult(new PyObjInt(newVal));
     }
     else if (nType == PY_FLOAT){
-        double rval = val.cast<PyObjFloat>()->value;
+        PyFloat rval = val.cast<PyObjFloat>()->value;
         if (rval == 0.0){
             THROW_EVAL_ERROR("div by zero");
         }
-        double newVal = long(self.cast<PyObjInt>()->value / rval);
+        PyFloat newVal = long(self.cast<PyObjInt>()->value / rval);
         return context.cacheResult(new PyObjFloat(newVal));
     }
     else{

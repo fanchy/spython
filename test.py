@@ -310,3 +310,14 @@ output.write('First line.')
 contents = output.getvalue()
 print(contents)
 testrange = range(0, 10)
+
+import math
+ceil1 = math.ceil(3.4)
+print(ceil1)
+floor1 = math.floor(5.6)
+print(floor1)
+
+acos1 = math.acos(0.3)
+print(acos1)
+
+strmod1 = 'abc%d'%10
