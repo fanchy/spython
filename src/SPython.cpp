@@ -16,10 +16,11 @@
 #include "ext/PyOsExt.h"
 #include "ext/PyStringIOExt.h"
 #include "ext/PyMathExt.h"
+#include "ext/PyRandomExt.h"
    
 using namespace std;
 using namespace ff;
-                            
+                         
 SPython::SPython(){
     pycontext.curstack = PyObjModule::BuildModule(pycontext, "__main__", "built-in");
     pycontext.curstack.cast<PyObjModule>()->loadFlag = PyObjModule::MOD_LOADOK;
@@ -35,6 +36,7 @@ SPython::SPython(){
     PySysExt::init(pycontext);
     PyStringIOExt::init(pycontext);
     PyMathExt::init(pycontext);
+    PyRandomExt::init(pycontext);
     
     pycontext.syspath += "pysrc;;pylib;justfortest;thrift;pylib/thrift/protocol;pylib/thrift/transport";
 }
@@ -45,4 +47,5 @@ PyObjPtr SPython::importFile(const std::string& modname, string __module__){
     }
     return PyOpsUtil::importFile(pycontext, modname, __module__);
 }
+
 

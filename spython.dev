@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
 CompilerSettings=0000000000100000101000000
-UnitCount=55
+UnitCount=56
 
 [VersionInfo]
 Major=1
@@ -592,6 +592,16 @@ BuildCmd=
 
 [Unit55]
 FileName=include\ext\PyMathExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit56]
+FileName=include\ext\PyRandomExt.h
 CompileCpp=1
 Folder=include/ext
 Compile=1

@@ -151,6 +151,12 @@ public:
         value.push_back(v);
         return *this;
     }
+    PyObjPtr& at(size_t i){
+        return value.at(i);
+    }
+    size_t size() const{
+        return value.size();
+    }
 public:
     std::vector<PyObjPtr> value;
 };

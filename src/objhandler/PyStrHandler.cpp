@@ -73,18 +73,107 @@ PyObjPtr& PyStrHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& 
     THROW_EVAL_ERROR("can't div to str");
     return self;
 }
-PyObjPtr& PyStrHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val){
+PyObjPtr strFmtGetArg(PyObjPtr& fmtArgs, size_t i){
+    if (i == 0){
+        if (PyCheckTuple(fmtArgs)){
+            if (i >= fmtArgs.cast<PyObjTuple>()->size()){
+                THROW_EVAL_ERROR("TypeError: not enough arguments for format string");
+            }
+            return fmtArgs.cast<PyObjTuple>()->at(i);
+        }
+        else{
+            return fmtArgs;
+        }
+    }
+    else{
+        if (PyCheckTuple(fmtArgs)){
+            if (i >= fmtArgs.cast<PyObjTuple>()->size()){
+                THROW_EVAL_ERROR("TypeError: not enough arguments for format string");
+            }
+            return fmtArgs.cast<PyObjTuple>()->at(i);
+        }
+        THROW_EVAL_ERROR("TypeError: not enough arguments for format string");
+    }
+    return NULL;
+}
+PyObjPtr& PyStrHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& fmtArgs){
     const string& selfval = self.cast<PyObjStr>()->value;
     string ret;
+    
+    //%[(name)][flags][width].[precision]typecode
+    string widthArg;
+    string tmpVal;
+    bool zeroFlag = false;//! fill zero
+    bool rightAlign = false;
+    int nArgIndex = 0;
     for (size_t i = 0; i < selfval.size(); ++i){
         if (selfval[i] != '%'){
             ret += selfval[i];
             continue;
         }
-        char nextChar = selfval.at(i + 1);
-        if (nextChar == 'd'){
-            ret += PyCppUtil::int2str(PyCppUtil::toInt(val));
+        size_t j = i + 1;
+        widthArg.clear();
+        zeroFlag = false;
+        rightAlign = false;
+        tmpVal.clear();
+        
+        for (; j < selfval.size(); ++j){
+            char nextChar = selfval.at(j);
+            if (nextChar == 'd' or nextChar == 'i'){
+                tmpVal += PyCppUtil::int2str(PyCppUtil::toInt(strFmtGetArg(fmtArgs, nArgIndex++)));
+            }
+            else if (nextChar == 's'){
+                tmpVal += PyCppUtil::toStr(strFmtGetArg(fmtArgs, nArgIndex++));
+            }
+            else if (nextChar == 'f' || nextChar == 'F'){
+                tmpVal += PyCppUtil::int2str(PyCppUtil::toInt(strFmtGetArg(fmtArgs, nArgIndex++)));
+            }
+            else if (nextChar == '%'){
+                tmpVal += '%';
+            }
+            else{
+                if (widthArg.empty()){
+                    if (nextChar == '0'){
+                        zeroFlag = true;
+                        continue;
+                    }
+                    else if (nextChar == '-'){
+                        rightAlign = true;
+                        continue;
+                    }
+                    else if (nextChar == '+'){
+                        continue;
+                    }
+                    
+                }
+                widthArg += nextChar;
+                continue;
+            }
+            if (!widthArg.empty()){
+                int nWidth = ::atoi(widthArg.c_str());
+                for (size_t m = tmpVal.size(); (int)m < nWidth; ++m){
+                    if (rightAlign){
+                        if (zeroFlag){
+                            tmpVal += '0';
+                        }
+                        else{
+                            tmpVal += ' ';
+                        }
+                    }
+                    else{
+                        if (zeroFlag){
+                            ret += '0';
+                        }
+                        else{
+                            ret += ' ';
+                        }
+                    }
+                }
+            }
+            ret += tmpVal;
+            break;
         }
+        i = j;
     }
     return context.cacheResult(PyCppUtil::genStr(ret));
 }

@@ -32,12 +32,12 @@
 32.weakref		-- ok
 33.__import__		-- ok
 34.__file__		-- ok
-35.time
-36.datetime
-37.StringIO
-38.string.format %
+35.time			-- ok
+36.datetime		-- ok
+37.StringIO		-- ok
+38.string.format %	-- ok
 39.copy deepcopy
-40.math
+40.math			-- ok
 41.random
 42.os
 43.sys

@@ -320,4 +320,13 @@ print(floor1)
 acos1 = math.acos(0.3)
 print(acos1)
 
-strmod1 = 'abc%d'%10
+strmod1 = 'abc%-3d,%d'%(12, 8)
+print('strmod1', strmod1)
+import random
+
+rand1 = random.random()
+print('rand1', rand1)
+rand2 = random.uniform(10,20)
+print('rand2', rand2)
+rand3 = random.randint(10,20)
+print('rand3', rand3)
