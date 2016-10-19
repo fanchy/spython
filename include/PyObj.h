@@ -105,6 +105,12 @@ public:
     PyObjPtr& getVar(PyContext& context, PyObjPtr& self, ExprAST* e){
         return PyObjBuiltinTool::getVar(context, self, e, "str");
     }
+    void append(const std::string& s){
+        value += s;
+    }
+    void append(const char* s, size_t n){
+        value.append(s, n);
+    }
 };
 
 
