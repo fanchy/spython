@@ -330,3 +330,15 @@ rand2 = random.uniform(10,20)
 print('rand2', rand2)
 rand3 = random.randint(10,20)
 print('rand3', rand3)
+
+listrand = [1,2, 3]
+rand4 = random.choice(listrand)
+print('rand4', rand4)
+rand5 = random.shuffle(listrand)
+print('listrand-2', listrand)
+rand6=random.sample(listrand,2)
+print('rand6', rand6)
+file2 = open("test2.py")
+print('file2', file2)
+
+

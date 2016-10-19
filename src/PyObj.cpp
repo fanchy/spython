@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <algorithm>
 
 #include "PyObj.h"
 #include "ExprAST.h"
@@ -663,3 +664,6 @@ PyObjPtr IterUtil::next(){
     return NULL;
 }
 
+void PyObjList::randShuffle(){
+    random_shuffle(value.begin(), value.end());
+}

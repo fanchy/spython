@@ -157,6 +157,9 @@ public:
     size_t size() const{
         return value.size();
     }
+    std::vector<PyObjPtr>& getValue(){
+        return value;
+    }
 public:
     std::vector<PyObjPtr> value;
 };
@@ -181,6 +184,10 @@ public:
     }
     size_t size(){
         return value.size();
+    }
+    void randShuffle();
+    std::vector<PyObjPtr>& getValue(){
+        return value;
     }
 public:
     std::vector<PyObjPtr> value;
