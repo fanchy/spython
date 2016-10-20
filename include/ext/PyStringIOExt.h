@@ -66,6 +66,7 @@ struct PyStringIOExt{
                 PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyStringIOExt::StringIO__init__, "__init__"));
                 PyCppUtil::setAttr(pycontext, objClass, "write", PyCppUtil::genFunc(PyStringIOExt::StringIO_write, "write"));
                 PyCppUtil::setAttr(pycontext, objClass, "getvalue", PyCppUtil::genFunc(PyStringIOExt::StringIO_getvalue, "getvalue"));
+                PyCppUtil::setAttr(pycontext, objClass, "read", PyCppUtil::genFunc(PyStringIOExt::StringIO_getvalue, "read"));
                 PyCppUtil::setAttr(pycontext, objClass, "close", PyCppUtil::genFunc(PyStringIOExt::StringIO_close, "close"));
                 PyCppUtil::setAttr(pycontext, mod, "StringIO", objClass);
                 PyCppUtil::setAttr(pycontext, mod, "cStringIO", objClass);

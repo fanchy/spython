@@ -555,6 +555,12 @@ struct PyCppUtil{
         PyAssertStr(v);
         return "";
     }
+    static bool toBool(PyObjPtr v){
+        if (PyCheckBool(v)){
+            return v.cast<PyObjBool>()->value;
+        }
+        return false;
+    }
     static PyObjPtr genInt(PyInt n){
         return new PyObjInt(n);
     }
