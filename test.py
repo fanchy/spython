@@ -360,3 +360,10 @@ struct1 = struct.pack('2s', 'abc')
 print('struct1', struct1)
 
 
+import json
+json1 = {'b':[1,2.3,3,'abc', [3, 4], {'a':123}]}
+json2 = json.dumps(json1)
+print('json2', json2)
+
+
+
