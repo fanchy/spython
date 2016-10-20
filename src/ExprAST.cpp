@@ -1482,3 +1482,41 @@ PyObjPtr& RetAfterIfAST::eval(PyContext& context){
     return else_test->eval(context);
 }
 
+struct WithGuard{
+    WithGuard(PyContext& c):context(c){
+    }
+    ~WithGuard(){
+        vector<PyObjPtr> tmpargs;
+        for (size_t i = 0; i < waitExit.size(); ++i){
+            PyObjPtr func = PyCppUtil::getAttr(context, waitExit[i], "__exit__");
+            tmpargs.clear();
+            tmpargs.push_back(PyObjTool::buildNone());
+            tmpargs.push_back(PyObjTool::buildNone());
+            tmpargs.push_back(PyObjTool::buildNone());
+            PyCppUtil::callPyfunc(context, func, tmpargs);
+        }
+    }
+    
+    PyContext& context;
+    vector<PyObjPtr> waitExit;
+};
+
+PyObjPtr& WithAST::eval(PyContext& context){
+    WithGuard guard(context);
+    vector<PyObjPtr> tmpargs;
+    for (size_t i = 0; i < with_items.size(); ++i){
+        with_item& item = with_items[i];
+        PyObjPtr obj = item.test->eval(context);
+        PyObjPtr func = PyCppUtil::getAttr(context, obj, "__enter__");
+        tmpargs.clear();
+        obj = PyCppUtil::callPyfunc(context, func, tmpargs);
+        guard.waitExit.push_back(obj);
+        
+        if (item.asexpr){
+            item.asexpr->assignVal(context, obj);
+        }
+    }
+    suite->eval(context);
+    return context.cacheResult(PyObjTool::buildNone());
+}
+

@@ -773,6 +773,33 @@ public:
     ExprASTPtr                  else_test;
 };
 
+class WithAST : public ExprAST {
+public:
+    struct with_item{
+        ExprASTPtr test;
+        ExprASTPtr asexpr;
+        with_item(){
+        }
+        with_item(const with_item& src){
+            test = src.test;
+            asexpr = src.asexpr;
+        }
+    };
+    virtual PyObjPtr& eval(PyContext& context);
+    virtual int getType() {
+        return EXPR_WITH_STMT;
+    }
+    void additem(ExprASTPtr test, ExprASTPtr asexpr){
+        with_item a;
+        a.test = test;
+        a.asexpr = asexpr;
+        with_items.push_back(a);
+    }
+public:
+    std::vector<with_item>      with_items;
+    ExprASTPtr                  suite;
+};
+
 }
 #endif
 

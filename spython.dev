@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
 CompilerSettings=0000000000100000101000000
-UnitCount=57
+UnitCount=58
 
 [VersionInfo]
 Major=1
@@ -612,6 +612,16 @@ BuildCmd=
 
 [Unit57]
 FileName=include\ext\PyIOExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit58]
+FileName=include\ext\PyStructExt.h
 CompileCpp=1
 Folder=include/ext
 Compile=1

@@ -1181,7 +1181,41 @@ ExprASTPtr Parser::parse_try_stmt(){
 
 //! with_stmt: 'with' with_item (',' with_item)*  ':' suite
 ExprASTPtr Parser::parse_with_stmt(){
-    return NULL;
+    if (m_curScanner->getToken()->strVal != "with"){
+        return NULL;
+    }
+    m_curScanner->seek(1);
+    
+    WithAST* withexpr = ALLOC_EXPR<WithAST>();
+    ExprASTPtr ret  = withexpr;
+
+    do {
+        ExprASTPtr test = parse_test();
+        if (!test){
+            THROW_ERROR("test needed when parse with after with");
+        }
+        ExprASTPtr asexpr;
+        if (m_curScanner->getToken()->strVal == "as"){
+            m_curScanner->seek(1);
+            asexpr = parse_name();
+            if (!asexpr){
+                THROW_ERROR("name needed when parse with after as");
+            }
+        }
+        withexpr->additem(test, asexpr);
+    }
+    while (m_curScanner->getToken()->strVal == ",");
+    
+    if (m_curScanner->getToken()->strVal != ":"){
+        THROW_ERROR(": needed when parse with after with");
+    }
+    m_curScanner->seek(1);
+    
+    withexpr->suite = parse_suite();
+    if (!withexpr->suite){
+        THROW_ERROR("suite needed when parse with after with");
+    }
+    return ret;
 }
 
 //! with_item: test ['as' expr]

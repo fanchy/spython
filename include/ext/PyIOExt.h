@@ -185,7 +185,21 @@ struct PyIOExt{
         ::fwrite(data.c_str(), nSize, 1, instanceData->fp);
         return PyObjTool::buildTrue();
     }
-    
+    static PyObjPtr file__enter__(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        if (argAssignVal.size() != 0){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: __enter__() takes exactly 0 argument (%u given)", argAssignVal.size()));
+        }
+        return self;
+    }
+    static PyObjPtr file__exit__(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        if (argAssignVal.size() != 3){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: __exit__() takes exactly 0 argument (%u given)", argAssignVal.size()));
+        }
+        PyAssertInstance(self);
+        PyIOData* instanceData = self.cast<PyObjClassInstance>()->instanceData->cast<PyIOData>();
+        instanceData->closeFile();
+        return self;
+    }
     static bool init(PyContext& pycontext){
         {
             PyObjPtr strClass = PyObjClassDef::build(pycontext, "file");
@@ -197,6 +211,8 @@ struct PyIOExt{
             PyCppUtil::setAttr(pycontext, strClass, "write", PyCppUtil::genFunc(PyIOExt::file_write, "write"));
             PyCppUtil::setAttr(pycontext, strClass, "readline", PyCppUtil::genFunc(PyIOExt::file_readline, "readline"));
             PyCppUtil::setAttr(pycontext, strClass, "readlines", PyCppUtil::genFunc(PyIOExt::file_readlines, "readlines"));
+            PyCppUtil::setAttr(pycontext, strClass, "__enter__", PyCppUtil::genFunc(PyIOExt::file__enter__, "__enter__"));
+            PyCppUtil::setAttr(pycontext, strClass, "__exit__", PyCppUtil::genFunc(PyIOExt::file__exit__, "__exit__"));
             pycontext.addBuiltin("file", strClass);
         }
         pycontext.addBuiltin("open", PyCppUtil::genFunc(PyIOExt::file_open, "open"));

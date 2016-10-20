@@ -16,7 +16,7 @@
 16.Slice 		-- ok
 17.eval exec
 18. \ 多行支持		-- ok
-19. open close 文件操作 with
+19. open close with	-- ok
 20. global 的实现	-- ok
 21.lambda		-- ok
 22. del			-- ok
@@ -41,7 +41,7 @@
 41.random		-- ok
 42.os
 43.sys
-44.file open close
+44.file open close	-- ok
 45.json
 46.xml
 47.unittest
@@ -51,6 +51,4 @@ http://www.wklken.me/posts/2015/03/03/python-base-datetime.html
 50. `dump`
 51. struct
 52. platform
-53. stringio
-54.random
 

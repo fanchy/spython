@@ -348,3 +348,15 @@ print('file3', file3)
 file2.close()
 print('file2', file2)
 
+
+with open("ma.py") as f:
+    file4 = f.read()
+    print('file4', file4)
+
+
+import struct
+
+struct1 = struct.pack('2s', 'abc')
+print('struct1', struct1)
+
+
