@@ -12,6 +12,7 @@ struct PySysExt{
         {
             PyObjPtr mod = PyObjModule::BuildModule(pycontext, "sys", "built-in");
             PyCppUtil::setAttr(pycontext, mod, "path", pycontext.syspath);
+            PyCppUtil::setAttr(pycontext, mod, "argv", new PyObjTuple());
             PyCppUtil::setAttr(pycontext, mod, "version_info", new PyObjTuple());
             pycontext.addModule("sys", mod);
         }

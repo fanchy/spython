@@ -16,6 +16,14 @@ int main(int argc, char** argv) {
             printf("usage spython xx.py\n");
             return 0;
         }
+        PyObjPtr sys = spython.pycontext.getModule("sys");
+        PyObjPtr sysargv = PyCppUtil::getAttr(spython.pycontext, sys, "argv");
+        if (PyCheckTuple(sysargv)){
+            for (int i = 1; i < argc; ++i){
+                sysargv.cast<PyObjTuple>()->append(PyCppUtil::genStr(argv[i]));
+            }
+        }
+        
         PyObjPtr ret = spython.importFile(argv[1], "__main__");
         if (!ret){
             printf("eval Ê§°Ü£¡\n");
@@ -25,6 +33,7 @@ int main(int argc, char** argv) {
             string strObj = PyObj::dump(spython.getPyContext(), spython.getPyContext().curstack);
             printf("%s", strObj.c_str());
         }
+        
     }
     catch(PyExceptionSignal& e){
         printf("Traceback (most recent call last):\n");

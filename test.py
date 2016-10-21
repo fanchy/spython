@@ -379,4 +379,6 @@ print('json3', json3)
 import platform
 print('*'*20, platform.system())
 
-
+import sys
+argv = sys.argv
+print('sys.argv', argv)
