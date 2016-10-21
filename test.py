@@ -382,3 +382,22 @@ print('*'*20, platform.system())
 import sys
 argv = sys.argv
 print('sys.argv', argv)
+
+import os
+getcwd = os.getcwd()
+print('getcwd', getcwd)
+listdir = os.listdir(os.getcwd())
+print('listdir', listdir)
+os.remove('json.txt')
+os.system('dir')
+split = os.path.split('C:\\Python25\\abc.txt')
+print('split', split)
+isdir = os.path.isdir(os.getcwd())
+print('isdir', isdir)
+isfile = os.path.isfile(os.getcwd())
+print('isfile', isfile)
+basename = os.path.basename('c:\\Python\\a.txt')
+print('basename', basename)
+dirname = os.path.dirname('c:\\Python\\a.txt')
+print('dirname', dirname)
+

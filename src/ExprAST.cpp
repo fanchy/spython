@@ -1258,10 +1258,14 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, s
 std::string PyOpsUtil::traceback(PyContext& context){
     string ret;
     char msg[512] = {0};
+    ExprAST* lastexpr = NULL;
     for (list<ExprAST*>::iterator it = context.exprTrace.begin(); it != context.exprTrace.end(); ++it){
         ExprAST* e = *it;
         if (!e)
             continue;
+        if (e == lastexpr)
+           continue;
+        lastexpr = e;
         snprintf(msg, sizeof(msg), "  File \"%s\", line %d\n", context.getFileId2Path(e->lineInfo.fileId).c_str(), e->lineInfo.nLine);
         ret += msg;
         string lineCode = StrTool::trim(context.getLine2Code(e->lineInfo.fileId, e->lineInfo.nLine));

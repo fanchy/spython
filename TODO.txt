@@ -39,8 +39,8 @@
 39.copy deepcopy
 40.math			-- ok
 41.random		-- ok
-42.os
-43.sys
+42.os			-- ok
+43.sys			-- ok
 44.file open close	-- ok
 45.json			-- ok
 46.xml
@@ -51,4 +51,4 @@ http://www.wklken.me/posts/2015/03/03/python-base-datetime.html
 50. `dump`
 51. struct		-- ok
 52. platform
-
+http://www.cnblogs.com/BeginMan/p/3327291.html
