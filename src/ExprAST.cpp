@@ -1156,6 +1156,16 @@ struct TmpImportCacheGuard{
     PyContext& context;
     int nFileId;
 };
+static void PyList2Vector(PyContext& context, PyObjPtr obj, vector<string>& ret){
+    IterUtil iterUtil(context, obj);
+    while (true){
+        PyObjPtr v = iterUtil.next();
+        if (!v){
+            break;
+        }
+        ret.push_back(PyCppUtil::toStr(v));
+    }
+}
 PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, std::string asName, bool assignFlag){
     PyObjPtr cacheMod = context.getModule(modpath);
     if (cacheMod){
@@ -1171,7 +1181,7 @@ PyObjPtr PyOpsUtil::importFile(PyContext& context, const std::string& modpath, s
     }
     else{
         vector<string> sysdir;
-        StrTool::split(context.syspath, sysdir, ";");
+        PyList2Vector(context, context.syspath, sysdir);//StrTool::split(context.syspath, sysdir, ";");
         if (sysdir.empty()){
             sysdir.push_back("./");
         }
@@ -1263,7 +1273,7 @@ std::string PyOpsUtil::traceback(PyContext& context){
 PyObjPtr& ImportAST::eval(PyContext& context) {
     TRACE_EXPR_PUSH();
     vector<string> sysdir;
-    StrTool::split(context.syspath, sysdir, ";");
+    PyList2Vector(context, context.syspath, sysdir);//StrTool::split(context.syspath, sysdir, ";");
     sysdir.push_back("");
     
     for (size_t i = 0; i < importArgs.size(); ++i){

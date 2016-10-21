@@ -22,8 +22,9 @@
    
 using namespace std;
 using namespace ff;
-                                
+      
 SPython::SPython(){
+    pycontext.syspath  = new PyObjList();
     pycontext.curstack = PyObjModule::BuildModule(pycontext, "__main__", "built-in");
     pycontext.curstack.cast<PyObjModule>()->loadFlag = PyObjModule::MOD_LOADOK;
     PyBaseExt::init(pycontext);
@@ -42,7 +43,7 @@ SPython::SPython(){
     PyIOExt::init(pycontext);
     PyStructExt::init(pycontext);
     
-    pycontext.syspath += "pysrc;;pylib;justfortest;thrift;pylib/thrift/protocol;pylib/thrift/transport";
+    //pycontext.syspath += "pysrc;;pylib;justfortest;thrift;pylib/thrift/protocol;pylib/thrift/transport";
 }
 
 PyObjPtr SPython::importFile(const std::string& modname, string __module__){

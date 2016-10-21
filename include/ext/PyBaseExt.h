@@ -140,6 +140,16 @@ struct PyBaseExceptionExt{
         return ret;
     }
 };
+struct PySystemExt{
+    static PyObjPtr pysystem(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+        #ifdef LINUX
+            reutrn PyCppUtil::genStr("Linux");
+        #else
+            return PyCppUtil::genStr("Windows");
+        #endif
+        return PyCppUtil::genStr("Posix");
+    }
+};
 
 struct PyBaseExt{
     static bool init(PyContext& pycontext){
@@ -192,6 +202,8 @@ struct PyBaseExt{
         }
         {
             PyObjPtr mod = PyObjModule::BuildModule(pycontext, "platform", "built-in");
+            PyCppUtil::setAttr(pycontext, mod, "system", PyCppUtil::genFunc(PySystemExt::pysystem, "system"));
+
             pycontext.addModule("platform", mod);
         }
         return true;

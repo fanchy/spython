@@ -11,8 +11,7 @@ struct PySysExt{
     static bool init(PyContext& pycontext){
         {
             PyObjPtr mod = PyObjModule::BuildModule(pycontext, "sys", "built-in");
-            PyObjPtr path = new PyObjList();
-            PyCppUtil::setAttr(pycontext, mod, "path", path);
+            PyCppUtil::setAttr(pycontext, mod, "path", pycontext.syspath);
             PyCppUtil::setAttr(pycontext, mod, "version_info", new PyObjTuple());
             pycontext.addModule("sys", mod);
         }

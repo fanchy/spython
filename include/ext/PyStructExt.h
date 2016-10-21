@@ -147,25 +147,21 @@ struct PyStructExt{
                 case 'P':
                     {
                         PyInt v = (PyInt)PyCppUtil::toInt(val);
-                        v = (PyInt)myhton64((uint64_t)v);
+                        if (useNetworkEndian){
+                            v = (PyInt)myhton64((uint64_t)v);
+                        }
                         ret.append((const char*)(&v), sizeof(v));
                     }
                     break;
                 case 'f':
                     {
                         float v = (float)PyCppUtil::toFloat(val);
-                        if (useNetworkEndian){
-                            v = (float)myhtonl((uint32_t)v);
-                        }
                         ret.append((const char*)(&v), sizeof(v));
                     }
                     break;
                 case 'd':
                     {
                         PyFloat v = (PyFloat)PyCppUtil::toFloat(val);
-                        if (useNetworkEndian){
-                            v = (PyFloat)myhton64((uint64_t)v);
-                        }
                         ret.append((const char*)(&v), sizeof(v));
                     }
                     break;
@@ -295,9 +291,6 @@ struct PyStructExt{
                             PY_RAISE_STR(context, PyCppUtil::strFormat("data num not enough"));
                         }
                         float v = *((float*)(data.c_str() + hasPopNum));
-                        if (useNetworkEndian){
-                            v = (uint32_t)myntohl((uint32_t)v);
-                        }
                         ret.cast<PyObjTuple>()->append(PyCppUtil::genFloat(v));
                         hasPopNum += sizeof(float);
                     }
@@ -308,9 +301,6 @@ struct PyStructExt{
                             PY_RAISE_STR(context, PyCppUtil::strFormat("data num not enough"));
                         }
                         PyFloat v = *((PyFloat*)(data.c_str() + hasPopNum));
-                        if (useNetworkEndian){
-                            v = (uint64_t)myntoh64((uint64_t)v);
-                        }
                         ret.cast<PyObjTuple>()->append(PyCppUtil::genFloat(v));
                         hasPopNum += sizeof(PyFloat);
                     }

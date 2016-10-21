@@ -449,13 +449,14 @@ public:
     PyContext& addModule(const std::string& name, PyObjPtr v);
     PyObjPtr   getModule(const std::string& name);
 public:
-    std::list<ExprAST*> exprTrace;//! for trace back
-    std::map<int, FileInfo> fileId2Info;
-    std::string             syspath;
-    PyObjPtr evalResult;
-    PyObjPtr curstack;//!cur using context
+    std::list<ExprAST*>                 exprTrace;//! for trace back
+    std::map<int, FileInfo>             fileId2Info;
+    //std::string                       syspath;
+    PyObjPtr                            syspath;
+    PyObjPtr                            evalResult;
+    PyObjPtr                            curstack;//!cur using context
     
-    std::map<std::string, PyObjPtr>  allBuiltin;
+    std::map<std::string, PyObjPtr>     allBuiltin;
     
     //!record obj field id num
     std::map<int, std::map<int, int> >  recordAllFiledIndex;

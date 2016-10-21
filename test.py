@@ -358,9 +358,9 @@ import struct
 print('structlen1', len(struct.pack('1s', 'a')))
 struct1 = struct.pack('hhiqb', 1, 1, 2, 3, 4)
 print('struct1', len(struct1))
-struct2 = struct.unpack('bhiq10s', struct1)
+struct2 = struct.unpack('hhiqb', struct1)
 print('struct2', struct2)
-
+struct1 = len(struct1)
 
 
 import json
@@ -375,5 +375,8 @@ print('json2', json2)
 json3 = json.loads(json2)
 print('json3', json3)
 
+
+import platform
+print('*'*20, platform.system())
 
 
