@@ -695,7 +695,9 @@ PyObjPtr& TupleExprAST::assignVal(PyContext& context, PyObjPtr& v){
 }
 
 PyObjPtr& DotGetFieldExprAST::eval(PyContext& context){TRACE_EXPR();
+    //printf("DotGetFieldExprAST filed:%s\n", fieldName->name.c_str());
     PyObjPtr obj = preExpr->eval(context);
+    //printf("DotGetFieldExprAST class:%s\n", obj.cast<PyObjClassInstance>()->classDefPtr.cast<PyObjClassDef>()->name.c_str()); 
     PyContextBackUp backup(context);
     context.curstack = obj;
     //string strObj = PyObj::dump(context, obj);

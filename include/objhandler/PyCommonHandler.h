@@ -57,6 +57,7 @@ public:
     
 public:
     ExprASTPtr  expr__str__;
+    ExprASTPtr  expr__repr__;
     ExprASTPtr  expr__lt__;
     ExprASTPtr  expr__le__;
     ExprASTPtr  expr__eq__;

@@ -70,6 +70,17 @@ struct PyBuiltinExt{
         //!TODO
         return PyObjTool::buildNone();
     }
+    static PyObjPtr hasattr(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
+        if (argAssignVal.size() != 2){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: hasaatr() takes exactly 2 argument (%u given)", argAssignVal.size()));
+        }
+        PyObjPtr& obj = argAssignVal[0];
+        PyObjPtr& param = argAssignVal[1];
+        if (PyCppUtil::hasAttr(context, obj, PyCppUtil::toStr(param))){
+            return PyObjTool::buildTrue();
+        }
+        return PyObjTool::buildFalse();
+    }
 };
 struct PyStrExt{
     static PyObjPtr upper(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
@@ -162,6 +173,7 @@ struct PyBaseExt{
         pycontext.addBuiltin("__import__", PyCppUtil::genFunc(PyBuiltinExt::__import__, "__import__"));
         pycontext.addBuiltin("range", PyCppUtil::genFunc(PyBuiltinExt::range, "range"));
         pycontext.addBuiltin("open", PyCppUtil::genFunc(PyBuiltinExt::pyopen, "open"));
+        pycontext.addBuiltin("hasattr", PyCppUtil::genFunc(PyBuiltinExt::hasattr, "hasattr"));
         
         {
             PyObjPtr strClass = PyObjClassDef::build(pycontext, "str", &singleton_t<ObjIdTypeTraits<PyObjStr> >::instance_ptr()->objInfo);
@@ -196,7 +208,6 @@ struct PyBaseExt{
             PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyBaseExceptionExt::BaseException__init__, "__init__"));
             PyCppUtil::setAttr(pycontext, objClass, "__str__", PyCppUtil::genFunc(PyBaseExceptionExt::BaseException__str__, "__str__"));
             pycontext.addBuiltin("BaseException", objClass);
-            pycontext.propertyClass = objClass;
             
             pycontext.addBuiltin("Exception", objClass);
         }

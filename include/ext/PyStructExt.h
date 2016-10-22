@@ -88,13 +88,14 @@ struct PyStructExt{
                 case '=':
                 case '<':
                     {
-                        
+                        continue;
                     }
                     break;
                 case '>':
                 case '!':
                     {
                         useNetworkEndian = true;
+                        continue;
                     }
                     break;
                 default:
@@ -207,13 +208,14 @@ struct PyStructExt{
                 case '=':
                 case '<':
                     {
-                        
+                        continue;
                     }
                     break;
                 case '>':
                 case '!':
                     {
                         useNetworkEndian = true;
+                        continue;
                     }
                     break;
                 default:

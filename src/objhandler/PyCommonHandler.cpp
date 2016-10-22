@@ -7,6 +7,7 @@ using namespace std;
 using namespace ff;
 PyCommonHandler::PyCommonHandler(){
     expr__str__ = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__str__");
+    expr__repr__= singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__repr__");
     expr__lt__  = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__lt__");
     expr__le__  = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__le__");
     expr__eq__  = singleton_t<VariableExprAllocator>::instance_ptr()->alloc("__eq__");
@@ -79,6 +80,19 @@ string PyCommonHandler::handleStr(PyContext& context, const PyObjPtr& self) cons
         PyObjPtr ret = PyCppUtil::callPyfunc(context, func, argAssignVal);
         if (PyCheckStr(ret)){
             return ret.cast<PyObjStr>()->value;
+        }
+    }
+    else {
+        expr  = expr__repr__;
+        func = expr->getFieldVal(context);
+        backup.rollback();
+        
+        if (func && PyCheckFunc(func)){
+            vector<PyObjPtr> argAssignVal;
+            PyObjPtr ret = PyCppUtil::callPyfunc(context, func, argAssignVal);
+            if (PyCheckStr(ret)){
+                return ret.cast<PyObjStr>()->value;
+            }
         }
     }
     return "";

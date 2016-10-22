@@ -34,6 +34,8 @@ def f1(a, b, c):
 s= f1(**{'a':1, 'b':2, 'c':5})
 class F:
     'OhThisIsDoc'
+    def __init__(self):
+        self.gg = 90
     def hi(self):
         self.d = 99
         print('hi')
@@ -44,6 +46,7 @@ class Foo(F):
     a = 10
     def __init__(self):
         self.b = 1022
+        self.f = F()
     def __str__(self):
         return 'Foo instance:'
     def __len__(self):
@@ -60,14 +63,14 @@ class Foo(F):
     @property
     def A(self):
         print('property self:', self)
-        return self.b
+        return self.f
     @A.setter
     def A(self, v):
         print('property set:', v)
         self.b = v
 f = Foo()
 print('lenf', len(f))
-f.A = 9966
+gg2 = f.A.gg
 property1 = f.A
 
 f2 = Foo()

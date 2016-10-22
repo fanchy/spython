@@ -262,6 +262,7 @@ PyObjPtr& PyObjClassInstance::getVar(PyContext& context, PyObjPtr& self, ExprAST
             }
             return context.cacheResult(PyObjTool::buildNULL());
         }
+        
         return ret;
     }
 
