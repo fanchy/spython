@@ -45,7 +45,6 @@ ExprASTPtr Parser::parse_file_input(){
             ExprASTPtr stmt = this->parse_stmt();
             
             if (stmt){
-                stmt->dump(0);
                 allStmt->exprs.push_back(stmt);
             }else{
                 if (m_curScanner->getToken()->strVal == "\n" || m_curScanner->getToken()->strVal == " "){
@@ -226,6 +225,12 @@ ExprASTPtr Parser::parse_parameters(){
     return varargslist;
 }
 
+bool Parser::isChar(const std::string& v, int offset){
+    if (m_curScanner->getToken(offset)->nTokenType == TOK_CHAR && m_curScanner->getToken(offset)->strVal == "*"){
+        return true;
+    }
+    return false;
+}
 //! varargslist: ((fpdef ['=' test] ',')*
 //!               ('*' NAME [',' '**' NAME] | '**' NAME) |
 //!               fpdef ['=' test] (',' fpdef ['=' test])* [','])
@@ -233,9 +238,9 @@ ExprASTPtr Parser::parse_varargslist(){
     ParametersExprAST* p = ALLOC_EXPR<ParametersExprAST>();
     ExprASTPtr ret = p;
     do{
-        if (m_curScanner->getToken()->strVal == "*"){
+        if (isChar("*")){
             m_curScanner->seek(1);
-            if (m_curScanner->getToken()->strVal == "*"){
+            if (isChar("*")){
                 m_curScanner->seek(1);
                 ExprASTPtr name = parse_name();
                 if (!name){
@@ -283,8 +288,8 @@ ExprASTPtr Parser::parse_varargslist(){
     }
     while (true);
     
-    if (m_curScanner->getToken()->strVal == "*"){
-        if (m_curScanner->getToken(1)->strVal == "*"){
+    if (isChar("*")){
+        if (isChar("*", 1)){
             m_curScanner->seek(2);
             ExprASTPtr eName = parse_name(true);
             p->addParam(eName, NULL, "**");
@@ -683,7 +688,7 @@ ExprASTPtr Parser::parse_import_from(){
         }
         m_curScanner->seek(1);
         
-        if (m_curScanner->getToken()->strVal == "*"){
+        if (isChar("*")){
             importAst.cast<ImportAST>()->importArgs.back().asinfo = "*";
             m_curScanner->seek(1);
         }
@@ -1364,7 +1369,7 @@ ExprASTPtr Parser::parse_or_test(){
     
     while (m_curScanner->getToken()->strVal == "or"){
         m_curScanner->seek(1);
-        
+        m_curScanner->skipEnterChar();
         ExprASTPtr and_test = parse_and_test();
         if (!and_test){
             THROW_ERROR("test expr needed after or");
@@ -1587,7 +1592,7 @@ ExprASTPtr Parser::parse_arith_expr(){
 //! term: factor (('*'|'/'|'%'|'//') factor)*
 ExprASTPtr Parser::parse_term(){
     ExprASTPtr ret = parse_factor();
-    while (m_curScanner->getToken()->strVal == "*" ||
+    while (isChar("*") ||
            m_curScanner->getToken()->strVal == "/" ||
            m_curScanner->getToken()->strVal == "%" ){
 
@@ -1691,6 +1696,7 @@ ExprASTPtr Parser::parse_atom(){
             if (!retExpr){
                 THROW_ERROR("listmake needed when parse list");
             }
+            m_curScanner->skipEnterChar();
             if (m_curScanner->getToken()->strVal != "]"){
                 THROW_ERROR("] needed when parse listmake");
             }
@@ -1700,9 +1706,14 @@ ExprASTPtr Parser::parse_atom(){
     }
     else if (m_curScanner->getToken()->strVal == "("){
         m_curScanner->seek(1);
-        if (m_curScanner->getToken()->strVal == ")"){
+        m_curScanner->skipEnterChar();
+        if (m_curScanner->getToken()->strVal == "," && m_curScanner->getToken(1)->strVal == ")"){
+            m_curScanner->seek(2);
+            return ALLOC_EXPR<TupleExprAST>();
+        }
+        else if (m_curScanner->getToken()->strVal == ")"){
             m_curScanner->seek(1);
-            THROW_ERROR("() empty invalid");
+            return ALLOC_EXPR<TupleExprAST>();
         }
         else{
             //parse_testlist_comp: test ( comp_for | (',' test)* [','] )
@@ -1760,6 +1771,18 @@ ExprASTPtr Parser::parse_atom(){
             m_curScanner->seek(1);
             return retExpr;
         }
+    }
+    else if (m_curScanner->getToken()->strVal == "`"){
+        m_curScanner->seek(1);
+        ExprASTPtr testlist1 = parse_testlist1();
+        if (!testlist1){
+            THROW_ERROR("testlist1 needed after `");
+        }
+        if (m_curScanner->getToken()->strVal != "`"){
+            THROW_ERROR("` needed");
+        }
+        retExpr = ALLOC_EXPR<DumpAST>();
+        retExpr.cast<DumpAST>()->testlist1 = testlist1;
     }
     else{
         return retExpr;
@@ -1836,12 +1859,17 @@ ExprASTPtr Parser::parse_trailer(){
     if (m_curScanner->getToken()->strVal == "("){ //!call func
         m_curScanner->seek(1);
         ExprASTPtr ret = ALLOC_EXPR<CallExprAST>();
+        m_curScanner->skipEnterChar();
         if (m_curScanner->getToken()->strVal != ")"){
             ExprASTPtr arglist = parse_arglist();
             if (!arglist){
                 THROW_ERROR("arglist parse failed when parse trailer after (");
             }
             ret.cast<CallExprAST>()->arglist = arglist;
+        }
+        m_curScanner->skipEnterChar();
+        if (m_curScanner->getToken()->strVal != ")"){
+            THROW_ERROR(") needed when parse trailer after (");
         }
         m_curScanner->seek(1);
         return ret;
@@ -2100,7 +2128,7 @@ ExprASTPtr Parser::parse_arglist(){
     ExprASTPtr ret = ALLOC_EXPR<FuncArglist>();
     ExprASTPtr argument;
     m_curScanner->skipEnterChar();
-    if (m_curScanner->getToken()->strVal != "*"){
+    if (!isChar("*")){
         argument = parse_argument(ret);
     }
     //DMSG(("parse_arglist [%s]\n",  m_curScanner->getToken()->strVal.c_str()));
@@ -2108,9 +2136,9 @@ ExprASTPtr Parser::parse_arglist(){
         m_curScanner->seek(1);
         m_curScanner->skipEnterChar();
         //DMSG(("parse_arglist [%s]\n",  m_curScanner->getToken()->strVal.c_str()));
-        if (m_curScanner->getToken()->strVal == "*"){
-            if (m_curScanner->getToken()->strVal == "*"){
-                if (m_curScanner->getToken(1)->strVal != "*"){
+        if (isChar("*")){
+            if (isChar("*")){
+                if (!isChar("*", 1)){
                     m_curScanner->seek(1);
                     ExprASTPtr test = parse_test();
                     if (!test){
@@ -2132,8 +2160,8 @@ ExprASTPtr Parser::parse_arglist(){
         argument = parse_argument(ret);
     }
 
-    if (m_curScanner->getToken()->strVal == "*"){
-        if (m_curScanner->getToken(1)->strVal != "*"){
+    if (isChar("*")){
+        if (!isChar("*", 1)){
             m_curScanner->seek(1);
             ExprASTPtr test = parse_test();
             if (!test){

@@ -241,6 +241,7 @@ private:
         ret->lineInfo.nLine  = getCurLine(-2);
         return ret;
     }
+    bool isChar(const std::string& v, int offset = 0);
 protected:
     Scanner*            m_curScanner;
 };

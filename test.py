@@ -177,6 +177,9 @@ testdict2['a'] = 'aaa'
 testdict3 = testdict2[3]
 testdict4 = testdict2['a']
 
+sdump = `listtuple`
+print('sdump', sdump)
+
 #listtuple[1] = 2
 
 lambda1 = lambda x : x + 1
@@ -389,7 +392,7 @@ print('getcwd', getcwd)
 listdir = os.listdir(os.getcwd())
 print('listdir', listdir)
 os.remove('json.txt')
-os.system('dir')
+os.system('pwd')
 split = os.path.split('C:\\Python25\\abc.txt')
 print('split', split)
 isdir = os.path.isdir(os.getcwd())
@@ -400,4 +403,7 @@ basename = os.path.basename('c:\\Python\\a.txt')
 print('basename', basename)
 dirname = os.path.dirname('c:\\Python\\a.txt')
 print('dirname', dirname)
+thrift_spec = (
+  )
+print(thrift_spec)
 

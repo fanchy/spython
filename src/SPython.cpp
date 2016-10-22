@@ -19,6 +19,7 @@
 #include "ext/PyRandomExt.h"
 #include "ext/PyIOExt.h"
 #include "ext/PyStructExt.h"
+#include "ext/PyCopyExt.h"
    
 using namespace std;
 using namespace ff;
@@ -42,6 +43,7 @@ SPython::SPython(){
     PyRandomExt::init(pycontext);
     PyIOExt::init(pycontext);
     PyStructExt::init(pycontext);
+    PyCopyExt::init(pycontext);
     
     //pycontext.syspath += "pysrc;;pylib;justfortest;thrift;pylib/thrift/protocol;pylib/thrift/transport";
 }

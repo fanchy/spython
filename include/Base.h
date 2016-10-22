@@ -198,16 +198,6 @@ public:
         return 0;
     }
 
-    virtual std::string dump(int nDepth){
-        std::string ret;
-        for (int i = 0; i < nDepth; ++i){
-            ret += "-";
-        }
-        char tmp[64] = {0};
-        snprintf(tmp, sizeof(tmp), "%s", name.c_str());
-        ret += tmp;
-        return ret;
-    }
     //std::vector<std::vector<int> >  module2objcet2fieldIndex;
     std::vector<int>                  module2objcet2fieldIndex;
 };
@@ -599,7 +589,8 @@ enum EEXPR_TYPE{
     EXPR_TUPLE,
     EXPR_CALL,
     EXPR_DOT_GET_FIELD,
-    EXPR_RET_AFTER_IF
+    EXPR_RET_AFTER_IF,
+    EXPR_DUMP
 };
 
 

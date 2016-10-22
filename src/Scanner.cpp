@@ -31,10 +31,17 @@ string Token::dump() const{
             if (strVal.empty() == false && strVal[0] == '\n'){
                 return "\\n(char)";
             }
-            return strVal + "(char)";
+            char buff[64] = {0};
+            snprintf(buff, sizeof(buff), "%c,%d(char)", strVal[0], int(strVal[0]));
+            return buff;
             break;
         }
-        default:
+        default:{
+            char buff[64] = {0};
+            snprintf(buff, sizeof(buff), "%s,(%d)", strVal.c_str(), nTokenType);
+            return buff;
+            break;
+        }
             break;
     }
     return msg;
@@ -66,6 +73,10 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
         if (cLastOne == '\\'){
             char nextOne = getCharNext(content, index);
             if (nextOne == '\n'){
+                if (index > (int)m_hasSearchMaxIndex){
+                    m_hasSearchMaxIndex = index;
+                    m_nCurLine++;
+                }
                 cLastOne = getCharNext(content, index);
             }
             else{
@@ -173,6 +184,10 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
                 char nextOne = getCharNext(content, index);
                 if (nextOne == '\n'){
                     cLastOne = getCharNext(content, index);
+                    if (index > (int)m_hasSearchMaxIndex){
+                        m_hasSearchMaxIndex = index;
+                        m_nCurLine++;
+                    }
                 }
                 else{
                     index--;//!pop last char \n
@@ -180,7 +195,19 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
             }
             else if (cLastOne == tmpC[0]){
                 if (tmpC.size() == 1){
-                    break;
+                    char nextOne = getCharNext(content, index);
+                    char nextOne2 = getCharNext(content, index);
+                    char nextOne3 = getCharNext(content, index);
+                    if (nextOne == '\\' && nextOne2 == '\n' && nextOne3 == tmpC[0]){
+                        if (index > (int)m_hasSearchMaxIndex){
+                            m_hasSearchMaxIndex = index;
+                            m_nCurLine++;
+                        }
+                    }
+                    else{
+                        index -= 3;
+                        break;
+                    }
                 }
                 else {
                     char nextOne = getCharNext(content, index);
@@ -319,34 +346,43 @@ void Scanner::calLineIndentInfo(const std::string& content){
             bLineCal = false;
         }
     }
-    
+
     for (unsigned int i = 0; i < content.size(); ++i)
     {
         char ret = content[i];
         if (ret != '\n'){
             continue;
         }
-        else if (i > 0 && content[i - 1] == '\\'){
-            continue;
-        }
+
         ++nLine;
         
         LineInfo& lineInfo = m_allLines[nLine];
+        
         bool bLineCal = true;
         for (unsigned int j = i + 1; j < content.size(); ++j){
             if (content[j] == '\n')
                 break;
             lineInfo.strLine += content[j];
             
-            if (bLineCal && content[j] == ' '){
+            if (bLineCal && (content[j] == ' ' || content[j] == '\t')){
                 lineInfo.nIndent ++;
             }
             else{
                 bLineCal = false;
             }
         }
+        string& lastLine = m_allLines[nLine - 1].strLine;
+        if (lastLine.empty() == false && lastLine[lastLine.size() - 1] == '\\'){
+            lineInfo.nIndent = m_allLines[nLine - 1].nIndent;
+        }
         //printf("line:%d indent:%d\n", nLine, lineInfo.nIndent);
     }
+}
+static bool isutf8(const std::string& content){
+    if (content.size() >= 3 && content[0] == -17 && content[1] == -69 && content[2] == -65){
+        return true;
+    }
+    return false;
 }
 bool Scanner::tokenizeFile(const std::string& path, int nFileId){
     FILE* fp = ::fopen(path.c_str(), "r");
@@ -368,19 +404,27 @@ bool Scanner::tokenizeFile(const std::string& path, int nFileId){
     }while (numread == sizeof(buf));
     ::fclose(fp);
     m_nCurFileId = nFileId;
+    if (isutf8(strCode)){
+        strCode.erase(strCode.begin(), strCode.begin() + 3);
+    }
+    
     return tokenize(strCode);
 }
+
 bool Scanner::tokenize(const std::string& content){
     //printf("tokenize 11111111\n");
+    
     int nIndex = 0;
     m_nCurLine = 1;
     m_hasSearchMaxIndex = 0;
     Token retToken;
     
     calLineIndentInfo(content);
+    //if (content.find("createRole") != std::string::npos)
+    //    dump();
     do{
         retToken = getOneToken(content, nIndex);
-        if (retToken.strVal == " "){
+        if (retToken.strVal == " "||retToken.strVal == "\t"){
             continue;
         }
         //if (retToken.strVal == "*"){
@@ -389,7 +433,7 @@ bool Scanner::tokenize(const std::string& content){
         retToken.nLine = m_nCurLine;
         m_allTokens.push_back(retToken);
 
-        //printf("token:%s, Line:%d\n", retToken.dump().c_str(), retToken.nLine);
+        //printf("token:%s, Line:%d %d\n", retToken.dump().c_str(), retToken.nLine, m_allLines[retToken.nLine].nIndent);
 
     }while (retToken.nTokenType != TOK_EOF && m_allTokens.size() < content.size());
 
@@ -443,7 +487,7 @@ int Scanner::resetTo(int nOffset){
 int Scanner::skipEnterChar(){
     int nRet = m_nSeekIndex;
     do{
-        while (this->getToken()->strVal == " "||this->getToken()->strVal == "\t"){
+        while (this->getToken()->strVal == " "||this->getToken()->strVal == "\t"||this->getToken()->strVal == "\\"){
             ++m_nSeekIndex;
         }
         if (this->getToken()->strVal == "\n"){

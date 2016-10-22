@@ -50,5 +50,5 @@ http://www.wklken.me/posts/2015/03/03/python-base-datetime.html
 49:math
 50. `dump`
 51. struct		-- ok
-52. platform
+52. platform		-- ok
 http://www.cnblogs.com/BeginMan/p/3327291.html
