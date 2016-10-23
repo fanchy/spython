@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 namespace ff {
-#ifdef LINUX
+#ifdef linux
     #define LINE_SEP "\n"
     #define SEP "/"
 #else

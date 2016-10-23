@@ -153,7 +153,7 @@ struct PyBaseExceptionExt{
 };
 struct PySystemExt{
     static PyObjPtr pysystem(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
-        #ifdef LINUX
+        #ifdef linux
             reutrn PyCppUtil::genStr("Linux");
         #else
             return PyCppUtil::genStr("Windows");
