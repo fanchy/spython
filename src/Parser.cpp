@@ -52,7 +52,7 @@ ExprASTPtr Parser::parse_file_input(){
                     continue;
                 }
                 
-                printf("parse_stmt failed£¡%d %s %d\n", m_curScanner->seek(0), 
+                printf("parse_stmt failed %d %s %d\n", m_curScanner->seek(0), 
                             m_curScanner->getToken()->dump().c_str(),
                             m_curScanner->getToken()->nLine);
                 m_curScanner->seek(1);
