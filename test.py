@@ -407,6 +407,6 @@ print('basename', basename)
 dirname = os.path.dirname('c:\\Python\\a.txt')
 print('dirname', dirname)
 thrift_spec = (
-  )
+)
 print(thrift_spec)
 
