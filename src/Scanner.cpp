@@ -436,8 +436,11 @@ bool Scanner::tokenize(const std::string& content){
     //    dump();
     do{
         retToken = getOneToken(content, nIndex);
-        if (retToken.strVal == " "||retToken.strVal == "\t"||retToken.strVal == "\r"){
+        if (retToken.strVal == " "||retToken.strVal == "\t"){
             continue;
+        }
+        if (retToken.strVal == "\r"){
+            retToken.strVal = "\n";
         }
         //if (retToken.strVal == "*"){
         //    printf("token2:%s, Line:%d\n", retToken.dump().c_str(), retToken.nLine);
