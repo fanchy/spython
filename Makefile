@@ -3,7 +3,7 @@ CROSS=
 CP=/bin/cp
 RM=-/bin/rm -rf
 LN=/bin/ln -s 
-CFLAGS=-g -Wall 
+CFLAGS= -g -Wall 
 LDFLAGS= -O2 
 #-lcurl
 #-llua 
@@ -27,7 +27,7 @@ SRCS=$(foreach dir,$(SrcDir),$(wildcard $(dir)/*.cpp))
 INCS=$(foreach dir,$(IncDir),$(addprefix -I,$(dir)))
 LINKS=$(foreach dir,$(LibDir),$(addprefix -L,$(dir)))
 CFLAGS := $(CFLAGS) $(INCS)
-LDFLAGS:= $(LINKS) $(LDFLAGS) 
+LDFLAGS:= $(LINKS) $(LDFLAGS) -lpthread
 CC=gcc
 ARCH=PC
 OBJS = $(SRCS:%.cpp=%.o)

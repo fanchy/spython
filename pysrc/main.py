@@ -5,7 +5,7 @@ TOPDIR = os.path.dirname(__file__)
 TOPDIR = TOPDIR[0:-4]
 
 if __name__ == '__main__':
-    print('***************main just for check syntax error*************')
+    #print('***************main just for check syntax error*************')
     import sys
     sys.path.append('./pysrc/justfortest')
     sys.path.append('./pysrc/pylib')
@@ -17,13 +17,13 @@ if __name__ == '__main__':
     
 import ffext
 
-from db import DbServiceBase
-from mapmgr import MapMgr
-from db import DbService as DbService
-import idtool
+#from db import DbServiceBase
+#from mapmgr import MapMgr
+#from db import DbService as DbService
+#import idtool
 
-from model import MonsterModel , PlayerModel , ItemModel, SkillModel, TaskModel, NpcModel, GuildModel
-from model import PetModel, TeamModel, MarryModel, RankModel, GlobalRecordModel, LoginRewardModel, ArenaModel
+#from model import MonsterModel , PlayerModel , ItemModel, SkillModel, TaskModel, NpcModel, GuildModel
+#from model import PetModel, TeamModel, MarryModel, RankModel, GlobalRecordModel, LoginRewardModel, ArenaModel
 
 def init():
     #pdb.set_trace()
@@ -123,12 +123,26 @@ def cleanup():
         print ('idtool cleanup failed')
         return -1
     return 0
+
 import msgtype.ttypes as MsgDef
-msg = MsgDef.UpdatePetExpRet(1, -2000000000, 3, 10000000000)
-testmsg = ffext.encodeMsg(msg)
-print('testmsg len', len(testmsg))
-msg2 = MsgDef.UpdatePetExpRet(0, 0, 0, 0)
-ffext.thriftDecodeMsg(msg2, testmsg)
-print(msg.exp, msg.level, msg.expMax, msg.uid)
-print(msg2.exp, msg2.level, msg2.expMax, msg.uid)
-print('i64', 10000000000, 0x123, 0.123)
+
+def test():
+    a = 123456
+    a += 10
+    c = a + 20
+    #msg = MsgDef.UpdatePetExpRet(1, -2000000000, 3, 10000000000)
+    #b = (msg.exp, msg.level, msg.expMax, msg.uid)
+    #testmsg = ffext.encodeMsg(msg)
+    # print('testmsg len', len(testmsg))
+    # msg2 = MsgDef.UpdatePetExpRet(0, 0, 0, 0)
+    # ffext.thriftDecodeMsg(msg2, testmsg)
+    # print(msg.exp, msg.level, msg.expMax, msg.uid)
+    # print(msg2.exp, msg2.level, msg2.expMax, msg.uid)
+    #print('i64', 10000000000, 0x123, 0.123)
+import time
+begin = time.time()
+for k in range(0, 100000):
+    test()
+end = time.time()
+cost = end - begin
+print('cost', cost)

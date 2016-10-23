@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #本页面存放一个PlayerService类，用于存放本游戏中用户登录、创建等操作的SQL操作。使用该类时，请调用DbService文件中的getPlayerService()函数
 
 #引用数据库初始化页面，用于调用getDB()函数

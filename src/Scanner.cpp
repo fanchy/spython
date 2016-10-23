@@ -405,7 +405,7 @@ bool Scanner::tokenizeFile(const std::string& path, int nFileId){
         return false;
     }
     
-    char buf[512];
+    char buf[1024];
     int numread = 0;
     do {
         numread  = fread(buf, 1, sizeof(buf), fp);
