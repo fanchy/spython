@@ -49,14 +49,14 @@ struct PyDatetimeExt{
                     for (size_t i = 0; i < 7; ++ i)
                     {
                         size_t len = strlen(strp_weekdays[i]);
-                        if (!strnicmp(strp_weekdays[i], s, len))
+                        if (!::strncasecmp(strp_weekdays[i], s, len))
                         {
                             tm->tm_wday = i;
                             s += len;
                             working = true;
                             break;
                         }
-                        else if (!strnicmp(strp_weekdays[i], s, 3))
+                        else if (!::strncasecmp(strp_weekdays[i], s, 3))
                         {
                             tm->tm_wday = i;
                             s += 3;
@@ -73,14 +73,14 @@ struct PyDatetimeExt{
                     for (size_t i = 0; i < 12; ++ i)
                     {
                         size_t len = strlen(strp_monthnames[i]);
-                        if (!strnicmp(strp_monthnames[i], s, len))
+                        if (!::strncasecmp(strp_monthnames[i], s, len))
                         {
                             tm->tm_mon = i;
                             s += len;
                             working = true;
                             break;
                         }
-                        else if (!strnicmp(strp_monthnames[i], s, 3))
+                        else if (!::strncasecmp(strp_monthnames[i], s, 3))
                         {
                             tm->tm_mon = i;
                             s += 3;
@@ -134,12 +134,12 @@ struct PyDatetimeExt{
                         ++s;
                     break;
                 case 'p': // am / pm
-                    if (!strnicmp(s, "am", 2))
+                    if (!::strncasecmp(s, "am", 2))
                     { // the hour will be 1 -> 12 maps to 12 am, 1 am .. 11 am, 12 noon 12 pm .. 11 pm
                         if (tm->tm_hour == 12) // 12 am == 00 hours
                             tm->tm_hour = 0;
                     }
-                    else if (!strnicmp(s, "pm", 2))
+                    else if (!::strncasecmp(s, "pm", 2))
                     {
                         if (tm->tm_hour < 12) // 12 pm == 12 hours
                             tm->tm_hour += 12; // 1 pm -> 13 hours, 11 pm -> 23 hours
@@ -164,12 +164,12 @@ struct PyDatetimeExt{
                                 ++ s;
                                 while (isspace((int)*s)) 
                                     ++s;
-                                if (!strnicmp(s, "am", 2))
+                                if (!::strncasecmp(s, "am", 2))
                                 { // the hour will be 1 -> 12 maps to 12 am, 1 am .. 11 am, 12 noon 12 pm .. 11 pm
                                     if (tm->tm_hour == 12) // 12 am == 00 hours
                                         tm->tm_hour = 0;
                                 }
-                                else if (!strnicmp(s, "pm", 2))
+                                else if (!::strncasecmp(s, "pm", 2))
                                 {
                                     if (tm->tm_hour < 12) // 12 pm == 12 hours
                                         tm->tm_hour += 12; // 1 pm -> 13 hours, 11 pm -> 23 hours
