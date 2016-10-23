@@ -41,7 +41,7 @@ bool PyStrHandler::handleGreatEqual(PyContext& context, const PyObjPtr& self, co
 
 PyObjPtr& PyStrHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& val){
     if (val->getType() == self->getType()){
-        string newVal = self.cast<PyObjStr>()->value += val.cast<PyObjStr>()->value;
+        string newVal = self.cast<PyObjStr>()->value + val.cast<PyObjStr>()->value;
         return context.cacheResult(new PyObjStr(newVal));
     }
     else{

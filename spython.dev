@@ -23,13 +23,13 @@ OverrideOutputName=spython.exe
 HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
-CommandLine=test.py -dump
+CommandLine=pysrc/main.py
 Folders=include,include/ext,include/objhandler,src,src/objhandler
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=2
 CompilerSettings=0000000000100000101000000
-UnitCount=58
+UnitCount=59
 
 [VersionInfo]
 Major=1
@@ -622,6 +622,16 @@ BuildCmd=
 
 [Unit58]
 FileName=include\ext\PyStructExt.h
+CompileCpp=1
+Folder=include/ext
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit59]
+FileName=include\ext\PyCopyExt.h
 CompileCpp=1
 Folder=include/ext
 Compile=1

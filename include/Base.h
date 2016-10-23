@@ -35,7 +35,8 @@ enum PyObjType{
     PY_TUPLE,
     PY_LIST,
     PY_DICT,
-    PY_BUILTIN_TYPE
+    PY_BUILTIN_TYPE,
+    PY_CALL_STACK
 };
 
 typedef  int TokenType;
@@ -284,9 +285,20 @@ public:
     bool handleBool(PyContext& context, const PyObjPtr& self){
         return false;
     }
-    bool handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val){
-        return val->getType() == PY_NONE;
+
+};
+class PyCallStackHandler: public PyObjHandler{
+public:
+    virtual int getType() const{
+        return PY_CALL_STACK;
     }
+    virtual std::string handleStr(PyContext& context, const PyObjPtr& self) const{
+        return "None";
+    }
+    bool handleBool(PyContext& context, const PyObjPtr& self){
+        return false;
+    }
+
 };
 class PyObjNone:public PyObj {
 public:

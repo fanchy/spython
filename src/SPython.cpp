@@ -23,7 +23,7 @@
    
 using namespace std;
 using namespace ff;
-        
+          
 SPython::SPython(){
     pycontext.syspath  = new PyObjList();
     pycontext.curstack = PyObjModule::BuildModule(pycontext, "__main__", "built-in");

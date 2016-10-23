@@ -378,7 +378,7 @@ BinaryExprAST::BinaryExprAST(const std::string& o, ExprASTPtr& l, ExprASTPtr& r)
     else if (op == "==" || op == "is"){
         funcImpl = &BinaryExprAST::eval_OP_EQ;
     }
-    else if (op == "!=" or op == "not" or op == "<>"){
+    else if (op == "!=" or op == "not" or op == "<>" or op == "is not"){
         funcImpl = &BinaryExprAST::eval_OP_NOTEQ;
     }
     else if (op == "<"){
@@ -477,7 +477,7 @@ PyObjPtr& BinaryExprAST::eval_OP_LESS(PyContext& context){
     PyObjPtr rval = right->eval(context);
     PyObjPtr lval = left->eval(context);
     if (lval->getHandler()->handleLess(context, lval, rval)){
-        return context.cacheResult(PyObjTool::buildFalse());
+        return context.cacheResult(PyObjTool::buildTrue());
     }
     return context.cacheResult(PyObjTool::buildFalse());
 }//<

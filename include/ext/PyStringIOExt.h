@@ -26,7 +26,16 @@ struct PyStringIOExt{
         PyStringIOData* instanceData = new PyStringIOData();
         iterself.cast<PyObjClassInstance>()->instanceData = instanceData;
         if (argAssignVal.size() >= 2){
-            instanceData->buff += PyCppUtil::toStr(argAssignVal[1]);
+            PyObjPtr& src = argAssignVal[1];
+            if (PyCheckStr(src)){
+                instanceData->buff += PyCppUtil::toStr(argAssignVal[1]);
+            }
+            else{
+                std::vector<PyObjPtr> argsnew;
+                //std::string dumps = src->getHandler()->handleStr(context, src);
+                PyObjPtr data = PyCppUtil::callPyObjfunc(context, src, "getvalue", argsnew);
+                instanceData->buff += PyCppUtil::toStr(data);
+            }
         }
         return PyObjTool::buildTrue();
     }
@@ -39,7 +48,9 @@ struct PyStringIOExt{
         
 
         PyStringIOData* instanceData = self.cast<PyObjClassInstance>()->instanceData->cast<PyStringIOData>();
-        instanceData->buff += PyCppUtil::toStr(param);
+        std::string paramStr = PyCppUtil::toStr(param);
+        instanceData->buff.append(paramStr.c_str(), paramStr.size());
+        //printf("StringIO_write %d\n", int(instanceData->buff.size()));
         return self;
     }
     static PyObjPtr StringIO_getvalue(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
@@ -49,7 +60,42 @@ struct PyStringIOExt{
         PyAssertInstance(self);
 
         PyStringIOData* instanceData = self.cast<PyObjClassInstance>()->instanceData->cast<PyStringIOData>();
+        //printf("getvalue %s\n", PyCppUtil::hexstr(instanceData->buff).c_str());
         return PyCppUtil::genStr(instanceData->buff);
+    }
+    static PyObjPtr StringIO_read(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
+        if (argAssignVal.size() > 1){
+            PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: read() takes exactly 0/1 argument (%u given)", argAssignVal.size()));
+        }
+        PyAssertInstance(self);
+        PyStringIOData* instanceData = self.cast<PyObjClassInstance>()->instanceData->cast<PyStringIOData>();
+        
+        PyInt n = instanceData->buff.size();
+        if (argAssignVal.size() >= 1){
+            n = PyCppUtil::toInt(argAssignVal[0]);
+            if (n < 0){
+                PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: read() size argument (%d given)", n));
+            }
+        }
+        std::string ret;
+        
+        if (instanceData->nIndex < 0){
+            instanceData->nIndex = 0;
+        }
+        if (instanceData->nIndex < (int)instanceData->buff.size()){
+            if (instanceData->nIndex + n > (int)instanceData->buff.size()){
+                n = (int)instanceData->buff.size() - instanceData->nIndex;
+            }
+            ret.assign(instanceData->buff.begin() + instanceData->nIndex, instanceData->buff.begin() + instanceData->nIndex + n);
+            instanceData->nIndex += n;
+            if (instanceData->nIndex > (int)instanceData->buff.size()){
+                instanceData->nIndex = instanceData->buff.size();
+            }
+        }
+        
+        //printf("stringio.read %d %d %d %s\n", instanceData->nIndex, int(n), int(ret.size()), PyCppUtil::hexstr(ret).c_str());
+
+        return PyCppUtil::genStr(ret);
     }
     static PyObjPtr StringIO_close(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
         if (argAssignVal.size() != 0){
@@ -103,7 +149,7 @@ struct PyStringIOExt{
                 PyCppUtil::setAttr(pycontext, objClass, "__init__", PyCppUtil::genFunc(PyStringIOExt::StringIO__init__, "__init__"));
                 PyCppUtil::setAttr(pycontext, objClass, "write", PyCppUtil::genFunc(PyStringIOExt::StringIO_write, "write"));
                 PyCppUtil::setAttr(pycontext, objClass, "getvalue", PyCppUtil::genFunc(PyStringIOExt::StringIO_getvalue, "getvalue"));
-                PyCppUtil::setAttr(pycontext, objClass, "read", PyCppUtil::genFunc(PyStringIOExt::StringIO_getvalue, "read"));
+                PyCppUtil::setAttr(pycontext, objClass, "read", PyCppUtil::genFunc(PyStringIOExt::StringIO_read, "read"));
                 PyCppUtil::setAttr(pycontext, objClass, "close", PyCppUtil::genFunc(PyStringIOExt::StringIO_close, "close"));
                 PyCppUtil::setAttr(pycontext, objClass, "truncate", PyCppUtil::genFunc(PyStringIOExt::StringIO_truncate, "truncate"));
                 PyCppUtil::setAttr(pycontext, objClass, "seek", PyCppUtil::genFunc(PyStringIOExt::StringIO_seek, "seek"));

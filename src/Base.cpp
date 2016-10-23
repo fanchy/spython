@@ -32,7 +32,7 @@ string PyObj::dump(PyContext& context, PyObjPtr& self, int preBlank) {
         }else{
             ret += blank + msg;
         }
-        if (PyCheckModule(self->m_objStack[i]) && preBlank < 4){
+        if ((PyCheckModule(self->m_objStack[i]) || PyCheckClass(self->m_objStack[i])) && preBlank < 4){
             ret += PyObj::dump(context, self->m_objStack[i], preBlank + 1);
             continue;
         }
@@ -49,7 +49,7 @@ bool PyObjHandler::handleBool(PyContext& context, const PyObjPtr& self) const{
     return false;
 }
 bool PyObjHandler::handleEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
-    return false;
+    return self.get() == val.get();
 }
 bool PyObjHandler::handleLessEqual(PyContext& context, const PyObjPtr& self, const PyObjPtr& val) const{
     throw PyException::buildException("handleLessEqual invalid");return self; 

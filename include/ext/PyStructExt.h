@@ -31,12 +31,12 @@ struct PyStructExt{
     }
     static int64_t myhton64(int64_t h)
     {
-       uint32_t* p = (uint32_t*)(&h);
-       uint32_t* p2 = p + 1;
+       int32_t* p = (int32_t*)(&h);
+       int32_t* p2 = p + 1;
 
        if (!IsBigendian()){
-           uint32_t v = BIG_HIG_LOW_SWAP32(*p);
-           uint32_t v2 = BIG_HIG_LOW_SWAP32(*p2);
+           int32_t v = BIG_HIG_LOW_SWAP32(*p);
+           int32_t v2 = BIG_HIG_LOW_SWAP32(*p2);
            *p2 = v;
            *p  = v2;
        }
@@ -44,32 +44,32 @@ struct PyStructExt{
     }
     static int64_t myntoh64(int64_t h)
     {
-       uint32_t* p = (uint32_t*)(&h);
-       uint32_t* p2 = p + 1;
+       int32_t* p = (int32_t*)(&h);
+       int32_t* p2 = p + 1;
 
        if (!IsBigendian()){
-           uint32_t v = BIG_HIG_LOW_SWAP32(*p);
-           uint32_t v2 = BIG_HIG_LOW_SWAP32(*p2);
+           int32_t v = BIG_HIG_LOW_SWAP32(*p);
+           int32_t v2 = BIG_HIG_LOW_SWAP32(*p2);
            *p2 = v;
            *p  = v2;
        }
        return h;
     }
-    static uint32_t myhtonl(uint32_t h)
+    static uint32_t myhtonl(int32_t h)
     {
        return IsBigendian() ? h : BIG_HIG_LOW_SWAP32(h);
     }
      
-    static uint32_t myntohl(uint32_t n)
+    static uint32_t myntohl(int32_t n)
     {
        return IsBigendian() ? n : BIG_HIG_LOW_SWAP32(n);
     }
     
-    static uint16_t myhtons(uint16_t h)
+    static uint16_t myhtons(int16_t h)
     {
        return IsBigendian() ? h : BIG_HIG_LOW_SWAP16(h);
     }
-    static uint16_t myntohs(uint16_t n)
+    static uint16_t myntohs(int16_t n)
     {
        return IsBigendian() ? n : BIG_HIG_LOW_SWAP16(n);
     }
@@ -82,6 +82,8 @@ struct PyStructExt{
         size_t hasPopNum = 1;
         bool useNetworkEndian = false;
         std::string numArg;
+        
+        //printf("struct_pack %s %s\n", fmt.c_str(), argAssignVal[1]->getHandler()->handleStr(context, argAssignVal[1]).c_str());
         for (size_t i = 0; i < fmt.size(); ++i){
             switch (fmt[i]){
                 case '@':
@@ -117,16 +119,16 @@ struct PyStructExt{
                 case 'b':
                 case 'B':
                     {
-                        uint8_t v = (uint8_t)PyCppUtil::toInt(val);
+                        int8_t v = (int8_t)PyCppUtil::toInt(val);
                         ret.append((const char*)(&v), sizeof(v));
                     }
                     break;
                 case 'h':
                 case 'H':
                     {
-                        uint16_t v = (uint16_t)PyCppUtil::toInt(val);
+                        int16_t v = (int16_t)PyCppUtil::toInt(val);
                         if (useNetworkEndian){
-                            v = (uint16_t)myhtons(v);
+                            v = (int16_t)myhtons(v);
                         }
                         ret.append((const char*)(&v), sizeof(v));
                     }
@@ -136,9 +138,9 @@ struct PyStructExt{
                 case 'l':
                 case 'L':
                     {
-                        uint32_t v = (uint32_t)PyCppUtil::toInt(val);
+                        int32_t v = (int32_t)PyCppUtil::toInt(val);
                         if (useNetworkEndian){
-                            v = (uint32_t)myhtonl(v);
+                            v = (int32_t)myhtonl(v);
                         }
                         ret.append((const char*)(&v), sizeof(v));
                     }
@@ -202,6 +204,8 @@ struct PyStructExt{
         size_t hasPopNum = 0;
         bool useNetworkEndian = false;
         std::string numArg;
+        
+        //printf("struct_unpack %s %d %s\n", fmt.c_str(), int(data.size()), PyCppUtil::hexstr(data).c_str());
         for (size_t i = 0; i < fmt.size(); ++i){
             switch (fmt[i]){
                 case '@':
@@ -234,26 +238,26 @@ struct PyStructExt{
                 case 'b':
                 case 'B':
                     {
-                        if (hasPopNum + sizeof(uint8_t) > data.size()){
+                        if (hasPopNum + sizeof(int8_t) > data.size()){
                             PY_RAISE_STR(context, PyCppUtil::strFormat("data num not enough"));
                         }
-                        uint8_t v = *((uint8_t*)(data.c_str() + hasPopNum));
+                        int8_t v = *((int8_t*)(data.c_str() + hasPopNum));
                         ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(v));
-                        hasPopNum += sizeof(uint8_t);
+                        hasPopNum += sizeof(int8_t);
                     }
                     break;
                 case 'h':
                 case 'H':
                     {
-                        if (hasPopNum + sizeof(uint16_t) > data.size()){
+                        if (hasPopNum + sizeof(int16_t) > data.size()){
                             PY_RAISE_STR(context, PyCppUtil::strFormat("data num not enough"));
                         }
-                        uint16_t v = *((uint16_t*)(data.c_str() + hasPopNum));
+                        int16_t v = *((int16_t*)(data.c_str() + hasPopNum));
                         if (useNetworkEndian){
-                            v = (uint16_t)myntohs(v);
+                            v = (int16_t)myntohs(v);
                         }
                         ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(v));
-                        hasPopNum += sizeof(uint16_t);
+                        hasPopNum += sizeof(int16_t);
                     }
                     break;
                 case 'i':
@@ -261,15 +265,15 @@ struct PyStructExt{
                 case 'l':
                 case 'L':
                     {
-                        if (hasPopNum + sizeof(uint32_t) > data.size()){
+                        if (hasPopNum + sizeof(int32_t) > data.size()){
                             PY_RAISE_STR(context, PyCppUtil::strFormat("data num not enough"));
                         }
-                        uint32_t v = *((uint32_t*)(data.c_str() + hasPopNum));
+                        int32_t v = *((int32_t*)(data.c_str() + hasPopNum));
                         if (useNetworkEndian){
-                            v = (uint32_t)myntohl(v);
+                            v = (int32_t)myntohl(v);
                         }
                         ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(v));
-                        hasPopNum += sizeof(uint32_t);
+                        hasPopNum += sizeof(int32_t);
                     }
                     break;
                 case 'q':
@@ -333,6 +337,8 @@ struct PyStructExt{
                     break;
             }
         }
+        //printf("struct_unpack %s %s\n", fmt.c_str(), ret->getHandler()->handleStr(context, ret).c_str());
+        
         return ret;
     }
     static bool init(PyContext& pycontext){

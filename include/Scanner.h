@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <stdint.h>
+#include<sstream>
 
 namespace ff {
 
@@ -63,6 +64,7 @@ protected:
     std::map<int, LineInfo> m_allLines;
     int                     m_hasSearchMaxIndex;
     int                     m_nCurFileId;
+    std::stringstream       m_istr;
 };
 
 }

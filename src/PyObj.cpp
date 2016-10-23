@@ -456,8 +456,11 @@ PyObjPtr PyObjClassDef::build(PyContext& context, const std::string& s, std::vec
     PyObjPtr ret = PyObjClassDef::build(context, s, NULL, nFileIdBelong);
     ret.cast<PyObjClassDef>()->parentClass = parentClass;
     ret.cast<PyObjClassDef>()->processInheritInfo(context, ret);
+    
     PyCppUtil::setAttr(context, ret, "__module__", context.curstack);
     PyCppUtil::setAttr(context, ret, "__name__", PyCppUtil::genStr(s));
+    //string data = PyObj::dump(context, ret, 0);
+    //printf("data %s %s\n", data.c_str(), s.c_str());
     return ret;
 }
 
@@ -578,7 +581,9 @@ void PyCppUtil::setAttr(PyContext& context, PyObjPtr& obj, const std::string& fi
     context.curstack = obj;
     
     ExprASTPtr expr = singleton_t<VariableExprAllocator>::instance_ptr()->alloc(fieldName);
-    expr->assignVal(context, v);
+    //expr->assignVal(context, v);
+    PyObjPtr& ref = obj->PyObj::getVar(context, obj, expr.get());
+    ref = v;
 }
 
 std::map<std::string, PyObjPtr> PyCppUtil::getAllFieldData(PyObjPtr obj){
@@ -607,6 +612,18 @@ PyObjPtr& PyCppUtil::callPyfunc(PyContext& context, PyObjPtr& func, std::vector<
     }
     return context.cacheResult(PyObjTool::buildNone());
 }
+PyObjPtr& PyCppUtil::callPyObjfunc(PyContext& context, PyObjPtr& obj, const std::string& funName, std::vector<PyObjPtr>& argAssignVal){
+    PyObjPtr func = PyCppUtil::getAttr(context, obj, funName);
+    if (func && PyCheckCallable(func)){
+        vector<ArgTypeInfo> allArgsVal;
+        for (size_t i = 0; i < argAssignVal.size(); ++i){
+            ArgTypeInfo info;
+            allArgsVal.push_back(info);
+        }
+        return func->getHandler()->handleCall(context, func, allArgsVal, argAssignVal);
+    }
+    return context.cacheResult(PyObjTool::buildNone());
+}
 PyObjPtr PyCppUtil::getArgVal(std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal, 
                                 size_t index, const std::string& argName){
     for (size_t i = 0; i < allArgsVal.size() && i < argAssignVal.size(); ++i){
@@ -621,6 +638,16 @@ PyObjPtr PyCppUtil::getArgVal(std::vector<ArgTypeInfo>& allArgsVal, std::vector<
     return NULL;
 }
 
+std::string PyCppUtil::hexstr(const std::string& src)
+{
+    std::string ret;
+    char buff[64] = {0};
+    for (size_t i = 0; i < src.size(); ++i){
+        snprintf(buff, sizeof(buff), "%x", int(src[i]));
+        ret += buff;
+    }
+    return ret;
+}
 IterUtil::IterUtil(PyContext& c, PyObjPtr v):context(c), obj(v), index(0){
     if (PyCheckInstance(obj) && PyCppUtil::hasAttr(context, obj, "next")){
         funcNext = PyCppUtil::getAttr(context, obj, "next");

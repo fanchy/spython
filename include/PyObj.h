@@ -272,7 +272,7 @@ typedef SmartPtr<PyCppFunc> PyCppFuncPtr;
 class PyCallTmpStack:public PyObj {
 public:
     PyCallTmpStack(const ObjIdInfo& m, PyObjPtr v, PyObjPtr c):modBelong(v), closureStack(c){
-        this->handler = singleton_t<PyNoneHandler>::instance_ptr();
+        this->handler = singleton_t<PyCallStackHandler>::instance_ptr();
         selfObjInfo   = m;
     }
     virtual const ObjIdInfo& getObjIdInfo(){
@@ -287,7 +287,7 @@ public:
     PyObjPtr        closureStack;
     std::set<ExprAST*>   globalVar;
 };
-#define IsFuncCallStack(o) (o->getType() == PY_NONE && o.cast<PyCallTmpStack>()->modBelong)
+#define IsFuncCallStack(o) (o->getType() == PY_CALL_STACK && o.cast<PyCallTmpStack>()->modBelong)
 
 class PyObjFuncDef:public PyObj {
 public:
@@ -597,10 +597,12 @@ struct PyCppUtil{
     static void setAttr(PyContext& context, PyObjPtr& obj, const std::string& fieldName, PyObjPtr v);
     
     static std::map<std::string, PyObjPtr> getAllFieldData(PyObjPtr obj);
-    static PyObjPtr& callPyfunc(PyContext& context, PyObjPtr& func, std::vector<PyObjPtr>& args);
-    
+    static PyObjPtr& callPyfunc(PyContext& context, PyObjPtr& obj, std::vector<PyObjPtr>& args);
+    static PyObjPtr& callPyObjfunc(PyContext& context, PyObjPtr& func, const std::string& funName, std::vector<PyObjPtr>& args);
     static PyObjPtr getArgVal(std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal, size_t index,
                               const std::string& argName);
+                              
+    static std::string hexstr(const std::string& src);
 };
 struct IterUtil{
     IterUtil(PyContext& context, PyObjPtr v);

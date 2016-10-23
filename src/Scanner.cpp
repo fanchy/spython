@@ -141,17 +141,29 @@ Token Scanner::getOneToken(const std::string& content, int& index) {
 
         if (false == isFloat){
             if (bit16Flag){
-                long nTmp = 0;
-                ::sscanf(strNum.c_str(), "%lx", &nTmp);
+                PyInt nTmp = 0;
+                m_istr.clear();
+                m_istr << std::hex << strNum;
+                m_istr >> nTmp;
+                
+                //::sscanf(strNum.c_str(), "%lx", &nTmp);
                 retToken.nVal = nPlusMinus * nTmp;
             }
             else{
-                retToken.nVal = nPlusMinus * ::atol(strNum.c_str());
+                m_istr.clear();
+                m_istr << strNum;
+                m_istr >> retToken.nVal;
+                retToken.nVal = nPlusMinus * retToken.nVal;
             }
             retToken.nTokenType = TOK_INT;
         }
         else{
-            retToken.fVal = nPlusMinus * ::atof(strNum.c_str());
+            m_istr.clear();
+            m_istr << strNum;
+            m_istr >> retToken.fVal;
+            
+            //retToken.fVal = nPlusMinus * ::atof(strNum.c_str());
+            retToken.fVal = nPlusMinus * retToken.fVal;
             retToken.nTokenType = TOK_FLOAT;
         }
 
