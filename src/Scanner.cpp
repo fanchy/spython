@@ -471,34 +471,12 @@ const Token* Scanner::getToken(int nOffset){
     
     return &(m_tokenEOF);
 }
-const Token* Scanner::getTokenIgnoreBlank(int nOffset){
-    int nIndex = m_nSeekIndex + nOffset;
-    while (nIndex >= 0 && nIndex < (int)m_allTokens.size()){
-        if (m_allTokens[nIndex].strVal == " "){
-            nIndex += 1;
-            continue;
-        }
-        return &(m_allTokens[nIndex]);
-    }
-    return &(m_tokenEOF);
-}
 
 int Scanner::seek(int nOffset){
     m_nSeekIndex += nOffset;
     return m_nSeekIndex;
 }
 
-int Scanner::skipBlankChar(){
-    while (getToken()->strVal == " ");{
-        m_nSeekIndex += 1;
-    }
-    return m_nSeekIndex;
-}
-    
-int Scanner::resetTo(int nOffset){
-    m_nSeekIndex = nOffset;
-    return m_nSeekIndex;
-}
 int Scanner::skipEnterChar(){
     int nRet = m_nSeekIndex;
     do{
@@ -521,9 +499,6 @@ int Scanner::curIndentWidth(int nOffset){
     return m_allLines[getToken(nOffset)->nLine].nIndent;
 }
 
-int Scanner::calLineIndentWidth(int nLine){
-    return m_allLines[nLine].nIndent;
-}
 std::string Scanner::getLineCode(int nLine){
     return m_allLines[nLine].strLine; 
 }

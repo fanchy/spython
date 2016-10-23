@@ -38,13 +38,10 @@ public:
 
     //!get cur token obj
     const Token* getToken(int nOffset = 0);
-    const Token* getTokenIgnoreBlank(int nOffset = 0);
     int seek(int nOffset);
-    int resetTo(int nOffset);
     int skipEnterChar();
-    int skipBlankChar();
     int curIndentWidth(int nOffset = 0);
-    int calLineIndentWidth(int nLine);
+
     int getCurFileId(){
         return m_nCurFileId;
     }
