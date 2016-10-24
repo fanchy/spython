@@ -271,9 +271,17 @@ typedef SmartPtr<PyCppFunc> PyCppFuncPtr;
 
 class PyCallTmpStack:public PyObj {
 public:
-    PyCallTmpStack(const ObjIdInfo& m, PyObjPtr v, PyObjPtr c):modBelong(v), closureStack(c){
+    static PyObjPtr alloc(PyContext& context, const ObjIdInfo& m, PyObjPtr& v, PyObjPtr& c);
+    PyCallTmpStack(const ObjIdInfo& m, PyObjPtr& v, PyObjPtr& c):modBelong(v), closureStack(c){
         this->handler = singleton_t<PyCallStackHandler>::instance_ptr();
         selfObjInfo   = m;
+    }
+    void assign(const ObjIdInfo& m, PyObjPtr& v, PyObjPtr& c){
+        selfObjInfo   = m;
+        modBelong     = v;
+        closureStack  = c;
+        globalVar.clear();
+        clear();
     }
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;

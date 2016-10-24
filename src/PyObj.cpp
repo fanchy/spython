@@ -422,19 +422,40 @@ void PyObjFuncDef::processParam(PyContext& context, PyObjPtr& self, std::vector<
         }
     }
 }
+PyObjPtr PyCallTmpStack::alloc(PyContext& context, const ObjIdInfo& m, PyObjPtr& v, PyObjPtr& c){
+    if (context.cachePyCallTmpStack.empty() == false){
+        PyObjPtr ret = context.cachePyCallTmpStack.back();
+        ret.cast<PyCallTmpStack>()->assign(m, v, c);
+        context.cachePyCallTmpStack.pop_back();
+        return ret;
+    }
+    return new PyCallTmpStack(m, v, c);
+}
+struct PyCallTmpStackGuard{
+    PyCallTmpStackGuard(PyContext& c, PyObjPtr& v):context(c), tmpstack(v){
+    }
+    ~PyCallTmpStackGuard(){
+        context.cachePyCallTmpStack.push_back(tmpstack);
+    }
+    PyContext& context;
+    PyObjPtr   tmpstack;
+};
 PyObjPtr& PyObjFuncDef::exeFunc(PyContext& context, PyObjPtr& self, std::vector<ArgTypeInfo>& allArgsVal, std::vector<PyObjPtr>& argAssignVal){
     try
     {
         PyContextBackUp backup(context);
 
         if (pyCppfunc){//!this is cpp func wrap
-            context.curstack = new PyCallTmpStack(this->getObjIdInfo(), NULL, getClosureStack());
+            PyObjPtr arg1;
+            context.curstack = PyCallTmpStack::alloc(context, this->getObjIdInfo(), arg1, getClosureStack());
+            PyCallTmpStackGuard stackguard(context, context.curstack);
             return pyCppfunc->exeFunc(context, self, allArgsVal, argAssignVal);
         }
-        else{
-            context.curstack = new PyCallTmpStack(this->getObjIdInfo(), context.getFileIdModCache(this->suite->lineInfo.fileId), getClosureStack());
-        }
 
+        PyObjPtr arg1 = context.getFileIdModCache(this->suite->lineInfo.fileId);
+        context.curstack = PyCallTmpStack::alloc(context, this->getObjIdInfo(), arg1, getClosureStack());
+        PyCallTmpStackGuard stackguard(context, context.curstack);
+        
         processParam(context, self, allArgsVal, argAssignVal);
         
         if (suite){

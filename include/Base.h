@@ -464,6 +464,8 @@ public:
     std::map<int, std::map<int, int> >  recordAllFiledIndex;
     //!cache property class
     PyObjPtr                            propertyClass;
+    //!cache PyCallTmpStack
+    std::list<PyObjPtr>                 cachePyCallTmpStack;
 };
 #define TRACE_EXPR() context.setTraceExpr(this)
 #define TRACE_EXPR_PUSH() context.pushTraceExpr(this)
