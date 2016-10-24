@@ -23,12 +23,12 @@ OverrideOutputName=spython.exe
 HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
-CommandLine=pysrc/main.py
+CommandLine=test.py
 Folders=include,include/ext,include/objhandler,src,src/objhandler
 IncludeVersionInfo=0
 SupportXPThemes=0
-CompilerSet=2
-CompilerSettings=0000000000100000101000000
+CompilerSet=1
+CompilerSettings=0000000000000000001000000
 UnitCount=59
 
 [VersionInfo]

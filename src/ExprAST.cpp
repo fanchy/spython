@@ -84,14 +84,11 @@ PyObjPtr& PowerAST::eval(PyContext& context){TRACE_EXPR();
     return merge->eval(context);
 }
 PyObjPtr& StmtAST::eval(PyContext& context){TRACE_EXPR();
-    if (exprs.empty()){
-        return context.cacheResult(PyObjTool::buildNone());
-    }
-    unsigned int i = 0;
-    for (; i < exprs.size() - 1; ++i){
+    size_t size = exprs.size();
+    for (size_t i = 0; i < size; ++i){
         exprs[i]->eval(context);
     }
-    return exprs[i]->eval(context);
+    return context.cacheResult(PyObjTool::buildNone());
 }
 
 PyObjPtr& PrintAST::eval(PyContext& context){TRACE_EXPR();
