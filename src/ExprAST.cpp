@@ -26,7 +26,7 @@ FloatExprAST::FloatExprAST(PyFloat v) : Val(v) {
     obj = new PyObjFloat(Val);
 }
 PyObjPtr& VariableExprAST::eval(PyContext& context) {
-    PyObjPtr& ret = this->getFieldVal(context);
+    PyObjPtr& ret = context.curstack->getVar(context, context.curstack, this);
     
     if (!ret){
         PyObjPtr ret2 = context.getBuiltin(this->name);

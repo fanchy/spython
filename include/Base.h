@@ -174,9 +174,6 @@ struct ExprLine{
 
 class ExprAST {
 public:
-    //int    nFieldId;
-    std::string name;
-    ExprLine    lineInfo;
     ExprAST(){
     }
     virtual ~ExprAST() {}
@@ -198,7 +195,10 @@ public:
     virtual int getType() {
         return 0;
     }
-
+    
+public:
+    std::string name;
+    ExprLine    lineInfo;
     //std::vector<std::vector<int> >  module2objcet2fieldIndex;
     std::vector<int>                  module2objcet2fieldIndex;
 };
@@ -467,10 +467,12 @@ public:
     //!cache PyCallTmpStack
     std::list<PyObjPtr>                 cachePyCallTmpStack;
 };
-#define TRACE_EXPR() context.setTraceExpr(this)
-#define TRACE_EXPR_PUSH() context.pushTraceExpr(this)
-#define TRACE_EXPR_POP() context.popTraceExpr()
-
+//#define TRACE_EXPR() context.setTraceExpr(this)
+//#define TRACE_EXPR_PUSH() context.pushTraceExpr(this)
+//#define TRACE_EXPR_POP() context.popTraceExpr()
+#define TRACE_EXPR() {}
+#define TRACE_EXPR_PUSH() {}
+#define TRACE_EXPR_POP() {}
 struct PyContextBackUp{
     PyContextBackUp(PyContext& c):bRollback(false),context(c), curstack(c.curstack){
     }

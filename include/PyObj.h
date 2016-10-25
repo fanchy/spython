@@ -281,7 +281,6 @@ public:
         modBelong     = v;
         closureStack  = c;
         globalVar.clear();
-        clear();
     }
     virtual const ObjIdInfo& getObjIdInfo(){
         return selfObjInfo;
