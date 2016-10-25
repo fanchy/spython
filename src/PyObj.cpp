@@ -437,7 +437,7 @@ struct PyCallTmpStackGuard{
     ~PyCallTmpStackGuard(){
         std::vector<PyObjPtr>& objStack = tmpstack->m_objStack;
         for (size_t i = 0; i < objStack.size(); ++i){
-            objStack[i].reset();
+            objStack[i] = NULL;
         }
         context.cachePyCallTmpStack.push_back(tmpstack);
     }

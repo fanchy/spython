@@ -4,7 +4,7 @@ CP=/bin/cp
 RM=-/bin/rm -rf
 LN=/bin/ln -s 
 CFLAGS= -g -Wall 
-LDFLAGS= -O2 
+LDFLAGS= -O2
 #-lcurl
 #-llua 
 #链接库名
