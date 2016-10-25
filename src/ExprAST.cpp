@@ -26,8 +26,13 @@ FloatExprAST::FloatExprAST(PyFloat v) : Val(v) {
     obj = new PyObjFloat(Val);
 }
 PyObjPtr& VariableExprAST::eval(PyContext& context) {
+    if (cache){
+        return *cache;
+    }
     PyObjPtr& ret = context.curstack->getVar(context, context.curstack, this);
-    
+    if (ret){
+        cache = &ret;
+    }
     if (!ret){
         PyObjPtr ret2 = context.getBuiltin(this->name);
         if (ret2){
@@ -63,6 +68,7 @@ PyObjPtr& VariableExprAST::eval(PyContext& context) {
         PY_RAISE_STR(context, 
             PyCppUtil::strFormat("NameError: global name '%s' is not defined %d", this->name.c_str(), context.curstack->getType()));
     }
+    
     return ret;
 }
 PyObjPtr& VariableExprAST::assignVal(PyContext& context, PyObjPtr& v){

@@ -61,6 +61,7 @@ struct PyBuiltinExt{
                 PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: range() step can't be <zero'"));
             }
         }
+        PyInt nSize = end - begin; ret.cast<PyObjList>()->value.reserve(nSize);
         for (PyInt i = begin; i < end; i += step){
             ret.cast<PyObjList>()->append(PyCppUtil::genInt(i));
         }

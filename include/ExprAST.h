@@ -54,6 +54,7 @@ class VariableExprAST : public ExprAST {
 public:
     VariableExprAST(const std::string &n) {
         this->name = n;
+        cache = NULL;
     }
     virtual PyObjPtr& eval(PyContext& context);
     virtual PyObjPtr& assignVal(PyContext& context, PyObjPtr& v);
@@ -61,6 +62,7 @@ public:
     virtual int getType() {
         return EXPR_VAR;
     }
+    PyObjPtr*   cache;
 };
 
 struct VariableExprAllocator{
