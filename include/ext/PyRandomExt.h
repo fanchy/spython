@@ -49,7 +49,7 @@ struct PyRandomExt{
         if (minVal > maxVal){
             PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: uniform() takes exactly arg invalid"));
         }
-        return PyCppUtil::genInt(randint(minVal, maxVal));
+        return PyCppUtil::genInt(context, randint(minVal, maxVal));
     }
     static PyObjPtr random_choice(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
         if (argAssignVal.size() != 1){

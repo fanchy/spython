@@ -22,7 +22,7 @@ struct PyTupleExt{
                 ++ret;
             }
         }
-        return PyCppUtil::genInt(ret);
+        return PyCppUtil::genInt(context, ret);
     }
     static PyObjPtr index(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
         PyAssertTuple(self);
@@ -34,11 +34,11 @@ struct PyTupleExt{
 
         for (size_t i = 0; i < pTuple->value.size(); ++i){
             if (param->getHandler()->handleEqual(context, param, pTuple->value[i])){
-                return PyCppUtil::genInt(i);
+                return PyCppUtil::genInt(context, i);
             }
         }
         PY_RAISE(context, PyCppUtil::genStr("ValueError: tuple.index(x): x not in tuple"));
-        return PyCppUtil::genInt(0);
+        return PyCppUtil::genInt(context, 0);
     }
     
     static bool init(PyContext& pycontext){

@@ -53,7 +53,7 @@ struct PyOsExt{
         }
         std::string path = PyCppUtil::toStr(argAssignVal[0]);
         int nRet = ::remove(path.c_str());
-        return PyCppUtil::genInt(nRet);
+        return PyCppUtil::genInt(context, nRet);
     }
     static PyObjPtr path_system(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
         if (argAssignVal.size() != 1){
@@ -62,7 +62,7 @@ struct PyOsExt{
         std::string path = PyCppUtil::toStr(argAssignVal[0]);
         
         int nRet = ::system(path.c_str());
-        return PyCppUtil::genInt(nRet);
+        return PyCppUtil::genInt(context, nRet);
     }
     
     static PyObjPtr path_split(PyContext& context, std::vector<PyObjPtr>& argAssignVal){

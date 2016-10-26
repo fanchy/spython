@@ -52,15 +52,15 @@ struct PyTimeExt{
             info = ::gmtime(&rawtime);
         }
         
-	    PyCppUtil::setAttr(context, self, "tm_sec", PyCppUtil::genInt(info->tm_sec));         /* seconds,  range 0 to 59          */
-        PyCppUtil::setAttr(context, self, "tm_min", PyCppUtil::genInt(info->tm_min));         /* minutes, range 0 to 59           */
-        PyCppUtil::setAttr(context, self, "tm_hour", PyCppUtil::genInt(info->tm_hour));        /* hours, range 0 to 23             */
-        PyCppUtil::setAttr(context, self, "tm_mday", PyCppUtil::genInt(info->tm_mday));        /* day of the month, range 1 to 31  */
-        PyCppUtil::setAttr(context, self, "tm_mon", PyCppUtil::genInt(info->tm_mon));         /* month, range 0 to 11             */
-        PyCppUtil::setAttr(context, self, "tm_year", PyCppUtil::genInt(info->tm_year));        /* The number of years since 1900   */
-        PyCppUtil::setAttr(context, self, "tm_wday", PyCppUtil::genInt(info->tm_wday));        /* day of the week, range 0 to 6    */
-        PyCppUtil::setAttr(context, self, "tm_yday", PyCppUtil::genInt(info->tm_yday));        /* day in the year, range 0 to 365  */
-        PyCppUtil::setAttr(context, self, "tm_isdst", PyCppUtil::genInt(info->tm_isdst));       /* daylight saving time             */
+	    PyCppUtil::setAttr(context, self, "tm_sec", PyCppUtil::genInt(context, info->tm_sec));         /* seconds,  range 0 to 59          */
+        PyCppUtil::setAttr(context, self, "tm_min", PyCppUtil::genInt(context, info->tm_min));         /* minutes, range 0 to 59           */
+        PyCppUtil::setAttr(context, self, "tm_hour", PyCppUtil::genInt(context, info->tm_hour));        /* hours, range 0 to 23             */
+        PyCppUtil::setAttr(context, self, "tm_mday", PyCppUtil::genInt(context, info->tm_mday));        /* day of the month, range 1 to 31  */
+        PyCppUtil::setAttr(context, self, "tm_mon", PyCppUtil::genInt(context, info->tm_mon));         /* month, range 0 to 11             */
+        PyCppUtil::setAttr(context, self, "tm_year", PyCppUtil::genInt(context, info->tm_year));        /* The number of years since 1900   */
+        PyCppUtil::setAttr(context, self, "tm_wday", PyCppUtil::genInt(context, info->tm_wday));        /* day of the week, range 0 to 6    */
+        PyCppUtil::setAttr(context, self, "tm_yday", PyCppUtil::genInt(context, info->tm_yday));        /* day in the year, range 0 to 365  */
+        PyCppUtil::setAttr(context, self, "tm_isdst", PyCppUtil::genInt(context, info->tm_isdst));       /* daylight saving time             */
 	    return PyObjTool::buildNone();
     }
     //
@@ -99,7 +99,7 @@ struct PyTimeExt{
         
         PyObjPtr mod = context.getModule("time");
         PyObjPtr objClass = PyCppUtil::getAttr(context, mod, "struct_time");
-        argAssignVal.push_back(PyCppUtil::genInt(1));
+        argAssignVal.push_back(PyCppUtil::genInt(context, 1));
         return PyCppUtil::callPyfunc(context, objClass, argAssignVal);
     }
     static PyObjPtr time_mktime(PyContext& context, std::vector<PyObjPtr>& argAssignVal){

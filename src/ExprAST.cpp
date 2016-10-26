@@ -547,36 +547,36 @@ PyObjPtr& BinaryExprAST::eval_OP_AND(PyContext& context){
 PyObjPtr& BinaryExprAST::eval_OP_BIT_AND(PyContext& context){
     PyObjPtr lval = left->eval(context);
     PyObjPtr rval = right->eval(context);
-    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) & PyCppUtil::toInt(rval));
+    PyObjPtr ret = PyCppUtil::genInt(context, PyCppUtil::toInt(lval) & PyCppUtil::toInt(rval));
     return context.cacheResult(ret);
 } //! &
 PyObjPtr& BinaryExprAST::eval_OP_BIT_OR(PyContext& context){
     PyObjPtr lval = left->eval(context);
     PyObjPtr rval = right->eval(context);
-    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) | PyCppUtil::toInt(rval));
+    PyObjPtr ret = PyCppUtil::genInt(context, PyCppUtil::toInt(lval) | PyCppUtil::toInt(rval));
     return context.cacheResult(ret);
 } //! |
 PyObjPtr& BinaryExprAST::eval_OP_BIT_XOR(PyContext& context){
     PyObjPtr lval = left->eval(context);
     PyObjPtr rval = right->eval(context);
-    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) ^ PyCppUtil::toInt(rval));
+    PyObjPtr ret = PyCppUtil::genInt(context, PyCppUtil::toInt(lval) ^ PyCppUtil::toInt(rval));
     return context.cacheResult(ret);
 } //! ^
 PyObjPtr& BinaryExprAST::eval_OP_BIT_INVERT(PyContext& context){
     PyObjPtr lval = left->eval(context);
-    PyObjPtr ret = PyCppUtil::genInt(~PyCppUtil::toInt(lval));
+    PyObjPtr ret = PyCppUtil::genInt(context, ~PyCppUtil::toInt(lval));
     return context.cacheResult(ret);
 } //! ~
 PyObjPtr& BinaryExprAST::eval_OP_BIT_SHIFT(PyContext& context){
     PyObjPtr lval = left->eval(context);
     PyObjPtr rval = right->eval(context);
-    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) << PyCppUtil::toInt(rval));
+    PyObjPtr ret = PyCppUtil::genInt(context, PyCppUtil::toInt(lval) << PyCppUtil::toInt(rval));
     return context.cacheResult(ret);
 } //! <<
 PyObjPtr& BinaryExprAST::eval_OP_BIT_RSHIFT(PyContext& context){
     PyObjPtr lval = left->eval(context);
     PyObjPtr rval = right->eval(context);
-    PyObjPtr ret = PyCppUtil::genInt(PyCppUtil::toInt(lval) >> PyCppUtil::toInt(rval));
+    PyObjPtr ret = PyCppUtil::genInt(context, PyCppUtil::toInt(lval) >> PyCppUtil::toInt(rval));
     return context.cacheResult(ret);
 } //! >>
 PyObjPtr& BinaryExprAST::eval(PyContext& context){TRACE_EXPR();

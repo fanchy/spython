@@ -30,6 +30,7 @@ public:
     virtual PyObjPtr& handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     virtual PyObjPtr& handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& val);
     size_t    handleHash(PyContext& context, const PyObjPtr& self) const;
+    virtual void handleRelese(PyObj* data);
 };
 
 

@@ -9,6 +9,7 @@
 #include <stdexcept>
 
 #include "SmartPtr.h"
+#include "PySmartPtr.h"
 #include "Singleton.h"
 #include "TypeInfo.h"
 
@@ -132,7 +133,11 @@ class PyContext;
 class ExprAST;
 class PyObj {
 public:
-    typedef SmartPtr<PyObj> PyObjPtr;
+    RefCounterData* getRefData(){
+        return &refdata;
+    }
+    void release();
+    typedef PySmartPtr<PyObj> PyObjPtr;
     PyObj():m_pObjIdInfo(NULL), handler(NULL){}
     virtual ~PyObj() {}
 
@@ -152,6 +157,7 @@ public:
     std::vector<PyObjPtr>    m_objStack;
     ObjIdInfo*               m_pObjIdInfo;
     PyObjHandler*            handler;
+    RefCounterData           refdata;
 };
 typedef PyObj::PyObjPtr PyObjPtr;
 
@@ -272,6 +278,10 @@ public:
     virtual PyObjPtr& handleSlice(PyContext& context, PyObjPtr& self, PyObjPtr& startVal, int* stop, int step);
     virtual PyObjPtr& handleSliceAssign(PyContext& context, PyObjPtr& self, PyObjPtr& k, PyObjPtr& v);
     virtual void handleSliceDel(PyContext& context, PyObjPtr& self, PyObjPtr& k){}
+    
+    virtual void handleRelese(PyObj* data){
+        delete data;
+    }
 };
 
 class PyNoneHandler: public PyObjHandler{
@@ -467,12 +477,28 @@ public:
     //!cache PyCallTmpStack
     std::list<PyObjPtr>                 cachePyCallTmpStack;
 };
-//#define TRACE_EXPR() context.setTraceExpr(this)
-//#define TRACE_EXPR_PUSH() context.pushTraceExpr(this)
-//#define TRACE_EXPR_POP() context.popTraceExpr()
-#define TRACE_EXPR() {}
-#define TRACE_EXPR_PUSH() {}
-#define TRACE_EXPR_POP() {}
+template<typename T>
+struct PyObjAllocator
+{
+    T* alloc(){
+        if (cachePyObj.empty() == false){
+            T* ret = cachePyObj.back();
+            cachePyObj.pop_back();
+            return ret;
+        }
+        return new T();
+    }
+    void release(T* p){
+        cachePyObj.push_back(p);
+    }
+    std::list<T*>                   cachePyObj;
+};
+#define TRACE_EXPR() context.setTraceExpr(this)
+#define TRACE_EXPR_PUSH() context.pushTraceExpr(this)
+#define TRACE_EXPR_POP() context.popTraceExpr()
+//#define TRACE_EXPR() {}
+//#define TRACE_EXPR_PUSH() {}
+//#define TRACE_EXPR_POP() {}
 struct PyContextBackUp{
     PyContextBackUp(PyContext& c):bRollback(false),context(c), curstack(c.curstack){
     }

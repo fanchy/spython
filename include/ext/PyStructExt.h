@@ -242,7 +242,7 @@ struct PyStructExt{
                             PY_RAISE_STR(context, PyCppUtil::strFormat("data num not enough"));
                         }
                         int8_t v = *((int8_t*)(data.c_str() + hasPopNum));
-                        ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(v));
+                        ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(context, v));
                         hasPopNum += sizeof(int8_t);
                     }
                     break;
@@ -256,7 +256,7 @@ struct PyStructExt{
                         if (useNetworkEndian){
                             v = (int16_t)myntohs(v);
                         }
-                        ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(v));
+                        ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(context, v));
                         hasPopNum += sizeof(int16_t);
                     }
                     break;
@@ -272,7 +272,7 @@ struct PyStructExt{
                         if (useNetworkEndian){
                             v = (int32_t)myntohl(v);
                         }
-                        ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(v));
+                        ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(context, v));
                         hasPopNum += sizeof(int32_t);
                     }
                     break;
@@ -287,7 +287,7 @@ struct PyStructExt{
                         if (useNetworkEndian){
                             v = (uint64_t)myntoh64(v);
                         }
-                        ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(v));
+                        ret.cast<PyObjTuple>()->append(PyCppUtil::genInt(context, v));
                         hasPopNum += sizeof(PyInt);
                     }
                     break;

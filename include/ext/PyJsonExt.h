@@ -153,9 +153,9 @@ struct PyJsonExt{
         return PyObjTool::buildTrue();
     }
     
-    static PyObjPtr json2PyObj(const rapidjson::Value& jval){
+    static PyObjPtr json2PyObj(PyContext& context, const rapidjson::Value& jval){
         if (jval.IsInt64()){
-            return PyCppUtil::genInt(jval.GetInt64());
+            return PyCppUtil::genInt(context, jval.GetInt64());
         }
         else if (jval.IsDouble()){
             return PyCppUtil::genFloat(jval.GetDouble());
@@ -175,7 +175,7 @@ struct PyJsonExt{
         if (jval.IsArray()){
             PyObjPtr ret = new PyObjList();
             for (rapidjson::Value::ConstValueIterator itr = jval.Begin(); itr != jval.End(); ++itr){
-                PyObjPtr elem = json2PyObj(*itr);
+                PyObjPtr elem = json2PyObj(context, *itr);
                 if (!elem){
                     elem = jsonArrayObject2PyObj(context, *itr);
                     if (!elem){
@@ -189,7 +189,7 @@ struct PyJsonExt{
         else if (jval.IsObject()){
             PyObjPtr ret = new PyObjDict();
             for (rapidjson::Value::ConstMemberIterator itr = jval.MemberBegin(); itr != jval.MemberEnd(); ++itr){
-                PyObjPtr elem = json2PyObj(itr->value);
+                PyObjPtr elem = json2PyObj(context, itr->value);
                 if (!elem){
                     elem = jsonArrayObject2PyObj(context, itr->value);
                     if (!elem){
@@ -202,7 +202,7 @@ struct PyJsonExt{
             return ret;
         }
         else{
-            return json2PyObj(jval);
+            return json2PyObj(context, jval);
         }
         return NULL;
     }
@@ -221,7 +221,7 @@ struct PyJsonExt{
             return jsonArrayObject2PyObj(context, d);
         }
         else{
-            return json2PyObj(d);
+            return json2PyObj(context, d);
         }
         return PyObjTool::buildNone();
     }

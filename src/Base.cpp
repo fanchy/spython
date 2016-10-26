@@ -41,7 +41,9 @@ string PyObj::dump(PyContext& context, PyObjPtr& self, int preBlank) {
     }
     return ret;
 }
-
+void PyObj::release(){
+    handler->handleRelese(this);
+}
 int PyObj::getType() const{
     return handler->getType();
 }

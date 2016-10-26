@@ -7,7 +7,7 @@
 #include "StrTool.h"
 
 namespace ff {
-typedef weak_ptr_t<PyObj> PyObjWeakRef;
+typedef PyWeakPtr<PyObj> PyObjWeakRef;
 
 class PyWeakData:public SafeTypeHelper<PyWeakData, PyInstanceData>{
 public:

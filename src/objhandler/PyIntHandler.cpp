@@ -55,7 +55,7 @@ PyObjPtr& PyIntHandler::handleAdd(PyContext& context, PyObjPtr& self, PyObjPtr& 
 
     if (nType == PY_INT){
         long newVal = self.cast<PyObjInt>()->value + val.cast<PyObjInt>()->value;
-        return context.cacheResult(new PyObjInt(newVal));
+        return context.cacheResult(PyCppUtil::genInt(context, newVal));
     }
     else if (nType == PY_FLOAT){
         PyFloat newVal = self.cast<PyObjInt>()->value + val.cast<PyObjFloat>()->value;
@@ -71,7 +71,7 @@ PyObjPtr& PyIntHandler::handleSub(PyContext& context, PyObjPtr& self, PyObjPtr& 
 
     if (nType == PY_INT){
         long newVal = self.cast<PyObjInt>()->value - val.cast<PyObjInt>()->value;
-        return context.cacheResult(new PyObjInt(newVal));
+        return context.cacheResult(PyCppUtil::genInt(context, newVal));
     }
     else if (nType == PY_FLOAT){
         PyFloat newVal = self.cast<PyObjInt>()->value - val.cast<PyObjFloat>()->value;
@@ -87,7 +87,7 @@ PyObjPtr& PyIntHandler::handleMul(PyContext& context, PyObjPtr& self, PyObjPtr& 
 
     if (nType == PY_INT){
         long newVal = self.cast<PyObjInt>()->value * val.cast<PyObjInt>()->value;
-        return context.cacheResult(new PyObjInt(newVal));
+        return context.cacheResult(PyCppUtil::genInt(context, newVal));
     }
     else if (nType == PY_FLOAT){
         PyFloat newVal = self.cast<PyObjInt>()->value * val.cast<PyObjFloat>()->value;
@@ -107,7 +107,7 @@ PyObjPtr& PyIntHandler::handleDiv(PyContext& context, PyObjPtr& self, PyObjPtr& 
             THROW_EVAL_ERROR("div by zero");
         }
         long newVal = self.cast<PyObjInt>()->value / rval;
-        return context.cacheResult(new PyObjInt(newVal));
+        return context.cacheResult(PyCppUtil::genInt(context, newVal));
     }
     else if (nType == PY_FLOAT){
         PyFloat rval = val.cast<PyObjFloat>()->value;
@@ -131,7 +131,7 @@ PyObjPtr& PyIntHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& 
             THROW_EVAL_ERROR("div by zero");
         }
         long newVal = self.cast<PyObjInt>()->value % rval;
-        return context.cacheResult(new PyObjInt(newVal));
+        return context.cacheResult(PyCppUtil::genInt(context, newVal));
     }
     else if (nType == PY_FLOAT){
         long rval = long(val.cast<PyObjFloat>()->value);
@@ -139,7 +139,7 @@ PyObjPtr& PyIntHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& 
             THROW_EVAL_ERROR("div by zero");
         }
         long newVal = self.cast<PyObjInt>()->value % rval;
-        return context.cacheResult(new PyObjInt(newVal));
+        return context.cacheResult(PyCppUtil::genInt(context, newVal));
     }
     else{
         THROW_EVAL_ERROR("can't mod to int");
@@ -149,4 +149,6 @@ PyObjPtr& PyIntHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr& 
 size_t PyIntHandler::handleHash(PyContext& context, const PyObjPtr& self) const{
     return self.cast<PyObjInt>()->value;
 }
-
+void PyIntHandler::handleRelese(PyObj* data){
+    singleton_t<PyObjAllocator<PyObjInt> >::instance_ptr()->release((PyObjInt*)data);
+}

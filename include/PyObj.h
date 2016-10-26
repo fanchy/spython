@@ -568,8 +568,10 @@ struct PyCppUtil{
         }
         return false;
     }
-    static PyObjPtr genInt(PyInt n){
-        return new PyObjInt(n);
+    static PyObjPtr genInt(PyContext& context, PyInt n){
+        PyObjInt* p = singleton_t<PyObjAllocator<PyObjInt> >::instance_ptr()->alloc();
+        p->value = n;
+        return p;
     }
     static PyObjPtr genFloat(PyFloat n){
         return new PyObjFloat(n);

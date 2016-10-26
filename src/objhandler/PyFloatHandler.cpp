@@ -111,7 +111,7 @@ PyObjPtr& PyFloatHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr
             THROW_EVAL_ERROR("div by zero");
         }
         long newVal = long(self.cast<PyObjFloat>()->value) % long(rval);
-        return context.cacheResult(new PyObjInt(newVal));
+        return context.cacheResult(PyCppUtil::genInt(context, newVal));
     }
     else if (nType == PY_FLOAT){
         PyFloat rval = val.cast<PyObjFloat>()->value;
@@ -119,7 +119,7 @@ PyObjPtr& PyFloatHandler::handleMod(PyContext& context, PyObjPtr& self, PyObjPtr
             THROW_EVAL_ERROR("div by zero");
         }
         long newVal = long(self.cast<PyObjFloat>()->value) % long(rval);
-        return context.cacheResult(new PyObjInt(newVal));
+        return context.cacheResult(PyCppUtil::genInt(context, newVal));
     }
     else{
         THROW_EVAL_ERROR("can't mod to int");

@@ -18,7 +18,7 @@ struct PyBuiltinExt{
         if (ret < 0){
             PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: object of type '%d' has no len()", param->getType()));
         }
-        return PyCppUtil::genInt(ret);
+        return PyCppUtil::genInt(context, ret);
     }
     static PyObjPtr isinstance(PyContext& context, std::vector<PyObjPtr>& argAssignVal){
         if (argAssignVal.size() != 2){
@@ -61,9 +61,8 @@ struct PyBuiltinExt{
                 PY_RAISE_STR(context, PyCppUtil::strFormat("TypeError: range() step can't be <zero'"));
             }
         }
-        PyInt nSize = end - begin; ret.cast<PyObjList>()->value.reserve(nSize);
         for (PyInt i = begin; i < end; i += step){
-            ret.cast<PyObjList>()->append(PyCppUtil::genInt(i));
+            ret.cast<PyObjList>()->append(PyCppUtil::genInt(context, i));
         }
         return ret;
     }

@@ -65,7 +65,7 @@ struct PyListExt{
                 ++ret;
             }
         }
-        return PyCppUtil::genInt(ret);
+        return PyCppUtil::genInt(context, ret);
     }
     static PyObjPtr index(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
         PyAssertList(self);
@@ -77,11 +77,11 @@ struct PyListExt{
 
         for (size_t i = 0; i < pList->value.size(); ++i){
             if (param->getHandler()->handleEqual(context, param, pList->value[i])){
-                return PyCppUtil::genInt(i);
+                return PyCppUtil::genInt(context, i);
             }
         }
         PY_RAISE(context, PyCppUtil::genStr("ValueError: list.index(x): x not in list"));
-        return PyCppUtil::genInt(0);
+        return PyCppUtil::genInt(context, 0);
     }
     static PyObjPtr append(PyContext& context, PyObjPtr& self, std::vector<PyObjPtr>& argAssignVal){
         PyAssertList(self);
