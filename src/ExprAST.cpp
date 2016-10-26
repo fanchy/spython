@@ -31,7 +31,7 @@ PyObjPtr& VariableExprAST::eval(PyContext& context) {
     }
     PyObjPtr& ret = context.curstack->getVar(context, context.curstack, this);
     if (ret){
-        cache = &ret;
+        //cache = &ret;
     }
     if (!ret){
         PyObjPtr ret2 = context.getBuiltin(this->name);
