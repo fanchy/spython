@@ -1,0 +1,85 @@
+# Project: spython
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe -D__DEBUG__
+CC       = gcc.exe -D__DEBUG__
+WINDRES  = windres.exe
+OBJ      = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o src/objhandler/PyClassHandler.o src/objhandler/PyClassInstanceHandler.o src/objhandler/PyModHandler.o src/SPython.o src/Util.o src/objhandler/PyCommonHandler.o src/objhandler/PyListHandler.o
+LINKOBJ  = src/Parser.o src/Base.o src/PyObj.o src/ExprAST.o src/main.o src/Scanner.o src/objhandler/PyBoolHandler.o src/objhandler/PyFloatHandler.o src/objhandler/PyIntHandler.o src/objhandler/PyFuncHandler.o src/objhandler/PyTupleHandler.o src/objhandler/PyDictHandler.o src/objhandler/PyStrHandler.o src/objhandler/PyClassHandler.o src/objhandler/PyClassInstanceHandler.o src/objhandler/PyModHandler.o src/SPython.o src/Util.o src/objhandler/PyCommonHandler.o src/objhandler/PyListHandler.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -g3
+INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"./include"
+CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++" -I"./include"
+BIN      = spython.exe
+CXXFLAGS = $(CXXINCS) -g3
+CFLAGS   = $(INCS) -g3
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+src/Parser.o: src/Parser.cpp
+	$(CPP) -c src/Parser.cpp -o src/Parser.o $(CXXFLAGS)
+
+src/Base.o: src/Base.cpp
+	$(CPP) -c src/Base.cpp -o src/Base.o $(CXXFLAGS)
+
+src/PyObj.o: src/PyObj.cpp
+	$(CPP) -c src/PyObj.cpp -o src/PyObj.o $(CXXFLAGS)
+
+src/ExprAST.o: src/ExprAST.cpp
+	$(CPP) -c src/ExprAST.cpp -o src/ExprAST.o $(CXXFLAGS)
+
+src/main.o: src/main.cpp
+	$(CPP) -c src/main.cpp -o src/main.o $(CXXFLAGS)
+
+src/Scanner.o: src/Scanner.cpp
+	$(CPP) -c src/Scanner.cpp -o src/Scanner.o $(CXXFLAGS)
+
+src/objhandler/PyBoolHandler.o: src/objhandler/PyBoolHandler.cpp
+	$(CPP) -c src/objhandler/PyBoolHandler.cpp -o src/objhandler/PyBoolHandler.o $(CXXFLAGS)
+
+src/objhandler/PyFloatHandler.o: src/objhandler/PyFloatHandler.cpp
+	$(CPP) -c src/objhandler/PyFloatHandler.cpp -o src/objhandler/PyFloatHandler.o $(CXXFLAGS)
+
+src/objhandler/PyIntHandler.o: src/objhandler/PyIntHandler.cpp
+	$(CPP) -c src/objhandler/PyIntHandler.cpp -o src/objhandler/PyIntHandler.o $(CXXFLAGS)
+
+src/objhandler/PyFuncHandler.o: src/objhandler/PyFuncHandler.cpp
+	$(CPP) -c src/objhandler/PyFuncHandler.cpp -o src/objhandler/PyFuncHandler.o $(CXXFLAGS)
+
+src/objhandler/PyTupleHandler.o: src/objhandler/PyTupleHandler.cpp
+	$(CPP) -c src/objhandler/PyTupleHandler.cpp -o src/objhandler/PyTupleHandler.o $(CXXFLAGS)
+
+src/objhandler/PyDictHandler.o: src/objhandler/PyDictHandler.cpp
+	$(CPP) -c src/objhandler/PyDictHandler.cpp -o src/objhandler/PyDictHandler.o $(CXXFLAGS)
+
+src/objhandler/PyStrHandler.o: src/objhandler/PyStrHandler.cpp
+	$(CPP) -c src/objhandler/PyStrHandler.cpp -o src/objhandler/PyStrHandler.o $(CXXFLAGS)
+
+src/objhandler/PyClassHandler.o: src/objhandler/PyClassHandler.cpp
+	$(CPP) -c src/objhandler/PyClassHandler.cpp -o src/objhandler/PyClassHandler.o $(CXXFLAGS)
+
+src/objhandler/PyClassInstanceHandler.o: src/objhandler/PyClassInstanceHandler.cpp
+	$(CPP) -c src/objhandler/PyClassInstanceHandler.cpp -o src/objhandler/PyClassInstanceHandler.o $(CXXFLAGS)
+
+src/objhandler/PyModHandler.o: src/objhandler/PyModHandler.cpp
+	$(CPP) -c src/objhandler/PyModHandler.cpp -o src/objhandler/PyModHandler.o $(CXXFLAGS)
+
+src/SPython.o: src/SPython.cpp
+	$(CPP) -c src/SPython.cpp -o src/SPython.o $(CXXFLAGS)
+
+src/Util.o: src/Util.cpp
+	$(CPP) -c src/Util.cpp -o src/Util.o $(CXXFLAGS)
+
+src/objhandler/PyCommonHandler.o: src/objhandler/PyCommonHandler.cpp
+	$(CPP) -c src/objhandler/PyCommonHandler.cpp -o src/objhandler/PyCommonHandler.o $(CXXFLAGS)
+
+src/objhandler/PyListHandler.o: src/objhandler/PyListHandler.cpp
+	$(CPP) -c src/objhandler/PyListHandler.cpp -o src/objhandler/PyListHandler.o $(CXXFLAGS)

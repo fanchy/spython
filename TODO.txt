@@ -1,0 +1,54 @@
+1. 类函数的修饰器	-- ok
+2. 类的继承             -- ok
+3. 类属性的赋值 	-- ok
+4. print 的实现 	-- ok
+5 __doc__ 属性		-- ok
+6 __dict__属性
+7. import 		-- ok
+8. traceback		-- ok
+9. exception		-- ok
+10.字典完善		-- ok
+11.单元测试
+12.builtin-type int float str tuple dict exception -- ok
+13.自定义类如何方便实现	-- ok
+14.assert
+15.__module__		-- ok
+16.Slice 		-- ok
+17.eval exec
+18. \ 多行支持		-- ok
+19. open close with	-- ok
+20. global 的实现	-- ok
+21.lambda		-- ok
+22. del			-- ok
+23.tuple list dict func -- ok
+24.linux		-- ok
+25.range		-- ok
+26. 闭包		-- ok
+27. += 			-- ok
+28. & |			-- ok
+29. __main__		-- ok
+30.set
+31.+-二元操作优化	-- ok
+32.weakref		-- ok
+33.__import__		-- ok
+34.__file__		-- ok
+35.time			-- ok
+36.datetime		-- ok
+37.StringIO		-- ok
+38.string.format %	-- ok
+39.copy deepcopy
+40.math			-- ok
+41.random		-- ok
+42.os			-- ok
+43.sys			-- ok
+44.file open close	-- ok
+45.json			-- ok
+46.xml
+47.unittest
+48.atexit
+http://www.wklken.me/posts/2015/03/03/python-base-datetime.html
+49:math
+50. `dump`
+51. struct		-- ok
+52. platform		-- ok
+http://www.cnblogs.com/BeginMan/p/3327291.html
