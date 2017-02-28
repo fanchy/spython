@@ -218,5 +218,7 @@ public:
 
 ### 总结 ###
 　　spython就是small python，本来想实现最简版本的python解释器，后来实现的比较顺，一口气把常用的python库都实现了。spython最成功的部分就是ast的解析和执行，代码结构清晰完全按照bnf的流程来，很直接明了。缺点主要有二。一是语法报错还是太简陋，不够友好。二是性能达不到原生python的性能。前文已经说过了，要达到甚至超过原生python的水平，必须要实现基于寄存器的VM，这个已经着手再弄了，暂时还不会放出代码，等差不多成型了再放出来吧。
+  
 　　代码地址：https://git.oschina.net/ownit/spython
+  
 　　构建：Linux下直接make就可以了，win下需要用dev c++
